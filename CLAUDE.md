@@ -38,6 +38,7 @@ npx convex dashboard    # Open Convex dashboard
 ## Architecture Overview
 
 ### Project Structure
+
 ```
 app/                    # Next.js App Router
 ├── (auth)/            # Authentication routes
@@ -47,7 +48,7 @@ app/                    # Next.js App Router
 │   └── analytics/     # Performance metrics
 └── api/               # API routes
 
-components/            
+components/
 ├── ui/               # Shadcn/ui components
 ├── video/            # Video-specific components
 └── ai/               # AI generation components
@@ -72,7 +73,7 @@ lib/                  # Utilities, hooks, and shared logic
 
 ### Authentication Flow
 
-NextAuth.js with Convex integration for session management. User authentication state synchronized between Next.js and Convex.
+Clerk authentication with Convex integration for session management. User authentication state synchronized between Next.js and Convex using Clerk's webhooks and JWT tokens.
 
 ### Video Processing Pipeline
 
@@ -82,14 +83,6 @@ NextAuth.js with Convex integration for session management. User authentication 
 4. Video upload to S3 with CDN distribution
 5. Database update with final video URLs
 
-## Important Implementation Notes
-
-- All video generation is asynchronous with job tracking
-- Implement fallback providers for AI video generation
-- Use Convex real-time subscriptions for progress updates
-- Video files stored in S3 with CloudFront CDN for global delivery
-- Analytics tracking requires both client-side and server-side events
-
 ## Environment Variables Required
 
 ```
@@ -97,9 +90,10 @@ NextAuth.js with Convex integration for session management. User authentication 
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
 
-# Authentication
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=
+# Authentication (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+CLERK_WEBHOOK_SECRET=
 
 # AI Video APIs
 VEO_API_KEY=
@@ -119,3 +113,19 @@ CLOUDFRONT_DOMAIN=
 - Integration tests for Convex mutations and queries
 - E2E tests for critical user flows (video creation, authentication)
 - Mock AI APIs in development/testing environments
+
+## Important Implementation Notes
+
+- All video generation is asynchronous with job tracking
+- Implement fallback providers for AI video generation
+- Use Convex real-time subscriptions for progress updates
+- Video files stored in S3 with CloudFront CDN for global delivery
+- Analytics tracking requires both client-side and server-side events
+- Never commit API keys or sensitive data to the repository
+- Use TypeScript strictly - all components and functions should be properly typed
+- Follow Next.js App Router conventions for file-based routing
+- Implement proper error boundaries for video generation failures
+
+## CLI Behavior Memories
+
+- Do not create a new session file when running the start session slash command if files are not tracked
