@@ -52,6 +52,19 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // ViralAI custom colors
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        "viral-gradient": {
+          start: "hsl(var(--viral-gradient-start))",
+          end: "hsl(var(--viral-gradient-end))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -1,5 +1,3 @@
-/* prettier-ignore-start */
-
 /* eslint-disable */
 /**
  * Generated `api` utility.
@@ -15,6 +13,9 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as trends from "../trends.js";
+import type * as users from "../users.js";
+import type * as videos from "../videos.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -24,12 +25,16 @@ import type {
  * const myFunctionReference = api.myModule.myFunction;
  * ```
  */
-declare const api: ApiFromModules<{}>;
-export default api;
-
-/**
- * Convex API utility for client-side usage.
- */
-export declare const internal: ApiFromModules<{}>;
-
-/* prettier-ignore-end */
+declare const fullApi: ApiFromModules<{
+  trends: typeof trends;
+  users: typeof users;
+  videos: typeof videos;
+}>;
+export declare const api: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "public">
+>;
+export declare const internal: FilterApi<
+  typeof fullApi,
+  FunctionReference<any, "internal">
+>;

@@ -132,3 +132,43 @@ export const getVideosByTrend = query({
     return videos;
   },
 });
+
+export const getVideosByStatus = query({
+  args: {
+    userId: v.id("users"),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("completed"),
+      v.literal("failed"),
+      v.literal("cancelled")
+    ),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const videos = await ctx.db
+      .query("videos")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .filter((q) => q.eq(q.field("status"), args.status))
+      .order("desc")
+      .take(args.limit || 20);
+
+    return videos;
+  },
+});
+
+export const updateVideoUrl = mutation({
+  args: {
+    videoId: v.id("videos"),
+    url: v.string(),
+    thumbnailUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.videoId, {
+      url: args.url,
+      thumbnailUrl: args.thumbnailUrl,
+      status: "completed",
+      updatedAt: Date.now(),
+    });
+  },
+});

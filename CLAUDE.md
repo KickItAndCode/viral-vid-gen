@@ -129,6 +129,66 @@ CLOUDFRONT_DOMAIN=
 ## CLI Behavior Memories
 
 - Do not create a new session file when running the start session slash command if files are not tracked
+- Always use pnpm for package installation and running commands
+- Keep documentation updated: CLAUDE.md, PRD.md, and TASKS.md files
+- Update session files when running appropriate slash commands
+- Update Claude.md at the start of every new conversation. Always check task.md before starting your work. Mark completed tasks. Mark tasks completed immediately. Add newly discovered tasks to the task.md
+
+## Session History
+
+### 2025-07-14-1459 Session (Foundation Implementation)
+**Status**: Completed
+**Duration**: ~3 hours
+**Focus**: Core project foundation setup
+
+**Major Accomplishments**:
+- Complete Next.js 14+ project setup with TypeScript and Tailwind CSS
+- Comprehensive Convex database schema design and implementation
+- Clerk authentication integration with custom styling
+- Professional development environment configuration
+- Environment variable setup for development and production
+
+**Tasks Completed**: 18+ subtasks across Tasks 1-3 (foundation phase)
+**Next Priority**: Task 4 - Shadcn/ui component library setup
+
+**Key Technical Decisions**:
+- Package manager: pnpm (per user preference)
+- Authentication: Clerk with custom dark theme
+- Database: Convex with real-time capabilities
+- Styling: Tailwind CSS with Shadcn/ui (planned)
+- State management: React Query + Zustand hybrid approach (planned)
+
+### 2025-07-14-1537 Session (Shadcn/ui Component Library)
+**Status**: Completed
+**Duration**: ~1 hour
+**Focus**: UI component library setup and theme configuration
+
+**Major Accomplishments**:
+- Complete Shadcn/ui CLI installation and configuration
+- Custom ViralAI brand colors (purple/blue gradient theme)
+- Dark/light theme system with CSS variables and next-themes
+- Base UI components (Button, Input, Card, Dialog) installed
+- Theme provider and toggle functionality implemented
+- Build pipeline working with all components
+
+**Tasks Completed**: All 10 subtasks in Task 4 (Shadcn/ui setup)
+**Next Priority**: Task 5 - React Query with Convex integration
+
+### 2025-07-14-1537 Session (UI & State Management Infrastructure)
+**Status**: Completed
+**Duration**: ~2 hours
+**Focus**: UI component library and server state management
+
+**Major Accomplishments**:
+- Complete Shadcn/ui setup with custom ViralAI branding (purple/blue theme)
+- React Query v5 integration with Convex for server state management
+- Custom hooks architecture with optimistic updates and error handling
+- Professional design system with dark/light theme switching
+- Type-safe data layer with domain-specific abstractions
+- Development tools integration (React Query DevTools)
+
+**Tasks Completed**: All 19 subtasks across Tasks 4-5 (UI + State Management)
+**Next Priority**: Task 6 - Zustand stores for client state management
 
 ## Development Best Practices
 

@@ -62,9 +62,9 @@ export const getTrends = query({
       query = query.filter((q) => q.eq(q.field("platform"), args.platform));
     }
 
-    if (args.minViralScore) {
+    if (args.minViralScore !== undefined) {
       query = query.filter((q) =>
-        q.gte(q.field("viralScore"), args.minViralScore)
+        q.gte(q.field("viralScore"), args.minViralScore!)
       );
     }
 
