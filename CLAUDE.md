@@ -17,22 +17,22 @@ ViralAI is an AI-powered video generation platform that creates viral-ready 15-3
 
 ```bash
 # Development server
-npm run dev
+pnpm dev
 
 # Build for production
-npm run build
+pnpm build
 
 # Run linting
-npm run lint
+pnpm lint
 
 # Run type checking
-npm run type-check
+pnpm type-check
 
 # Database operations (Convex)
-npx convex dev          # Start Convex development server
-npx convex deploy       # Deploy database changes
-npx convex import       # Import data
-npx convex dashboard    # Open Convex dashboard
+pnpm convex dev         # Start Convex development server
+pnpm convex deploy      # Deploy database changes
+pnpm convex import      # Import data
+pnpm convex dashboard   # Open Convex dashboard
 ```
 
 ## Architecture Overview
@@ -129,3 +129,15 @@ CLOUDFRONT_DOMAIN=
 ## CLI Behavior Memories
 
 - Do not create a new session file when running the start session slash command if files are not tracked
+
+## Development Best Practices
+
+- Always use pnpm to install and run the application
+
+## Documentation Maintenance
+
+- Keep documentation updated across files:
+  * claude.md
+  * PRD.md
+  * Tasks.md
+- Use appropriate slash commands to update session files when changes occur

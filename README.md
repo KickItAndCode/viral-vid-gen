@@ -15,7 +15,7 @@ ViralAI is an AI-powered video generation platform that creates viral-ready 15-3
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 18+ and pnpm
 - Git
 
 ### Installation
@@ -30,7 +30,7 @@ ViralAI is an AI-powered video generation platform that creates viral-ready 15-3
 2. Install dependencies:
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. Set up environment variables:
@@ -43,7 +43,7 @@ ViralAI is an AI-powered video generation platform that creates viral-ready 15-3
 4. Start the development server:
 
    ```bash
-   npm run dev
+   pnpm dev
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -52,21 +52,21 @@ ViralAI is an AI-powered video generation platform that creates viral-ready 15-3
 
 ```bash
 # Development
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
+pnpm dev             # Start development server
+pnpm build           # Build for production
+pnpm start           # Start production server
 
 # Code Quality
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues
-npm run format       # Format code with Prettier
-npm run format:check # Check code formatting
-npm run type-check   # Run TypeScript type checking
+pnpm lint            # Run ESLint
+pnpm lint:fix        # Fix ESLint issues
+pnpm format          # Format code with Prettier
+pnpm format:check    # Check code formatting
+pnpm type-check      # Run TypeScript type checking
 
 # Database (Convex)
-npx convex dev       # Start Convex development server
-npx convex deploy    # Deploy database changes
-npx convex dashboard # Open Convex dashboard
+pnpm convex dev      # Start Convex development server
+pnpm convex deploy   # Deploy database changes
+pnpm convex dashboard # Open Convex dashboard
 ```
 
 ## Project Structure
