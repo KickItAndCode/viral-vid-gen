@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Breadcrumb } from "@/components/layout";
 import {
   Card,
@@ -8,8 +12,37 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Target, Zap } from "lucide-react";
+import { VideoCreationWizard } from "@/components/wizard/video-creation-wizard";
 
 export default function CreateVideoPage() {
+  const [showWizard, setShowWizard] = useState(false);
+  const router = useRouter();
+
+  const handleStartCreating = () => {
+    setShowWizard(true);
+  };
+
+  const handleWizardComplete = async (data: any) => {
+    console.log("Video creation completed:", data);
+    // Redirect to library or video details page
+    router.push("/dashboard/library");
+  };
+
+  const handleWizardCancel = () => {
+    setShowWizard(false);
+  };
+
+  if (showWizard) {
+    return (
+      <div className="p-6">
+        <VideoCreationWizard
+          onComplete={handleWizardComplete}
+          onCancel={handleWizardCancel}
+          sessionId={`create_${Date.now()}`}
+        />
+      </div>
+    );
+  }
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb />
@@ -90,7 +123,10 @@ export default function CreateVideoPage() {
               </div>
             </div>
 
-            <Button className="w-full mt-6 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">
+            <Button 
+              className="w-full mt-6 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90"
+              onClick={handleStartCreating}
+            >
               <Zap className="h-4 w-4 mr-2" />
               Start Creating
             </Button>
