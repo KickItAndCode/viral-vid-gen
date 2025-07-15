@@ -123,7 +123,7 @@ export default function CreateVideoPage() {
               </div>
             </div>
 
-            <Button 
+            <Button
               className="w-full mt-6 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90"
               onClick={handleStartCreating}
             >

@@ -25,7 +25,6 @@ export function WizardProvider({
   sessionId,
 }: WizardProviderProps) {
   const [isInitialized, setIsInitialized] = React.useState(false);
-  const { loadProgress, resetWizard } = useWizardStore();
 
   useEffect(() => {
     // Initialize wizard store with config
@@ -37,14 +36,14 @@ export function WizardProvider({
 
     // Auto-load progress if enabled
     if (autoLoadProgress && sessionId) {
-      loadProgress(sessionId);
+      useWizardStore.getState().loadProgress(sessionId);
     } else if (!autoLoadProgress) {
       // Reset wizard if not auto-loading
-      resetWizard();
+      useWizardStore.getState().resetWizard();
     }
 
     setIsInitialized(true);
-  }, [config, autoLoadProgress, sessionId, loadProgress, resetWizard]);
+  }, [config.steps.length, autoLoadProgress, sessionId]);
 
   const contextValue: WizardContextValue = {
     config,

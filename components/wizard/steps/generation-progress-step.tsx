@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Activity, 
-  Play, 
-  Pause, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  Activity,
+  Play,
+  Pause,
+  AlertCircle,
+  CheckCircle,
   Clock,
   Sparkles,
   Video,
@@ -21,7 +21,7 @@ import {
   Eye,
   Download,
   RotateCcw,
-  Settings
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -86,7 +86,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
   // State for generation progress
   const [generationState, setGenerationState] = useState<GenerationState>({
     currentStage: 0,
-    stages: GENERATION_STAGES.map(stage => ({
+    stages: GENERATION_STAGES.map((stage) => ({
       id: stage.id,
       status: "pending" as GenerationStatus,
       progress: 0,
@@ -109,18 +109,27 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
 
   const startGeneration = async () => {
     setIsGenerating(true);
-    
+
     // Simulate generation process
-    for (let stageIndex = 0; stageIndex < GENERATION_STAGES.length; stageIndex++) {
+    for (
+      let stageIndex = 0;
+      stageIndex < GENERATION_STAGES.length;
+      stageIndex++
+    ) {
       const stage = GENERATION_STAGES[stageIndex];
-      
+
       // Update current stage
-      setGenerationState(prev => ({
+      setGenerationState((prev) => ({
         ...prev,
         currentStage: stageIndex,
         stages: prev.stages.map((s, i) => ({
           ...s,
-          status: i === stageIndex ? "running" : i < stageIndex ? "completed" : "pending",
+          status:
+            i === stageIndex
+              ? "running"
+              : i < stageIndex
+                ? "completed"
+                : "pending",
           progress: i < stageIndex ? 100 : 0,
         })),
       }));
@@ -132,23 +141,28 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
 
       for (let step = 0; step <= progressSteps; step++) {
         const progress = (step / progressSteps) * 100;
-        const overallProgress = ((stageIndex * 100 + progress) / GENERATION_STAGES.length);
+        const overallProgress =
+          (stageIndex * 100 + progress) / GENERATION_STAGES.length;
 
-        setGenerationState(prev => ({
+        setGenerationState((prev) => ({
           ...prev,
           stages: prev.stages.map((s, i) => ({
             ...s,
             progress: i === stageIndex ? progress : i < stageIndex ? 100 : 0,
           })),
           overallProgress,
-          estimatedTimeRemaining: calculateTimeRemaining(stageIndex, step, progressSteps),
+          estimatedTimeRemaining: calculateTimeRemaining(
+            stageIndex,
+            step,
+            progressSteps
+          ),
         }));
 
-        await new Promise(resolve => setTimeout(resolve, stepDelay));
+        await new Promise((resolve) => setTimeout(resolve, stepDelay));
       }
 
       // Mark stage as completed
-      setGenerationState(prev => ({
+      setGenerationState((prev) => ({
         ...prev,
         stages: prev.stages.map((s, i) => ({
           ...s,
@@ -159,7 +173,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
     }
 
     // Generation completed
-    setGenerationState(prev => ({
+    setGenerationState((prev) => ({
       ...prev,
       isCompleted: true,
       canPreview: true,
@@ -187,13 +201,19 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
     return durations[stageId as keyof typeof durations] || 2000;
   };
 
-  const calculateTimeRemaining = (currentStageIndex: number, currentStep: number, totalSteps: number): string => {
+  const calculateTimeRemaining = (
+    currentStageIndex: number,
+    currentStep: number,
+    totalSteps: number
+  ): string => {
     const remainingStages = GENERATION_STAGES.length - currentStageIndex - 1;
     const currentStageProgress = currentStep / totalSteps;
     const averageStageTime = 30; // seconds
-    
-    const remaining = (remainingStages * averageStageTime) + ((1 - currentStageProgress) * averageStageTime);
-    
+
+    const remaining =
+      remainingStages * averageStageTime +
+      (1 - currentStageProgress) * averageStageTime;
+
     if (remaining < 60) {
       return `${Math.ceil(remaining)}s remaining`;
     } else {
@@ -204,7 +224,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
   const handleRetry = () => {
     setGenerationState({
       currentStage: 0,
-      stages: GENERATION_STAGES.map(stage => ({
+      stages: GENERATION_STAGES.map((stage) => ({
         id: stage.id,
         status: "pending" as GenerationStatus,
         progress: 0,
@@ -249,25 +269,33 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
                 ) : (
                   <Loader2 className="h-5 w-5 text-primary mr-2 animate-spin" />
                 )}
-                {generationState.isCompleted ? "Generation Complete!" : 
-                 generationState.hasError ? "Generation Failed" : 
-                 "Generating Video..."}
+                {generationState.isCompleted
+                  ? "Generation Complete!"
+                  : generationState.hasError
+                    ? "Generation Failed"
+                    : "Generating Video..."}
               </CardTitle>
-              <Badge variant={generationState.isCompleted ? "default" : "secondary"}>
+              <Badge
+                variant={generationState.isCompleted ? "default" : "secondary"}
+              >
                 {Math.round(generationState.overallProgress)}%
               </Badge>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <Progress value={generationState.overallProgress} className="w-full" />
-              
-              {generationState.estimatedTimeRemaining && !generationState.isCompleted && (
-                <div className="flex items-center justify-center text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 mr-1" />
-                  {generationState.estimatedTimeRemaining}
-                </div>
-              )}
+              <Progress
+                value={generationState.overallProgress}
+                className="w-full"
+              />
+
+              {generationState.estimatedTimeRemaining &&
+                !generationState.isCompleted && (
+                  <div className="flex items-center justify-center text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4 mr-1" />
+                    {generationState.estimatedTimeRemaining}
+                  </div>
+                )}
 
               {generationState.isCompleted && (
                 <div className="text-center space-y-2">
@@ -305,7 +333,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
         {/* Generation Stages */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Generation Progress</h3>
-          
+
           <div className="space-y-3">
             {GENERATION_STAGES.map((stage, index) => {
               const stageState = generationState.stages[index];
@@ -314,7 +342,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
               const isError = stageState.status === "error";
 
               return (
-                <Card 
+                <Card
                   key={stage.id}
                   className={cn(
                     "transition-all",
@@ -325,19 +353,29 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center space-x-4">
-                      <div className={cn(
-                        "p-2 rounded-full",
-                        isCompleted ? "bg-green-100 text-green-600" :
-                        isError ? "bg-red-100 text-red-600" :
-                        isActive ? "bg-primary/10 text-primary" :
-                        "bg-muted text-muted-foreground"
-                      )}>
-                        {isCompleted ? <CheckCircle className="h-4 w-4" /> :
-                         isError ? <AlertCircle className="h-4 w-4" /> :
-                         isActive ? <Loader2 className="h-4 w-4 animate-spin" /> :
-                         stage.icon}
+                      <div
+                        className={cn(
+                          "p-2 rounded-full",
+                          isCompleted
+                            ? "bg-green-100 text-green-600"
+                            : isError
+                              ? "bg-red-100 text-red-600"
+                              : isActive
+                                ? "bg-primary/10 text-primary"
+                                : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="h-4 w-4" />
+                        ) : isError ? (
+                          <AlertCircle className="h-4 w-4" />
+                        ) : isActive ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          stage.icon
+                        )}
                       </div>
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="font-medium">{stage.name}</h4>
@@ -348,11 +386,14 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
                         <p className="text-sm text-muted-foreground mb-2">
                           {stage.description}
                         </p>
-                        
+
                         {(isActive || isCompleted) && (
-                          <Progress value={stageState.progress} className="w-full h-2" />
+                          <Progress
+                            value={stageState.progress}
+                            className="w-full h-2"
+                          />
                         )}
-                        
+
                         {!isActive && !isCompleted && !isError && (
                           <div className="text-xs text-muted-foreground">
                             Est. {stage.estimatedTime}
@@ -375,15 +416,21 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <span className="font-medium text-muted-foreground">Provider:</span>
+                <span className="font-medium text-muted-foreground">
+                  Provider:
+                </span>
                 <p>{wizardData.aiConfiguration?.provider || "Veo 3"}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Style:</span>
+                <span className="font-medium text-muted-foreground">
+                  Style:
+                </span>
                 <p>{wizardData.videoStyle?.style || "Educational"}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">Duration:</span>
+                <span className="font-medium text-muted-foreground">
+                  Duration:
+                </span>
                 <p>{wizardData.videoStyle?.duration || 30} seconds</p>
               </div>
             </div>
@@ -407,7 +454,9 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
                   <div className="text-center text-muted-foreground">
                     <Video className="h-12 w-12 mx-auto mb-2" />
                     <p>Video preview would appear here</p>
-                    <p className="text-sm">Integration with video player in next phase</p>
+                    <p className="text-sm">
+                      Integration with video player in next phase
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -419,8 +468,9 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
         {!generationState.isCompleted && (
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              💡 <strong>Tip:</strong> Generation time varies by AI provider and video complexity. 
-              You can safely close this tab - we'll notify you when it's ready!
+              💡 <strong>Tip:</strong> Generation time varies by AI provider and
+              video complexity. You can safely close this tab - we'll notify you
+              when it's ready!
             </p>
           </div>
         )}

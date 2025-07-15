@@ -41,10 +41,15 @@ export interface WizardData {
     tags: string[];
     engagementMetrics: Record<string, number>;
   };
-  
+
   // Step 2: Style Configuration
   videoStyle?: {
-    style: "educational" | "entertaining" | "dramatic" | "minimalist" | "cinematic";
+    style:
+      | "educational"
+      | "entertaining"
+      | "dramatic"
+      | "minimalist"
+      | "cinematic";
     tone: "professional" | "casual" | "humorous" | "serious" | "inspiring";
     visualStyle: "realistic" | "animated" | "abstract" | "documentary";
     duration: number;
@@ -53,7 +58,7 @@ export interface WizardData {
     resolution: "720p" | "1080p" | "4k";
     fps: 24 | 30 | 60;
   };
-  
+
   // Step 3: AI Configuration
   aiSettings?: {
     provider: "veo" | "runway" | "luma" | "auto";
@@ -68,11 +73,17 @@ export interface WizardData {
       tags: string[];
     };
   };
-  
+
   // Step 4: Generation Progress
   generation?: {
     jobId?: string;
-    status: "idle" | "queued" | "processing" | "completed" | "failed" | "cancelled";
+    status:
+      | "idle"
+      | "queued"
+      | "processing"
+      | "completed"
+      | "failed"
+      | "cancelled";
     progress: number;
     estimatedCompletion?: number;
     errorMessage?: string;
@@ -80,7 +91,7 @@ export interface WizardData {
     videoUrl?: string;
     thumbnailUrl?: string;
   };
-  
+
   // Step 5: Preview & Edit
   preview?: {
     videoUrl?: string;
@@ -91,7 +102,7 @@ export interface WizardData {
     isPublic: boolean;
     downloadRequested: boolean;
   };
-  
+
   // Metadata
   createdAt: number;
   updatedAt: number;
@@ -173,7 +184,8 @@ export const STYLE_PRESETS: StylePreset[] = [
   {
     id: "tiktok-viral",
     name: "TikTok Viral",
-    description: "High-energy, engaging content optimized for TikTok's algorithm",
+    description:
+      "High-energy, engaging content optimized for TikTok's algorithm",
     style: "entertaining",
     tone: "casual",
     visualStyle: "realistic",
@@ -185,7 +197,8 @@ export const STYLE_PRESETS: StylePreset[] = [
   {
     id: "youtube-educational",
     name: "YouTube Educational",
-    description: "Professional, informative content perfect for YouTube tutorials",
+    description:
+      "Professional, informative content perfect for YouTube tutorials",
     style: "educational",
     tone: "professional",
     visualStyle: "realistic",
@@ -209,7 +222,8 @@ export const STYLE_PRESETS: StylePreset[] = [
   {
     id: "twitter-news",
     name: "Twitter News",
-    description: "Quick, attention-grabbing content for news and current events",
+    description:
+      "Quick, attention-grabbing content for news and current events",
     style: "dramatic",
     tone: "serious",
     visualStyle: "realistic",

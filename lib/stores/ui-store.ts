@@ -72,7 +72,7 @@ export const useUIStore = create<UIState>()(
       // Initial state
       theme: "system",
       resolvedTheme: "dark",
-      sidebarOpen: true,
+      sidebarOpen: false,
       sidebarCollapsed: false,
       modals: [],
       notifications: [],

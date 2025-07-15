@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTrends } from "@/hooks/use-trends";
-import { TrendingUp, Search, Filter, RefreshCw, CheckCircle } from "lucide-react";
+import {
+  TrendingUp,
+  Search,
+  Filter,
+  RefreshCw,
+  CheckCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TrendSelectionStepProps extends WizardStepProps {}
@@ -42,7 +48,7 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
 
   const handleTrendSelect = (trend: any) => {
     setSelectedTrendId(trend._id);
-    
+
     // Update wizard data
     onDataChange("trend-selection", {
       selectedTrend: {
@@ -75,7 +81,9 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
     }
   };
 
-  const selectedTrend = trends.find((trend: any) => trend._id === selectedTrendId);
+  const selectedTrend = trends.find(
+    (trend: any) => trend._id === selectedTrendId
+  );
 
   if (isError) {
     return (
@@ -106,11 +114,13 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center space-x-2">
             <TrendingUp className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-semibold">Choose Your Trending Topic</h2>
+            <h2 className="text-xl font-semibold">
+              Choose Your Trending Topic
+            </h2>
           </div>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Select a trending topic to base your video on. Higher viral scores indicate 
-            content with better engagement potential.
+            Select a trending topic to base your video on. Higher viral scores
+            indicate content with better engagement potential.
           </p>
         </div>
 
@@ -123,7 +133,10 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
                   <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
                   Selected Trend
                 </CardTitle>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <Badge
+                  variant="secondary"
+                  className="bg-green-100 text-green-800"
+                >
                   Viral Score: {selectedTrend.viralScore}
                 </Badge>
               </div>
@@ -165,7 +178,7 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
               Use the search bar and filters to find relevant trending topics
             </p>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center space-x-2 mb-2">
               <TrendingUp className="h-4 w-4 text-green-500" />
@@ -175,7 +188,7 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
               Higher scores (80+) indicate content with viral potential
             </p>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center space-x-2 mb-2">
               <Filter className="h-4 w-4 text-purple-500" />
@@ -216,8 +229,9 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
         {/* Help Text */}
         <div className="text-center text-sm text-muted-foreground">
           <p>
-            💡 <strong>Tip:</strong> Choose trends with high engagement and recent activity 
-            for the best results. You can change your selection at any time.
+            💡 <strong>Tip:</strong> Choose trends with high engagement and
+            recent activity for the best results. You can change your selection
+            at any time.
           </p>
         </div>
       </div>

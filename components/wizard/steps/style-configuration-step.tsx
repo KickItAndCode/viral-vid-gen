@@ -8,15 +8,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Palette, 
-  Play, 
-  Monitor, 
-  Smartphone, 
+import {
+  Palette,
+  Play,
+  Monitor,
+  Smartphone,
   Instagram,
   Twitter,
   Youtube,
@@ -25,7 +31,7 @@ import {
   CheckCircle,
   Camera,
   Mic,
-  Zap
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -126,7 +132,7 @@ const DURATION_PRESETS = [
 
 export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
   const { wizardData, onDataChange } = props;
-  
+
   // State for style configuration
   const [selectedStyle, setSelectedStyle] = useState<string>(
     wizardData.videoStyle?.style || ""
@@ -153,7 +159,7 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
   // Update step validation when data changes
   useEffect(() => {
     const isValid = !!(selectedStyle && selectedPlatform && duration > 0);
-    
+
     if (isValid) {
       const styleData = {
         style: selectedStyle,
@@ -163,7 +169,9 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
         includeSubtitles,
         includeMusicOverlay,
         voiceNarration,
-        aspectRatio: PLATFORMS.find(p => p.id === selectedPlatform)?.aspectRatio || "9:16",
+        aspectRatio:
+          PLATFORMS.find((p) => p.id === selectedPlatform)?.aspectRatio ||
+          "9:16",
       };
 
       onDataChange("style-configuration", {
@@ -187,10 +195,13 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
 
   const handlePlatformSelect = (platformId: string) => {
     setSelectedPlatform(platformId);
-    
+
     // Auto-adjust duration based on platform constraints
-    const platform = PLATFORMS.find(p => p.id === platformId);
-    if (platform && (duration < platform.duration[0] || duration > platform.duration[1])) {
+    const platform = PLATFORMS.find((p) => p.id === platformId);
+    if (
+      platform &&
+      (duration < platform.duration[0] || duration > platform.duration[1])
+    ) {
       setDuration(platform.duration[0]);
     }
   };
@@ -199,8 +210,8 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
     setDuration(value[0]);
   };
 
-  const selectedStyleData = VIDEO_STYLES.find(s => s.id === selectedStyle);
-  const selectedPlatformData = PLATFORMS.find(p => p.id === selectedPlatform);
+  const selectedStyleData = VIDEO_STYLES.find((s) => s.id === selectedStyle);
+  const selectedPlatformData = PLATFORMS.find((p) => p.id === selectedPlatform);
 
   return (
     <WizardStepWrapper step={props.step}>
@@ -212,7 +223,8 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
             <h2 className="text-xl font-semibold">Configure Video Style</h2>
           </div>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Choose the visual style, platform, and format settings for your video.
+            Choose the visual style, platform, and format settings for your
+            video.
           </p>
         </div>
 
@@ -236,7 +248,9 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
                 {selectedPlatform && (
                   <div>
                     <span className="font-medium text-blue-800">Platform:</span>
-                    <p className="text-blue-700">{selectedPlatformData?.name}</p>
+                    <p className="text-blue-700">
+                      {selectedPlatformData?.name}
+                    </p>
                   </div>
                 )}
                 <div>
@@ -289,7 +303,11 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
                   <div className="space-y-2">
                     <div className="flex flex-wrap gap-1">
                       {style.features.map((feature) => (
-                        <Badge key={feature} variant="outline" className="text-xs">
+                        <Badge
+                          key={feature}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {feature}
                         </Badge>
                       ))}
@@ -370,13 +388,15 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
                     {DURATION_PRESETS.map((preset) => (
                       <Button
                         key={preset.value}
-                        variant={duration === preset.value ? "default" : "outline"}
+                        variant={
+                          duration === preset.value ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => setDuration(preset.value)}
                         disabled={
                           selectedPlatformData &&
                           (preset.value < selectedPlatformData.duration[0] ||
-                           preset.value > selectedPlatformData.duration[1])
+                            preset.value > selectedPlatformData.duration[1])
                         }
                       >
                         {preset.label}
@@ -472,7 +492,8 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
                 className="resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                These instructions will be passed to the AI to customize your video generation.
+                These instructions will be passed to the AI to customize your
+                video generation.
               </p>
             </div>
           </CardContent>
@@ -481,9 +502,9 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
         {/* Help Text */}
         <div className="text-center text-sm text-muted-foreground">
           <p>
-            💡 <strong>Tip:</strong> Different platforms have optimal duration ranges. 
-            TikTok and Instagram Reels perform best with 15-30 second videos, 
-            while YouTube Shorts can be up to 60 seconds.
+            💡 <strong>Tip:</strong> Different platforms have optimal duration
+            ranges. TikTok and Instagram Reels perform best with 15-30 second
+            videos, while YouTube Shorts can be up to 60 seconds.
           </p>
         </div>
       </div>

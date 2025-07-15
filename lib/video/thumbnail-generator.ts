@@ -1,17 +1,17 @@
-import sharp from 'sharp';
-import ffmpeg from 'fluent-ffmpeg';
-import { promises as fs } from 'fs';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import { s3FileManager } from '@/lib/aws/s3-upload';
+import sharp from "sharp";
+import ffmpeg from "fluent-ffmpeg";
+import { promises as fs } from "fs";
+import { join } from "path";
+import { tmpdir } from "os";
+import { s3FileManager } from "@/lib/aws/s3-upload";
 
 export interface ThumbnailOptions {
   width: number;
   height: number;
   quality: number;
-  format: 'jpeg' | 'png' | 'webp';
+  format: "jpeg" | "png" | "webp";
   background?: string;
-  fit?: 'contain' | 'cover' | 'fill' | 'inside' | 'outside';
+  fit?: "contain" | "cover" | "fill" | "inside" | "outside";
 }
 
 export interface ThumbnailResult {
@@ -27,13 +27,13 @@ export interface ThumbnailResult {
 
 export interface VideoThumbnailOptions extends ThumbnailOptions {
   timestamps: number[]; // Array of timestamps in seconds
-  seekAccuracy?: 'fast' | 'accurate'; // FFmpeg seek accuracy
+  seekAccuracy?: "fast" | "accurate"; // FFmpeg seek accuracy
 }
 
 export interface ImageThumbnailOptions extends ThumbnailOptions {
   sizes: Array<{ width: number; height: number; suffix: string }>;
   progressive?: boolean;
-  optimizeFor?: 'web' | 'print' | 'speed';
+  optimizeFor?: "web" | "print" | "speed";
 }
 
 export class ThumbnailGenerator {
@@ -58,40 +58,49 @@ export class ThumbnailGenerator {
       // Download video file
       const videoBuffer = await s3FileManager.downloadFile(videoKey);
       if (!videoBuffer) {
-        throw new Error('Failed to download video file');
+        throw new Error("Failed to download video file");
       }
 
       await fs.writeFile(tempVideoPath, videoBuffer);
 
       // Generate thumbnails for each timestamp
       const thumbnailPromises = options.timestamps.map((timestamp, index) =>
-        this.generateSingleVideoThumbnail(tempVideoPath, outputPrefix, timestamp, index, options)
+        this.generateSingleVideoThumbnail(
+          tempVideoPath,
+          outputPrefix,
+          timestamp,
+          index,
+          options
+        )
       );
 
       const thumbnailResults = await Promise.allSettled(thumbnailPromises);
-      
+
       // Process results
       thumbnailResults.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           results.push({
             ...result.value,
             timestamp: options.timestamps[index],
           });
         } else {
-          console.error(`Thumbnail generation failed for timestamp ${options.timestamps[index]}:`, result.reason);
+          console.error(
+            `Thumbnail generation failed for timestamp ${options.timestamps[index]}:`,
+            result.reason
+          );
         }
       });
 
       return results;
     } catch (error) {
-      console.error('Video thumbnail generation error:', error);
+      console.error("Video thumbnail generation error:", error);
       throw error;
     } finally {
       // Clean up temporary files
       try {
         await fs.unlink(tempVideoPath);
       } catch (error) {
-        console.error('Error cleaning up temp video file:', error);
+        console.error("Error cleaning up temp video file:", error);
       }
     }
   }
@@ -106,32 +115,43 @@ export class ThumbnailGenerator {
     index: number,
     options: VideoThumbnailOptions
   ): Promise<ThumbnailResult> {
-    const tempThumbnailPath = join(this.tempDir, `thumb_${Date.now()}_${index}.jpg`);
+    const tempThumbnailPath = join(
+      this.tempDir,
+      `thumb_${Date.now()}_${index}.jpg`
+    );
     const thumbnailFilename = `${outputPrefix}_thumbnail_${index + 1}.${options.format}`;
 
     return new Promise((resolve, reject) => {
       ffmpeg(videoPath)
         .seekInput(timestamp)
-        .videoFilters(`scale=${options.width}:${options.height}:force_original_aspect_ratio=decrease,pad=${options.width}:${options.height}:(ow-iw)/2:(oh-ih)/2:${options.background || 'black'}`)
+        .videoFilters(
+          `scale=${options.width}:${options.height}:force_original_aspect_ratio=decrease,pad=${options.width}:${options.height}:(ow-iw)/2:(oh-ih)/2:${options.background || "black"}`
+        )
         .frames(1)
         .output(tempThumbnailPath)
-        .on('end', async () => {
+        .on("end", async () => {
           try {
             // Process with Sharp for optimization
-            const processedBuffer = await this.processImageWithSharp(tempThumbnailPath, options);
-            
+            const processedBuffer = await this.processImageWithSharp(
+              tempThumbnailPath,
+              options
+            );
+
             // Upload to S3
-            const uploadResult = await s3FileManager.uploadFile(processedBuffer, {
-              folder: 'thumbnails',
-              filename: thumbnailFilename,
-              contentType: `image/${options.format}`,
-              metadata: {
-                timestamp: timestamp.toString(),
-                width: options.width.toString(),
-                height: options.height.toString(),
-                quality: options.quality.toString(),
-              },
-            });
+            const uploadResult = await s3FileManager.uploadFile(
+              processedBuffer,
+              {
+                folder: "thumbnails",
+                filename: thumbnailFilename,
+                contentType: `image/${options.format}`,
+                metadata: {
+                  timestamp: timestamp.toString(),
+                  width: options.width.toString(),
+                  height: options.height.toString(),
+                  quality: options.quality.toString(),
+                },
+              }
+            );
 
             if (!uploadResult.success) {
               throw new Error(`Upload failed: ${uploadResult.error}`);
@@ -156,7 +176,7 @@ export class ThumbnailGenerator {
             reject(error);
           }
         })
-        .on('error', reject)
+        .on("error", reject)
         .run();
     });
   }
@@ -175,28 +195,34 @@ export class ThumbnailGenerator {
       // Download image file
       const imageBuffer = await s3FileManager.downloadFile(imageKey);
       if (!imageBuffer) {
-        throw new Error('Failed to download image file');
+        throw new Error("Failed to download image file");
       }
 
       // Generate thumbnails for each size
       const thumbnailPromises = options.sizes.map((size, index) =>
-        this.generateSingleImageThumbnail(imageBuffer, outputPrefix, size, index, options)
+        this.generateSingleImageThumbnail(
+          imageBuffer,
+          outputPrefix,
+          size,
+          index,
+          options
+        )
       );
 
       const thumbnailResults = await Promise.allSettled(thumbnailPromises);
-      
+
       // Process results
       thumbnailResults.forEach((result) => {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           results.push(result.value);
         } else {
-          console.error('Image thumbnail generation failed:', result.reason);
+          console.error("Image thumbnail generation failed:", result.reason);
         }
       });
 
       return results;
     } catch (error) {
-      console.error('Image thumbnail generation error:', error);
+      console.error("Image thumbnail generation error:", error);
       throw error;
     }
   }
@@ -219,51 +245,51 @@ export class ThumbnailGenerator {
 
       // Apply resize and fit options
       sharpInstance = sharpInstance.resize(size.width, size.height, {
-        fit: options.fit || 'cover',
-        background: options.background || 'transparent',
+        fit: options.fit || "cover",
+        background: options.background || "transparent",
       });
 
       // Apply format-specific options
       switch (options.format) {
-        case 'jpeg':
+        case "jpeg":
           sharpInstance = sharpInstance.jpeg({
             quality: options.quality,
             progressive: options.progressive || false,
-            mozjpeg: options.optimizeFor === 'web',
+            mozjpeg: options.optimizeFor === "web",
           });
           break;
-        case 'png':
+        case "png":
           sharpInstance = sharpInstance.png({
             quality: options.quality,
             progressive: options.progressive || false,
-            compressionLevel: options.optimizeFor === 'speed' ? 1 : 9,
+            compressionLevel: options.optimizeFor === "speed" ? 1 : 9,
           });
           break;
-        case 'webp':
+        case "webp":
           sharpInstance = sharpInstance.webp({
             quality: options.quality,
-            effort: options.optimizeFor === 'speed' ? 1 : 6,
+            effort: options.optimizeFor === "speed" ? 1 : 6,
           });
           break;
       }
 
       // Apply optimization based on target
-      if (options.optimizeFor === 'web') {
+      if (options.optimizeFor === "web") {
         sharpInstance = sharpInstance.normalize().sharpen();
       }
 
       const processedBuffer = await sharpInstance.toBuffer();
-      
+
       // Upload to S3
       const uploadResult = await s3FileManager.uploadFile(processedBuffer, {
-        folder: 'thumbnails',
+        folder: "thumbnails",
         filename: thumbnailFilename,
         contentType: `image/${options.format}`,
         metadata: {
           width: size.width.toString(),
           height: size.height.toString(),
           quality: options.quality.toString(),
-          optimized: options.optimizeFor || 'web',
+          optimized: options.optimizeFor || "web",
         },
       });
 
@@ -284,7 +310,7 @@ export class ThumbnailGenerator {
         format: options.format,
       };
     } catch (error) {
-      console.error('Single image thumbnail generation error:', error);
+      console.error("Single image thumbnail generation error:", error);
       throw error;
     }
   }
@@ -292,32 +318,35 @@ export class ThumbnailGenerator {
   /**
    * Process image with Sharp for optimization
    */
-  private async processImageWithSharp(imagePath: string, options: ThumbnailOptions): Promise<Buffer> {
+  private async processImageWithSharp(
+    imagePath: string,
+    options: ThumbnailOptions
+  ): Promise<Buffer> {
     let sharpInstance = sharp(imagePath);
 
     // Apply resize and fit options
     sharpInstance = sharpInstance.resize(options.width, options.height, {
-      fit: options.fit || 'cover',
-      background: options.background || 'transparent',
+      fit: options.fit || "cover",
+      background: options.background || "transparent",
     });
 
     // Apply format-specific processing
     switch (options.format) {
-      case 'jpeg':
+      case "jpeg":
         sharpInstance = sharpInstance.jpeg({
           quality: options.quality,
           progressive: true,
           mozjpeg: true,
         });
         break;
-      case 'png':
+      case "png":
         sharpInstance = sharpInstance.png({
           quality: options.quality,
           progressive: true,
           compressionLevel: 9,
         });
         break;
-      case 'webp':
+      case "webp":
         sharpInstance = sharpInstance.webp({
           quality: options.quality,
           effort: 6,
@@ -338,7 +367,7 @@ export class ThumbnailGenerator {
     videoKey: string,
     outputPrefix: string,
     videoDuration: number,
-    options: Omit<VideoThumbnailOptions, 'timestamps'>
+    options: Omit<VideoThumbnailOptions, "timestamps">
   ): Promise<ThumbnailResult[]> {
     const timestamps = [
       videoDuration * 0.25,
@@ -358,13 +387,13 @@ export class ThumbnailGenerator {
   async generateResponsiveImageThumbnails(
     imageKey: string,
     outputPrefix: string,
-    options: Omit<ImageThumbnailOptions, 'sizes'>
+    options: Omit<ImageThumbnailOptions, "sizes">
   ): Promise<ThumbnailResult[]> {
     const sizes = [
-      { width: 150, height: 150, suffix: 'thumbnail' },
-      { width: 300, height: 300, suffix: 'small' },
-      { width: 600, height: 600, suffix: 'medium' },
-      { width: 1200, height: 1200, suffix: 'large' },
+      { width: 150, height: 150, suffix: "thumbnail" },
+      { width: 300, height: 300, suffix: "small" },
+      { width: 600, height: 600, suffix: "medium" },
+      { width: 1200, height: 1200, suffix: "large" },
     ];
 
     return this.generateImageThumbnails(imageKey, outputPrefix, {
@@ -379,14 +408,14 @@ export class ThumbnailGenerator {
   async generateSocialMediaThumbnails(
     imageKey: string,
     outputPrefix: string,
-    options: Omit<ImageThumbnailOptions, 'sizes'>
+    options: Omit<ImageThumbnailOptions, "sizes">
   ): Promise<ThumbnailResult[]> {
     const sizes = [
-      { width: 1200, height: 630, suffix: 'facebook' },
-      { width: 1024, height: 512, suffix: 'twitter' },
-      { width: 1080, height: 1080, suffix: 'instagram' },
-      { width: 735, height: 1102, suffix: 'pinterest' },
-      { width: 1200, height: 627, suffix: 'linkedin' },
+      { width: 1200, height: 630, suffix: "facebook" },
+      { width: 1024, height: 512, suffix: "twitter" },
+      { width: 1080, height: 1080, suffix: "instagram" },
+      { width: 735, height: 1102, suffix: "pinterest" },
+      { width: 1200, height: 627, suffix: "linkedin" },
     ];
 
     return this.generateImageThumbnails(imageKey, outputPrefix, {
@@ -405,11 +434,11 @@ export class ThumbnailGenerator {
       const maxAge = 2 * 60 * 60 * 1000; // 2 hours
 
       for (const file of files) {
-        if (file.startsWith('thumb_') || file.startsWith('video_')) {
+        if (file.startsWith("thumb_") || file.startsWith("video_")) {
           const filePath = join(this.tempDir, file);
           try {
             const stats = await fs.stat(filePath);
-            
+
             if (now - stats.mtime.getTime() > maxAge) {
               await fs.unlink(filePath);
             }
@@ -419,7 +448,7 @@ export class ThumbnailGenerator {
         }
       }
     } catch (error) {
-      console.error('Error cleaning up thumbnail temp files:', error);
+      console.error("Error cleaning up thumbnail temp files:", error);
     }
   }
 }
@@ -431,24 +460,24 @@ export const thumbnailGenerator = new ThumbnailGenerator();
 export const THUMBNAIL_PRESETS = {
   video: {
     quality: 85,
-    format: 'jpeg' as const,
+    format: "jpeg" as const,
     width: 1280,
     height: 720,
-    background: 'black',
-    fit: 'contain' as const,
+    background: "black",
+    fit: "contain" as const,
   },
   image: {
     quality: 85,
-    format: 'jpeg' as const,
+    format: "jpeg" as const,
     progressive: true,
-    optimizeFor: 'web' as const,
-    fit: 'cover' as const,
+    optimizeFor: "web" as const,
+    fit: "cover" as const,
   },
   socialMedia: {
     quality: 90,
-    format: 'jpeg' as const,
+    format: "jpeg" as const,
     progressive: true,
-    optimizeFor: 'web' as const,
-    fit: 'cover' as const,
+    optimizeFor: "web" as const,
+    fit: "cover" as const,
   },
 } as const;

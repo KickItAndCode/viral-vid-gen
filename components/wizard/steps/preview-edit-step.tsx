@@ -11,13 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Eye, 
-  Play, 
-  Pause, 
-  RotateCcw, 
-  Download, 
-  Share2, 
+import {
+  Eye,
+  Play,
+  Pause,
+  RotateCcw,
+  Download,
+  Share2,
   Edit3,
   Volume2,
   VolumeX,
@@ -31,7 +31,7 @@ import {
   Settings,
   Clock,
   FileText,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -49,21 +49,45 @@ const MOCK_VIDEO = {
     { start: 0, end: 3, text: "Welcome to the future of content creation!" },
     { start: 3, end: 6, text: "This video was generated using AI technology." },
     { start: 6, end: 9, text: "Based on trending topics and viral patterns." },
-    { start: 9, end: 12, text: "With just a few clicks, you can create engaging content." },
+    {
+      start: 9,
+      end: 12,
+      text: "With just a few clicks, you can create engaging content.",
+    },
   ],
 };
 
 // Export formats
 const EXPORT_FORMATS = [
-  { id: "mp4-1080p", name: "MP4 - 1080p", description: "Best quality for YouTube, Instagram", size: "15-25 MB" },
-  { id: "mp4-720p", name: "MP4 - 720p", description: "Good quality, smaller size", size: "8-15 MB" },
-  { id: "webm", name: "WebM", description: "Web optimized format", size: "5-10 MB" },
-  { id: "gif", name: "Animated GIF", description: "For social media previews", size: "2-5 MB" },
+  {
+    id: "mp4-1080p",
+    name: "MP4 - 1080p",
+    description: "Best quality for YouTube, Instagram",
+    size: "15-25 MB",
+  },
+  {
+    id: "mp4-720p",
+    name: "MP4 - 720p",
+    description: "Good quality, smaller size",
+    size: "8-15 MB",
+  },
+  {
+    id: "webm",
+    name: "WebM",
+    description: "Web optimized format",
+    size: "5-10 MB",
+  },
+  {
+    id: "gif",
+    name: "Animated GIF",
+    description: "For social media previews",
+    size: "2-5 MB",
+  },
 ];
 
 export function PreviewEditStep(props: PreviewEditStepProps) {
   const { wizardData, onDataChange } = props;
-  
+
   // Video player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -71,7 +95,7 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
+
   // Editing state
   const [videoTitle, setVideoTitle] = useState(
     wizardData.finalVideo?.title || "My AI Generated Video"
@@ -83,13 +107,13 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
   const [includeSubtitles, setIncludeSubtitles] = useState(true);
   const [includeBranding, setIncludeBranding] = useState(false);
   const [customThumbnail, setCustomThumbnail] = useState<File | null>(null);
-  
+
   // Advanced editing
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(30);
   const [audioLevel, setAudioLevel] = useState(80);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Update wizard data when changes occur
@@ -128,7 +152,7 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
     let interval: NodeJS.Timeout;
     if (isPlaying) {
       interval = setInterval(() => {
-        setCurrentTime(prev => {
+        setCurrentTime((prev) => {
           if (prev >= duration) {
             setIsPlaying(false);
             return 0;
@@ -183,7 +207,7 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
   };
 
   const currentSubtitle = MOCK_VIDEO.subtitles.find(
-    sub => currentTime >= sub.start && currentTime <= sub.end
+    (sub) => currentTime >= sub.start && currentTime <= sub.end
   );
 
   return (
@@ -196,7 +220,8 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
             <h2 className="text-xl font-semibold">Preview & Finalize</h2>
           </div>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Review your generated video and make final adjustments before exporting.
+            Review your generated video and make final adjustments before
+            exporting.
           </p>
         </div>
 
@@ -212,9 +237,12 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                     <div className="text-center text-white space-y-4">
                       <Sparkles className="h-16 w-16 mx-auto opacity-50" />
                       <div>
-                        <h3 className="text-lg font-semibold mb-2">AI Generated Video</h3>
+                        <h3 className="text-lg font-semibold mb-2">
+                          AI Generated Video
+                        </h3>
                         <p className="text-sm opacity-75">
-                          {wizardData.selectedTrend?.title || "Trending Content Video"}
+                          {wizardData.selectedTrend?.title ||
+                            "Trending Content Video"}
                         </p>
                       </div>
                       {currentSubtitle && (
@@ -280,8 +308,16 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                   {/* Control Buttons */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm" onClick={handlePlayPause}>
-                        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handlePlayPause}
+                      >
+                        {isPlaying ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
                       </Button>
                       <Button variant="ghost" size="sm" onClick={handleMute}>
                         {isMuted || volume === 0 ? (
@@ -305,10 +341,12 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                       <Button variant="ghost" size="sm">
                         <RotateCcw className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
-                        onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
+                        onClick={() =>
+                          setShowAdvancedOptions(!showAdvancedOptions)
+                        }
                       >
                         <Settings className="h-4 w-4" />
                       </Button>
@@ -351,7 +389,7 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label>Audio Level: {audioLevel}%</Label>
                     <Slider
@@ -407,7 +445,13 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                   </div>
                   <div>
                     <span className="font-medium">Format:</span>
-                    <p>{EXPORT_FORMATS.find(f => f.id === selectedExportFormat)?.name}</p>
+                    <p>
+                      {
+                        EXPORT_FORMATS.find(
+                          (f) => f.id === selectedExportFormat
+                        )?.name
+                      }
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -437,10 +481,14 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="font-medium text-sm">{format.name}</h4>
-                          <p className="text-xs text-muted-foreground">{format.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format.description}
+                          </p>
                         </div>
                         <div className="text-right">
-                          <div className="text-xs text-muted-foreground">{format.size}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {format.size}
+                          </div>
                           {selectedExportFormat === format.id && (
                             <CheckCircle className="h-4 w-4 text-primary mt-1" />
                           )}
@@ -454,7 +502,9 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label>Include Subtitles</Label>
-                      <p className="text-xs text-muted-foreground">Add captions to video</p>
+                      <p className="text-xs text-muted-foreground">
+                        Add captions to video
+                      </p>
                     </div>
                     <Switch
                       checked={includeSubtitles}
@@ -465,7 +515,9 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                   <div className="flex items-center justify-between">
                     <div>
                       <Label>Include Branding</Label>
-                      <p className="text-xs text-muted-foreground">Add ViralAI watermark</p>
+                      <p className="text-xs text-muted-foreground">
+                        Add ViralAI watermark
+                      </p>
                     </div>
                     <Switch
                       checked={includeBranding}
@@ -482,7 +534,7 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                 <Download className="h-4 w-4 mr-2" />
                 Export Video
               </Button>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="outline" onClick={handleShare}>
                   <Share2 className="h-4 w-4 mr-2" />
@@ -503,7 +555,9 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
               <CardContent className="space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Trend:</span>
-                  <span>{wizardData.selectedTrend?.title || "Trending Topic"}</span>
+                  <span>
+                    {wizardData.selectedTrend?.title || "Trending Topic"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Style:</span>
@@ -525,8 +579,8 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
         {/* Help Text */}
         <div className="text-center text-sm text-muted-foreground">
           <p>
-            💡 <strong>Tip:</strong> You can make basic edits here or export now and use 
-            professional editing software for advanced modifications.
+            💡 <strong>Tip:</strong> You can make basic edits here or export now
+            and use professional editing software for advanced modifications.
           </p>
         </div>
       </div>

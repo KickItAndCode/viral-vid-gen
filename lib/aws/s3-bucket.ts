@@ -11,22 +11,22 @@ import {
   BucketAlreadyExistsError,
   BucketAlreadyOwnedByYouError,
   NoSuchBucketError,
-} from '@aws-sdk/client-s3';
-import { s3Client, S3_CONFIG } from './s3-config';
+} from "@aws-sdk/client-s3";
+import { s3Client, S3_CONFIG } from "./s3-config";
 
 // CORS configuration for browser uploads
 const CORS_CONFIGURATION = {
   CORSRules: [
     {
-      AllowedHeaders: ['*'],
-      AllowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
+      AllowedHeaders: ["*"],
+      AllowedMethods: ["GET", "POST", "PUT", "DELETE", "HEAD"],
       AllowedOrigins: [
-        'http://localhost:3000',
-        'https://localhost:3000',
-        'https://viralai.com',
-        'https://*.viralai.com',
+        "http://localhost:3000",
+        "https://localhost:3000",
+        "https://viralai.com",
+        "https://*.viralai.com",
       ],
-      ExposeHeaders: ['ETag', 'x-amz-meta-*'],
+      ExposeHeaders: ["ETag", "x-amz-meta-*"],
       MaxAgeSeconds: 3600,
     },
   ],
@@ -34,20 +34,20 @@ const CORS_CONFIGURATION = {
 
 // Bucket policy for public read access to processed videos
 const BUCKET_POLICY = {
-  Version: '2012-10-17',
+  Version: "2012-10-17",
   Statement: [
     {
-      Sid: 'PublicReadGetObject',
-      Effect: 'Allow',
-      Principal: '*',
-      Action: 's3:GetObject',
+      Sid: "PublicReadGetObject",
+      Effect: "Allow",
+      Principal: "*",
+      Action: "s3:GetObject",
       Resource: `arn:aws:s3:::${S3_CONFIG.bucketName}/${S3_CONFIG.folders.processed}/*`,
     },
     {
-      Sid: 'PublicReadGetThumbnails',
-      Effect: 'Allow',
-      Principal: '*',
-      Action: 's3:GetObject',
+      Sid: "PublicReadGetThumbnails",
+      Effect: "Allow",
+      Principal: "*",
+      Action: "s3:GetObject",
       Resource: `arn:aws:s3:::${S3_CONFIG.bucketName}/${S3_CONFIG.folders.thumbnails}/*`,
     },
   ],
@@ -57,8 +57,8 @@ const BUCKET_POLICY = {
 const LIFECYCLE_CONFIGURATION = {
   Rules: [
     {
-      ID: 'TempFileCleanup',
-      Status: 'Enabled',
+      ID: "TempFileCleanup",
+      Status: "Enabled",
       Filter: {
         Prefix: `${S3_CONFIG.folders.temp}/`,
       },
@@ -67,16 +67,16 @@ const LIFECYCLE_CONFIGURATION = {
       },
     },
     {
-      ID: 'IncompleteMultipartUploads',
-      Status: 'Enabled',
+      ID: "IncompleteMultipartUploads",
+      Status: "Enabled",
       Filter: {},
       AbortIncompleteMultipartUpload: {
         DaysAfterInitiation: 1,
       },
     },
     {
-      ID: 'OldVersionCleanup',
-      Status: 'Enabled',
+      ID: "OldVersionCleanup",
+      Status: "Enabled",
       Filter: {},
       NoncurrentVersionExpiration: {
         NoncurrentDays: 30,
@@ -90,7 +90,7 @@ const ENCRYPTION_CONFIGURATION = {
   Rules: [
     {
       ApplyServerSideEncryptionByDefault: {
-        SSEAlgorithm: 'AES256',
+        SSEAlgorithm: "AES256",
       },
       BucketKeyEnabled: true,
     },
@@ -99,8 +99,8 @@ const ENCRYPTION_CONFIGURATION = {
 
 // Versioning configuration
 const VERSIONING_CONFIGURATION = {
-  Status: 'Enabled',
-  MFADelete: 'Disabled',
+  Status: "Enabled",
+  MFADelete: "Disabled",
 };
 
 export class S3BucketManager {
@@ -133,26 +133,34 @@ export class S3BucketManager {
       // Check if bucket already exists
       const exists = await this.bucketExists();
       if (exists) {
-        return { success: true, message: 'Bucket already exists' };
+        return { success: true, message: "Bucket already exists" };
       }
 
       // Create bucket
-      await s3Client.send(new CreateBucketCommand({
-        Bucket: this.bucketName,
-        CreateBucketConfiguration: S3_CONFIG.region !== 'us-east-1' ? {
-          LocationConstraint: S3_CONFIG.region,
-        } : undefined,
-      }));
+      await s3Client.send(
+        new CreateBucketCommand({
+          Bucket: this.bucketName,
+          CreateBucketConfiguration:
+            S3_CONFIG.region !== "us-east-1"
+              ? {
+                  LocationConstraint: S3_CONFIG.region,
+                }
+              : undefined,
+        })
+      );
 
       // Configure bucket settings
       await this.configureBucket();
 
-      return { success: true, message: 'Bucket created successfully' };
+      return { success: true, message: "Bucket created successfully" };
     } catch (error) {
-      if (error instanceof BucketAlreadyExistsError || error instanceof BucketAlreadyOwnedByYouError) {
-        return { success: true, message: 'Bucket already exists' };
+      if (
+        error instanceof BucketAlreadyExistsError ||
+        error instanceof BucketAlreadyOwnedByYouError
+      ) {
+        return { success: true, message: "Bucket already exists" };
       }
-      console.error('Error creating bucket:', error);
+      console.error("Error creating bucket:", error);
       return { success: false, message: `Failed to create bucket: ${error}` };
     }
   }
@@ -163,38 +171,48 @@ export class S3BucketManager {
   async configureBucket(): Promise<void> {
     try {
       // Set CORS configuration
-      await s3Client.send(new PutBucketCorsCommand({
-        Bucket: this.bucketName,
-        CORSConfiguration: CORS_CONFIGURATION,
-      }));
+      await s3Client.send(
+        new PutBucketCorsCommand({
+          Bucket: this.bucketName,
+          CORSConfiguration: CORS_CONFIGURATION,
+        })
+      );
 
       // Set bucket policy
-      await s3Client.send(new PutBucketPolicyCommand({
-        Bucket: this.bucketName,
-        Policy: JSON.stringify(BUCKET_POLICY),
-      }));
+      await s3Client.send(
+        new PutBucketPolicyCommand({
+          Bucket: this.bucketName,
+          Policy: JSON.stringify(BUCKET_POLICY),
+        })
+      );
 
       // Set lifecycle configuration
-      await s3Client.send(new PutBucketLifecycleConfigurationCommand({
-        Bucket: this.bucketName,
-        LifecycleConfiguration: LIFECYCLE_CONFIGURATION,
-      }));
+      await s3Client.send(
+        new PutBucketLifecycleConfigurationCommand({
+          Bucket: this.bucketName,
+          LifecycleConfiguration: LIFECYCLE_CONFIGURATION,
+        })
+      );
 
       // Set encryption configuration
-      await s3Client.send(new PutBucketEncryptionCommand({
-        Bucket: this.bucketName,
-        ServerSideEncryptionConfiguration: ENCRYPTION_CONFIGURATION,
-      }));
+      await s3Client.send(
+        new PutBucketEncryptionCommand({
+          Bucket: this.bucketName,
+          ServerSideEncryptionConfiguration: ENCRYPTION_CONFIGURATION,
+        })
+      );
 
       // Set versioning configuration
-      await s3Client.send(new PutBucketVersioningCommand({
-        Bucket: this.bucketName,
-        VersioningConfiguration: VERSIONING_CONFIGURATION,
-      }));
+      await s3Client.send(
+        new PutBucketVersioningCommand({
+          Bucket: this.bucketName,
+          VersioningConfiguration: VERSIONING_CONFIGURATION,
+        })
+      );
 
-      console.log('Bucket configuration completed successfully');
+      console.log("Bucket configuration completed successfully");
     } catch (error) {
-      console.error('Error configuring bucket:', error);
+      console.error("Error configuring bucket:", error);
       throw error;
     }
   }
@@ -204,12 +222,14 @@ export class S3BucketManager {
    */
   async getBucketLocation(): Promise<string> {
     try {
-      const response = await s3Client.send(new GetBucketLocationCommand({
-        Bucket: this.bucketName,
-      }));
-      return response.LocationConstraint || 'us-east-1';
+      const response = await s3Client.send(
+        new GetBucketLocationCommand({
+          Bucket: this.bucketName,
+        })
+      );
+      return response.LocationConstraint || "us-east-1";
     } catch (error) {
-      console.error('Error getting bucket location:', error);
+      console.error("Error getting bucket location:", error);
       throw error;
     }
   }
@@ -222,19 +242,24 @@ export class S3BucketManager {
       const result = await this.createBucket();
       if (result.success) {
         await this.configureBucket();
-        return { success: true, message: 'Bucket initialized successfully' };
+        return { success: true, message: "Bucket initialized successfully" };
       }
       return result;
     } catch (error) {
-      console.error('Error initializing bucket:', error);
-      return { success: false, message: `Failed to initialize bucket: ${error}` };
+      console.error("Error initializing bucket:", error);
+      return {
+        success: false,
+        message: `Failed to initialize bucket: ${error}`,
+      };
     }
   }
 
   /**
    * Update CORS configuration for development/production
    */
-  async updateCorsConfiguration(additionalOrigins: string[] = []): Promise<void> {
+  async updateCorsConfiguration(
+    additionalOrigins: string[] = []
+  ): Promise<void> {
     const corsConfig = {
       CORSRules: [
         {
@@ -247,10 +272,12 @@ export class S3BucketManager {
       ],
     };
 
-    await s3Client.send(new PutBucketCorsCommand({
-      Bucket: this.bucketName,
-      CORSConfiguration: corsConfig,
-    }));
+    await s3Client.send(
+      new PutBucketCorsCommand({
+        Bucket: this.bucketName,
+        CORSConfiguration: corsConfig,
+      })
+    );
   }
 }
 

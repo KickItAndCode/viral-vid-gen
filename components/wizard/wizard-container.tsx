@@ -5,15 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  X, 
-  Check, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Check,
   SkipForward,
   AlertCircle,
   Save,
-  RotateCcw
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WizardConfig, WizardStep, WizardStepProps } from "./types";
@@ -61,7 +61,9 @@ export function WizardContainer({
     resetWizard,
   } = useWizardStore();
 
-  const [stepValidations, setStepValidations] = useState<Record<string, boolean>>({});
+  const [stepValidations, setStepValidations] = useState<
+    Record<string, boolean>
+  >({});
 
   // Initialize wizard
   useEffect(() => {
@@ -88,7 +90,13 @@ export function WizardContainer({
 
       return () => clearInterval(interval);
     }
-  }, [persistProgress, config.autoSave, config.autoSaveInterval, isCompleted, saveProgress]);
+  }, [
+    persistProgress,
+    config.autoSave,
+    config.autoSaveInterval,
+    isCompleted,
+    saveProgress,
+  ]);
 
   // Validate current step
   const validateCurrentStep = useCallback((): boolean => {
@@ -103,8 +111,8 @@ export function WizardContainer({
     // Default validation based on step data
     const stepData = getStepData(currentStep.id);
     const isValid = validateStepData(currentStep.id, stepData);
-    
-    setStepValidations(prev => ({
+
+    setStepValidations((prev) => ({
       ...prev,
       [currentStep.id]: isValid,
     }));
@@ -153,7 +161,7 @@ export function WizardContainer({
     }
 
     setError(null);
-    
+
     // Call step change callback
     if (config.onStepChange) {
       config.onStepChange(currentStepIndex, currentStepId, data);
@@ -167,7 +175,7 @@ export function WizardContainer({
   };
 
   const handlePrevious = () => {
-    if (currentStepIndex > 0 && (config.allowBackNavigation !== false)) {
+    if (currentStepIndex > 0 && config.allowBackNavigation !== false) {
       previousStep();
       setError(null);
     }
@@ -190,10 +198,10 @@ export function WizardContainer({
 
   const handleDataChange = (stepId: string, stepData: Record<string, any>) => {
     updateStepData(stepId, stepData);
-    
+
     // Trigger validation for the current step
     setTimeout(() => validateCurrentStep(), 0);
-    
+
     // Call data change callback
     if (config.onDataChange) {
       config.onDataChange(data);
@@ -210,7 +218,9 @@ export function WizardContainer({
       }
       completeWizard();
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to complete wizard");
+      setError(
+        error instanceof Error ? error.message : "Failed to complete wizard"
+      );
       if (config.onError) {
         config.onError(error as Error, currentStepIndex);
       }
@@ -237,14 +247,17 @@ export function WizardContainer({
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === totalSteps - 1;
   const canProceed = validateCurrentStep();
-  const canGoBack = currentStepIndex > 0 && (config.allowBackNavigation !== false);
+  const canGoBack =
+    currentStepIndex > 0 && config.allowBackNavigation !== false;
 
   if (!currentStep) {
     return (
       <Card className={cn("w-full max-w-4xl mx-auto", className)}>
         <CardContent className="p-8 text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <p className="text-lg text-muted-foreground">No wizard steps configured</p>
+          <p className="text-lg text-muted-foreground">
+            No wizard steps configured
+          </p>
         </CardContent>
       </Card>
     );
@@ -308,7 +321,7 @@ export function WizardContainer({
               Save Progress
             </Button>
           )}
-          
+
           {allowClose && (
             <Button
               variant="outline"
@@ -331,7 +344,8 @@ export function WizardContainer({
               Step {currentStepIndex + 1} of {totalSteps}
             </span>
             <span className="text-muted-foreground">
-              {Math.round(((currentStepIndex + 1) / totalSteps) * 100)}% Complete
+              {Math.round(((currentStepIndex + 1) / totalSteps) * 100)}%
+              Complete
             </span>
           </div>
           <Progress value={((currentStepIndex + 1) / totalSteps) * 100} />
@@ -356,16 +370,18 @@ export function WizardContainer({
                     "flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors",
                     isActive && "bg-primary text-primary-foreground",
                     isCompleted && "bg-green-500 text-white",
-                    !isActive && !isCompleted && isAccessible && "bg-muted hover:bg-muted/80",
-                    !isAccessible && "bg-muted/50 text-muted-foreground cursor-not-allowed",
-                    !isValid && index <= currentStepIndex && "bg-red-500 text-white"
+                    !isActive &&
+                      !isCompleted &&
+                      isAccessible &&
+                      "bg-muted hover:bg-muted/80",
+                    !isAccessible &&
+                      "bg-muted/50 text-muted-foreground cursor-not-allowed",
+                    !isValid &&
+                      index <= currentStepIndex &&
+                      "bg-red-500 text-white"
                   )}
                 >
-                  {isCompleted ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    index + 1
-                  )}
+                  {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
                 </button>
                 {index < config.steps.length - 1 && (
                   <div className="w-8 h-px bg-muted mx-1" />
@@ -419,13 +435,9 @@ export function WizardContainer({
               Previous
             </Button>
           )}
-          
+
           {currentStep.isSkippable && config.allowSkipSteps && (
-            <Button
-              variant="ghost"
-              onClick={handleSkip}
-              disabled={isLoading}
-            >
+            <Button variant="ghost" onClick={handleSkip} disabled={isLoading}>
               <SkipForward className="h-4 w-4 mr-2" />
               Skip
             </Button>
@@ -433,11 +445,7 @@ export function WizardContainer({
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={handleReset} disabled={isLoading}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset
           </Button>
@@ -463,15 +471,9 @@ export function WizardContainer({
 
       {/* Step Status Indicators */}
       <div className="flex items-center justify-center space-x-4 text-xs text-muted-foreground">
-        {currentStep.isOptional && (
-          <Badge variant="secondary">Optional</Badge>
-        )}
-        {currentStep.isSkippable && (
-          <Badge variant="outline">Skippable</Badge>
-        )}
-        {!canProceed && (
-          <Badge variant="destructive">Incomplete</Badge>
-        )}
+        {currentStep.isOptional && <Badge variant="secondary">Optional</Badge>}
+        {currentStep.isSkippable && <Badge variant="outline">Skippable</Badge>}
+        {!canProceed && <Badge variant="destructive">Incomplete</Badge>}
       </div>
     </div>
   );

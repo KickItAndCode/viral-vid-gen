@@ -1,13 +1,13 @@
-import { 
-  ListObjectsV2Command, 
-  DeleteObjectsCommand, 
+import {
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
   PutBucketLifecycleConfigurationCommand,
   GetBucketLifecycleConfigurationCommand,
   DeleteBucketLifecycleCommand,
-} from '@aws-sdk/client-s3';
-import { s3Client, S3_CONFIG } from './s3-config';
-import { s3FileManager } from './s3-upload';
-import { cloudFrontManager } from './cloudfront-config';
+} from "@aws-sdk/client-s3";
+import { s3Client, S3_CONFIG } from "./s3-config";
+import { s3FileManager } from "./s3-upload";
+import { cloudFrontManager } from "./cloudfront-config";
 
 export interface CleanupRule {
   id: string;
@@ -38,7 +38,7 @@ export interface CleanupOptions {
 
 export interface LifecyclePolicyRule {
   ID: string;
-  Status: 'Enabled' | 'Disabled';
+  Status: "Enabled" | "Disabled";
   Filter: {
     Prefix?: string;
     Tag?: { Key: string; Value: string };
@@ -55,14 +55,14 @@ export interface LifecyclePolicyRule {
   Transitions?: Array<{
     Days?: number;
     Date?: Date;
-    StorageClass: 'STANDARD_IA' | 'ONEZONE_IA' | 'GLACIER' | 'DEEP_ARCHIVE';
+    StorageClass: "STANDARD_IA" | "ONEZONE_IA" | "GLACIER" | "DEEP_ARCHIVE";
   }>;
   NoncurrentVersionExpiration?: {
     NoncurrentDays: number;
   };
   NoncurrentVersionTransitions?: Array<{
     NoncurrentDays: number;
-    StorageClass: 'STANDARD_IA' | 'ONEZONE_IA' | 'GLACIER' | 'DEEP_ARCHIVE';
+    StorageClass: "STANDARD_IA" | "ONEZONE_IA" | "GLACIER" | "DEEP_ARCHIVE";
   }>;
   AbortIncompleteMultipartUpload?: {
     DaysAfterInitiation: number;
@@ -72,36 +72,36 @@ export interface LifecyclePolicyRule {
 // Predefined cleanup rules
 export const DEFAULT_CLEANUP_RULES: CleanupRule[] = [
   {
-    id: 'temp-files-daily',
+    id: "temp-files-daily",
     enabled: true,
-    prefix: 'temp/',
+    prefix: "temp/",
     days: 1,
     applyToMultipartUploads: true,
   },
   {
-    id: 'failed-uploads-weekly',
+    id: "failed-uploads-weekly",
     enabled: true,
-    prefix: 'uploads/failed/',
+    prefix: "uploads/failed/",
     days: 7,
     applyToMultipartUploads: true,
   },
   {
-    id: 'old-processed-videos',
+    id: "old-processed-videos",
     enabled: true,
-    prefix: 'processed/',
+    prefix: "processed/",
     days: 365, // 1 year
     applyToVersions: true,
   },
   {
-    id: 'old-thumbnails',
+    id: "old-thumbnails",
     enabled: true,
-    prefix: 'thumbnails/',
+    prefix: "thumbnails/",
     days: 180, // 6 months
   },
   {
-    id: 'orphaned-files',
+    id: "orphaned-files",
     enabled: true,
-    prefix: 'orphaned/',
+    prefix: "orphaned/",
     days: 30,
     applyToMultipartUploads: true,
   },
@@ -110,10 +110,10 @@ export const DEFAULT_CLEANUP_RULES: CleanupRule[] = [
 // Predefined lifecycle policies
 export const DEFAULT_LIFECYCLE_POLICIES: LifecyclePolicyRule[] = [
   {
-    ID: 'TempFilesCleanup',
-    Status: 'Enabled',
+    ID: "TempFilesCleanup",
+    Status: "Enabled",
     Filter: {
-      Prefix: 'temp/',
+      Prefix: "temp/",
     },
     Expiration: {
       Days: 1,
@@ -123,23 +123,23 @@ export const DEFAULT_LIFECYCLE_POLICIES: LifecyclePolicyRule[] = [
     },
   },
   {
-    ID: 'VideoTransitions',
-    Status: 'Enabled',
+    ID: "VideoTransitions",
+    Status: "Enabled",
     Filter: {
-      Prefix: 'videos/',
+      Prefix: "videos/",
     },
     Transitions: [
       {
         Days: 30,
-        StorageClass: 'STANDARD_IA',
+        StorageClass: "STANDARD_IA",
       },
       {
         Days: 90,
-        StorageClass: 'GLACIER',
+        StorageClass: "GLACIER",
       },
       {
         Days: 365,
-        StorageClass: 'DEEP_ARCHIVE',
+        StorageClass: "DEEP_ARCHIVE",
       },
     ],
     NoncurrentVersionExpiration: {
@@ -147,10 +147,10 @@ export const DEFAULT_LIFECYCLE_POLICIES: LifecyclePolicyRule[] = [
     },
   },
   {
-    ID: 'ProcessedVideoCleanup',
-    Status: 'Enabled',
+    ID: "ProcessedVideoCleanup",
+    Status: "Enabled",
     Filter: {
-      Prefix: 'processed/',
+      Prefix: "processed/",
     },
     Expiration: {
       Days: 365,
@@ -158,19 +158,19 @@ export const DEFAULT_LIFECYCLE_POLICIES: LifecyclePolicyRule[] = [
     Transitions: [
       {
         Days: 30,
-        StorageClass: 'STANDARD_IA',
+        StorageClass: "STANDARD_IA",
       },
       {
         Days: 90,
-        StorageClass: 'GLACIER',
+        StorageClass: "GLACIER",
       },
     ],
   },
   {
-    ID: 'ThumbnailCleanup',
-    Status: 'Enabled',
+    ID: "ThumbnailCleanup",
+    Status: "Enabled",
     Filter: {
-      Prefix: 'thumbnails/',
+      Prefix: "thumbnails/",
     },
     Expiration: {
       Days: 180,
@@ -178,13 +178,13 @@ export const DEFAULT_LIFECYCLE_POLICIES: LifecyclePolicyRule[] = [
     Transitions: [
       {
         Days: 30,
-        StorageClass: 'STANDARD_IA',
+        StorageClass: "STANDARD_IA",
       },
     ],
   },
   {
-    ID: 'MultipartUploadCleanup',
-    Status: 'Enabled',
+    ID: "MultipartUploadCleanup",
+    Status: "Enabled",
     Filter: {},
     AbortIncompleteMultipartUpload: {
       DaysAfterInitiation: 1,
@@ -196,7 +196,10 @@ export class CleanupManager {
   private bucketName: string;
   private cleanupRules: CleanupRule[];
 
-  constructor(bucketName: string = S3_CONFIG.bucketName, cleanupRules: CleanupRule[] = DEFAULT_CLEANUP_RULES) {
+  constructor(
+    bucketName: string = S3_CONFIG.bucketName,
+    cleanupRules: CleanupRule[] = DEFAULT_CLEANUP_RULES
+  ) {
     this.bucketName = bucketName;
     this.cleanupRules = cleanupRules;
   }
@@ -210,14 +213,14 @@ export class CleanupManager {
     let deletedSize = 0;
     const errors: string[] = [];
 
-    console.log('Starting cleanup process...');
+    console.log("Starting cleanup process...");
 
     try {
       for (const rule of this.cleanupRules) {
         if (!rule.enabled) continue;
 
         console.log(`Processing rule: ${rule.id}`);
-        
+
         const ruleResult = await this.processCleanupRule(rule, options);
         deletedFiles += ruleResult.deletedFiles;
         deletedSize += ruleResult.deletedSize;
@@ -230,7 +233,9 @@ export class CleanupManager {
       deletedSize += orphanedResult.deletedSize;
       errors.push(...orphanedResult.errors);
 
-      console.log(`Cleanup completed. Deleted ${deletedFiles} files (${this.formatBytes(deletedSize)})`);
+      console.log(
+        `Cleanup completed. Deleted ${deletedFiles} files (${this.formatBytes(deletedSize)})`
+      );
 
       return {
         success: errors.length === 0,
@@ -240,7 +245,7 @@ export class CleanupManager {
         duration: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('Cleanup process failed:', error);
+      console.error("Cleanup process failed:", error);
       return {
         success: false,
         deletedFiles,
@@ -254,7 +259,10 @@ export class CleanupManager {
   /**
    * Process a single cleanup rule
    */
-  private async processCleanupRule(rule: CleanupRule, options: CleanupOptions): Promise<CleanupResult> {
+  private async processCleanupRule(
+    rule: CleanupRule,
+    options: CleanupOptions
+  ): Promise<CleanupResult> {
     const startTime = Date.now();
     let deletedFiles = 0;
     let deletedSize = 0;
@@ -262,18 +270,39 @@ export class CleanupManager {
 
     try {
       const cutoffDate = new Date(Date.now() - rule.days * 24 * 60 * 60 * 1000);
-      const files = await this.listFilesForCleanup(rule.prefix, cutoffDate, options);
+      const files = await this.listFilesForCleanup(
+        rule.prefix,
+        cutoffDate,
+        options
+      );
 
       if (files.length === 0) {
         console.log(`No files found for cleanup rule: ${rule.id}`);
-        return { success: true, deletedFiles: 0, deletedSize: 0, errors: [], duration: Date.now() - startTime };
+        return {
+          success: true,
+          deletedFiles: 0,
+          deletedSize: 0,
+          errors: [],
+          duration: Date.now() - startTime,
+        };
       }
 
-      console.log(`Found ${files.length} files to clean up for rule: ${rule.id}`);
+      console.log(
+        `Found ${files.length} files to clean up for rule: ${rule.id}`
+      );
 
       if (options.dryRun) {
-        console.log('DRY RUN - Would delete:', files.map(f => f.key));
-        return { success: true, deletedFiles: files.length, deletedSize: files.reduce((sum, f) => sum + f.size, 0), errors: [], duration: Date.now() - startTime };
+        console.log(
+          "DRY RUN - Would delete:",
+          files.map((f) => f.key)
+        );
+        return {
+          success: true,
+          deletedFiles: files.length,
+          deletedSize: files.reduce((sum, f) => sum + f.size, 0),
+          errors: [],
+          duration: Date.now() - startTime,
+        };
       }
 
       // Delete files in batches
@@ -281,7 +310,7 @@ export class CleanupManager {
       for (let i = 0; i < files.length; i += batchSize) {
         const batch = files.slice(i, i + batchSize);
         const batchResult = await this.deleteBatch(batch);
-        
+
         deletedFiles += batchResult.deletedFiles;
         deletedSize += batchResult.deletedSize;
         errors.push(...batchResult.errors);
@@ -318,12 +347,14 @@ export class CleanupManager {
     let continuationToken: string | undefined;
 
     do {
-      const response = await s3Client.send(new ListObjectsV2Command({
-        Bucket: this.bucketName,
-        Prefix: prefix,
-        MaxKeys: 1000,
-        ContinuationToken: continuationToken,
-      }));
+      const response = await s3Client.send(
+        new ListObjectsV2Command({
+          Bucket: this.bucketName,
+          Prefix: prefix,
+          MaxKeys: 1000,
+          ContinuationToken: continuationToken,
+        })
+      );
 
       if (response.Contents) {
         for (const object of response.Contents) {
@@ -331,8 +362,16 @@ export class CleanupManager {
 
           // Apply filters
           if (object.LastModified > cutoffDate) continue;
-          if (options.fileTypes && !this.matchesFileType(object.Key, options.fileTypes)) continue;
-          if (options.folders && !this.matchesFolder(object.Key, options.folders)) continue;
+          if (
+            options.fileTypes &&
+            !this.matchesFileType(object.Key, options.fileTypes)
+          )
+            continue;
+          if (
+            options.folders &&
+            !this.matchesFolder(object.Key, options.folders)
+          )
+            continue;
 
           files.push({
             key: object.Key,
@@ -352,7 +391,7 @@ export class CleanupManager {
 
     // Sort by age (oldest first) and preserve recent files if specified
     files.sort((a, b) => a.lastModified.getTime() - b.lastModified.getTime());
-    
+
     if (options.preserveRecent) {
       return files.slice(0, -options.preserveRecent);
     }
@@ -363,65 +402,91 @@ export class CleanupManager {
   /**
    * Delete a batch of files
    */
-  private async deleteBatch(files: Array<{ key: string; size: number; lastModified: Date }>): Promise<CleanupResult> {
+  private async deleteBatch(
+    files: Array<{ key: string; size: number; lastModified: Date }>
+  ): Promise<CleanupResult> {
     let deletedFiles = 0;
     let deletedSize = 0;
     const errors: string[] = [];
 
     try {
-      const deleteObjects = files.map(file => ({ Key: file.key }));
+      const deleteObjects = files.map((file) => ({ Key: file.key }));
 
-      const response = await s3Client.send(new DeleteObjectsCommand({
-        Bucket: this.bucketName,
-        Delete: {
-          Objects: deleteObjects,
-        },
-      }));
+      const response = await s3Client.send(
+        new DeleteObjectsCommand({
+          Bucket: this.bucketName,
+          Delete: {
+            Objects: deleteObjects,
+          },
+        })
+      );
 
       if (response.Deleted) {
         deletedFiles = response.Deleted.length;
         deletedSize = files.reduce((sum, file) => sum + file.size, 0);
-        
+
         // Invalidate CloudFront cache for deleted files
-        const paths = response.Deleted.map(obj => `/${obj.Key}`);
+        const paths = response.Deleted.map((obj) => `/${obj.Key}`);
         await cloudFrontManager.createInvalidation(paths);
       }
 
       if (response.Errors) {
-        errors.push(...response.Errors.map(err => `${err.Key}: ${err.Message}`));
+        errors.push(
+          ...response.Errors.map((err) => `${err.Key}: ${err.Message}`)
+        );
       }
 
-      return { success: errors.length === 0, deletedFiles, deletedSize, errors, duration: 0 };
+      return {
+        success: errors.length === 0,
+        deletedFiles,
+        deletedSize,
+        errors,
+        duration: 0,
+      };
     } catch (error) {
-      console.error('Error deleting batch:', error);
-      return { success: false, deletedFiles, deletedSize, errors: [String(error)], duration: 0 };
+      console.error("Error deleting batch:", error);
+      return {
+        success: false,
+        deletedFiles,
+        deletedSize,
+        errors: [String(error)],
+        duration: 0,
+      };
     }
   }
 
   /**
    * Clean up orphaned files (files not referenced in database)
    */
-  private async cleanupOrphanedFiles(options: CleanupOptions): Promise<CleanupResult> {
-    console.log('Checking for orphaned files...');
-    
+  private async cleanupOrphanedFiles(
+    options: CleanupOptions
+  ): Promise<CleanupResult> {
+    console.log("Checking for orphaned files...");
+
     // This would typically check against the database to find unreferenced files
     // For now, we'll implement a basic check for files older than 30 days in temp folder
     const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const files = await this.listFilesForCleanup('temp/', cutoffDate, options);
+    const files = await this.listFilesForCleanup("temp/", cutoffDate, options);
 
     if (files.length === 0) {
-      return { success: true, deletedFiles: 0, deletedSize: 0, errors: [], duration: 0 };
+      return {
+        success: true,
+        deletedFiles: 0,
+        deletedSize: 0,
+        errors: [],
+        duration: 0,
+      };
     }
 
     console.log(`Found ${files.length} orphaned files`);
 
     if (options.dryRun) {
-      return { 
-        success: true, 
-        deletedFiles: files.length, 
-        deletedSize: files.reduce((sum, f) => sum + f.size, 0), 
-        errors: [], 
-        duration: 0 
+      return {
+        success: true,
+        deletedFiles: files.length,
+        deletedSize: files.reduce((sum, f) => sum + f.size, 0),
+        errors: [],
+        duration: 0,
       };
     }
 
@@ -431,18 +496,22 @@ export class CleanupManager {
   /**
    * Configure S3 lifecycle policies
    */
-  async configureLifecyclePolicies(policies: LifecyclePolicyRule[] = DEFAULT_LIFECYCLE_POLICIES): Promise<void> {
+  async configureLifecyclePolicies(
+    policies: LifecyclePolicyRule[] = DEFAULT_LIFECYCLE_POLICIES
+  ): Promise<void> {
     try {
-      await s3Client.send(new PutBucketLifecycleConfigurationCommand({
-        Bucket: this.bucketName,
-        LifecycleConfiguration: {
-          Rules: policies,
-        },
-      }));
+      await s3Client.send(
+        new PutBucketLifecycleConfigurationCommand({
+          Bucket: this.bucketName,
+          LifecycleConfiguration: {
+            Rules: policies,
+          },
+        })
+      );
 
-      console.log('Lifecycle policies configured successfully');
+      console.log("Lifecycle policies configured successfully");
     } catch (error) {
-      console.error('Error configuring lifecycle policies:', error);
+      console.error("Error configuring lifecycle policies:", error);
       throw error;
     }
   }
@@ -452,13 +521,15 @@ export class CleanupManager {
    */
   async getLifecyclePolicies(): Promise<LifecyclePolicyRule[]> {
     try {
-      const response = await s3Client.send(new GetBucketLifecycleConfigurationCommand({
-        Bucket: this.bucketName,
-      }));
+      const response = await s3Client.send(
+        new GetBucketLifecycleConfigurationCommand({
+          Bucket: this.bucketName,
+        })
+      );
 
       return response.Rules || [];
     } catch (error) {
-      console.error('Error getting lifecycle policies:', error);
+      console.error("Error getting lifecycle policies:", error);
       return [];
     }
   }
@@ -468,13 +539,15 @@ export class CleanupManager {
    */
   async deleteLifecyclePolicies(): Promise<void> {
     try {
-      await s3Client.send(new DeleteBucketLifecycleCommand({
-        Bucket: this.bucketName,
-      }));
+      await s3Client.send(
+        new DeleteBucketLifecycleCommand({
+          Bucket: this.bucketName,
+        })
+      );
 
-      console.log('Lifecycle policies deleted successfully');
+      console.log("Lifecycle policies deleted successfully");
     } catch (error) {
-      console.error('Error deleting lifecycle policies:', error);
+      console.error("Error deleting lifecycle policies:", error);
       throw error;
     }
   }
@@ -488,9 +561,9 @@ export class CleanupManager {
     const runScheduledCleanup = async () => {
       try {
         const result = await this.runCleanup();
-        console.log('Scheduled cleanup completed:', result);
+        console.log("Scheduled cleanup completed:", result);
       } catch (error) {
-        console.error('Scheduled cleanup failed:', error);
+        console.error("Scheduled cleanup failed:", error);
       }
     };
 
@@ -523,24 +596,28 @@ export class CleanupManager {
 
     try {
       // Get all files
-      const allFiles = await this.listFilesForCleanup('', new Date(0), {});
+      const allFiles = await this.listFilesForCleanup("", new Date(0), {});
       stats.totalFiles = allFiles.length;
       stats.totalSize = allFiles.reduce((sum, f) => sum + f.size, 0);
 
       // Get temp files
-      const tempFiles = await this.listFilesForCleanup('temp/', new Date(0), {});
+      const tempFiles = await this.listFilesForCleanup(
+        "temp/",
+        new Date(0),
+        {}
+      );
       stats.tempFiles = tempFiles.length;
       stats.tempSize = tempFiles.reduce((sum, f) => sum + f.size, 0);
 
       // Get old files (older than 30 days)
       const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const oldFiles = await this.listFilesForCleanup('', cutoffDate, {});
+      const oldFiles = await this.listFilesForCleanup("", cutoffDate, {});
       stats.oldFiles = oldFiles.length;
       stats.oldSize = oldFiles.reduce((sum, f) => sum + f.size, 0);
 
       return stats;
     } catch (error) {
-      console.error('Error getting cleanup stats:', error);
+      console.error("Error getting cleanup stats:", error);
       return stats;
     }
   }
@@ -549,20 +626,20 @@ export class CleanupManager {
    * Helper methods
    */
   private matchesFileType(key: string, fileTypes: string[]): boolean {
-    const extension = key.split('.').pop()?.toLowerCase();
+    const extension = key.split(".").pop()?.toLowerCase();
     return extension ? fileTypes.includes(extension) : false;
   }
 
   private matchesFolder(key: string, folders: string[]): boolean {
-    return folders.some(folder => key.startsWith(folder));
+    return folders.some((folder) => key.startsWith(folder));
   }
 
   private formatBytes(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 }
 
@@ -570,17 +647,21 @@ export class CleanupManager {
 export const cleanupManager = new CleanupManager();
 
 // Utility functions
-export const cleanupTempFiles = async (olderThanHours: number = 24): Promise<CleanupResult> => {
+export const cleanupTempFiles = async (
+  olderThanHours: number = 24
+): Promise<CleanupResult> => {
   return cleanupManager.runCleanup({
-    folders: ['temp/'],
+    folders: ["temp/"],
     olderThanDays: olderThanHours / 24,
   });
 };
 
-export const cleanupOrphanedFiles = async (options: CleanupOptions = {}): Promise<CleanupResult> => {
+export const cleanupOrphanedFiles = async (
+  options: CleanupOptions = {}
+): Promise<CleanupResult> => {
   return cleanupManager.runCleanup({
     ...options,
-    folders: ['temp/', 'uploads/failed/'],
+    folders: ["temp/", "uploads/failed/"],
   });
 };
 

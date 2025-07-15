@@ -1,14 +1,19 @@
-import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import { s3Client, cloudFrontClient, S3_CONFIG, CLOUDFRONT_CONFIG } from './s3-config';
-import { cloudFrontManager } from './cloudfront-config';
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { CreateInvalidationCommand } from "@aws-sdk/client-cloudfront";
+import {
+  s3Client,
+  cloudFrontClient,
+  S3_CONFIG,
+  CLOUDFRONT_CONFIG,
+} from "./s3-config";
+import { cloudFrontManager } from "./cloudfront-config";
 
 export interface CDNUrlOptions {
   secure?: boolean;
   cacheBusting?: boolean;
   customDomain?: string;
-  protocol?: 'http' | 'https';
+  protocol?: "http" | "https";
   queryParams?: Record<string, string>;
 }
 
@@ -21,7 +26,7 @@ export interface SignedUrlOptions {
 
 export interface CacheInvalidationOptions {
   paths: string[];
-  priority?: 'high' | 'normal';
+  priority?: "high" | "normal";
   waitForCompletion?: boolean;
   maxWaitTime?: number;
 }
@@ -50,37 +55,40 @@ export class CDNHelper {
       secure = true,
       cacheBusting = false,
       customDomain = this.distributionDomain,
-      protocol = 'https',
+      protocol = "https",
       queryParams = {},
     } = options;
 
     // Use S3 direct URL if no CloudFront distribution
     if (!customDomain) {
-      const s3Protocol = secure ? 'https' : 'http';
-      let url = `${s3Protocol}://${this.s3Domain}/${key}`;
-      
+      const s3Protocol = secure ? "https" : "http";
+      const url = `${s3Protocol}://${this.s3Domain}/${key}`;
+
       if (cacheBusting) {
         queryParams.v = Date.now().toString();
       }
-      
+
       return this.appendQueryParams(url, queryParams);
     }
 
     // Use CloudFront URL
-    const cdnProtocol = secure ? 'https' : protocol;
-    let url = `${cdnProtocol}://${customDomain}/${key}`;
-    
+    const cdnProtocol = secure ? "https" : protocol;
+    const url = `${cdnProtocol}://${customDomain}/${key}`;
+
     if (cacheBusting) {
       queryParams.v = Date.now().toString();
     }
-    
+
     return this.appendQueryParams(url, queryParams);
   }
 
   /**
    * Generate signed URL for private content
    */
-  async generateSignedUrl(key: string, options: SignedUrlOptions = {}): Promise<string> {
+  async generateSignedUrl(
+    key: string,
+    options: SignedUrlOptions = {}
+  ): Promise<string> {
     const {
       expiresInSeconds = 3600,
       responseHeaders = {},
@@ -91,12 +99,14 @@ export class CDNHelper {
     const command = new GetObjectCommand({
       Bucket: S3_CONFIG.bucketName,
       Key: key,
-      ResponseContentType: responseHeaders['Content-Type'],
-      ResponseContentLanguage: responseHeaders['Content-Language'],
-      ResponseContentEncoding: responseHeaders['Content-Encoding'],
-      ResponseContentDisposition: responseHeaders['Content-Disposition'],
-      ResponseCacheControl: responseHeaders['Cache-Control'],
-      ResponseExpires: responseHeaders['Expires'] ? new Date(responseHeaders['Expires']) : undefined,
+      ResponseContentType: responseHeaders["Content-Type"],
+      ResponseContentLanguage: responseHeaders["Content-Language"],
+      ResponseContentEncoding: responseHeaders["Content-Encoding"],
+      ResponseContentDisposition: responseHeaders["Content-Disposition"],
+      ResponseCacheControl: responseHeaders["Cache-Control"],
+      ResponseExpires: responseHeaders["Expires"]
+        ? new Date(responseHeaders["Expires"])
+        : undefined,
     });
 
     const signedUrl = await getSignedUrl(s3Client, command, {
@@ -109,94 +119,117 @@ export class CDNHelper {
   /**
    * Generate multiple CDN URLs for different file formats
    */
-  generateMultiFormatUrls(baseKey: string, formats: string[], options: CDNUrlOptions = {}): Record<string, string> {
+  generateMultiFormatUrls(
+    baseKey: string,
+    formats: string[],
+    options: CDNUrlOptions = {}
+  ): Record<string, string> {
     const urls: Record<string, string> = {};
-    
-    formats.forEach(format => {
+
+    formats.forEach((format) => {
       const key = baseKey.replace(/\.[^/.]+$/, `.${format}`);
       urls[format] = this.generateCDNUrl(key, options);
     });
-    
+
     return urls;
   }
 
   /**
    * Generate responsive image URLs
    */
-  generateResponsiveUrls(baseKey: string, sizes: string[], options: CDNUrlOptions = {}): Record<string, string> {
+  generateResponsiveUrls(
+    baseKey: string,
+    sizes: string[],
+    options: CDNUrlOptions = {}
+  ): Record<string, string> {
     const urls: Record<string, string> = {};
-    
-    sizes.forEach(size => {
+
+    sizes.forEach((size) => {
       const key = baseKey.replace(/\.[^/.]+$/, `_${size}$&`);
       urls[size] = this.generateCDNUrl(key, options);
     });
-    
+
     return urls;
   }
 
   /**
    * Generate video streaming URLs for different qualities
    */
-  generateVideoStreamingUrls(baseKey: string, qualities: string[], options: CDNUrlOptions = {}): Record<string, string> {
+  generateVideoStreamingUrls(
+    baseKey: string,
+    qualities: string[],
+    options: CDNUrlOptions = {}
+  ): Record<string, string> {
     const urls: Record<string, string> = {};
-    
-    qualities.forEach(quality => {
+
+    qualities.forEach((quality) => {
       const key = baseKey.replace(/\.[^/.]+$/, `_${quality}$&`);
       urls[quality] = this.generateCDNUrl(key, options);
     });
-    
+
     return urls;
   }
 
   /**
    * Generate HLS (HTTP Live Streaming) URLs
    */
-  generateHLSUrls(baseKey: string, options: CDNUrlOptions = {}): { master: string; segments: string[] } {
-    const masterKey = baseKey.replace(/\.[^/.]+$/, '.m3u8');
+  generateHLSUrls(
+    baseKey: string,
+    options: CDNUrlOptions = {}
+  ): { master: string; segments: string[] } {
+    const masterKey = baseKey.replace(/\.[^/.]+$/, ".m3u8");
     const masterUrl = this.generateCDNUrl(masterKey, options);
-    
+
     // Generate segment URLs (this would typically be done based on actual segment files)
     const segments = Array.from({ length: 10 }, (_, i) => {
       const segmentKey = baseKey.replace(/\.[^/.]+$/, `_segment_${i}.ts`);
       return this.generateCDNUrl(segmentKey, options);
     });
-    
+
     return { master: masterUrl, segments };
   }
 
   /**
    * Generate DASH (Dynamic Adaptive Streaming) URLs
    */
-  generateDASHUrls(baseKey: string, options: CDNUrlOptions = {}): { manifest: string; segments: string[] } {
-    const manifestKey = baseKey.replace(/\.[^/.]+$/, '.mpd');
+  generateDASHUrls(
+    baseKey: string,
+    options: CDNUrlOptions = {}
+  ): { manifest: string; segments: string[] } {
+    const manifestKey = baseKey.replace(/\.[^/.]+$/, ".mpd");
     const manifestUrl = this.generateCDNUrl(manifestKey, options);
-    
+
     // Generate segment URLs (this would typically be done based on actual segment files)
     const segments = Array.from({ length: 10 }, (_, i) => {
       const segmentKey = baseKey.replace(/\.[^/.]+$/, `_segment_${i}.m4s`);
       return this.generateCDNUrl(segmentKey, options);
     });
-    
+
     return { manifest: manifestUrl, segments };
   }
 
   /**
    * Invalidate CloudFront cache for specific paths
    */
-  async invalidateCache(options: CacheInvalidationOptions): Promise<CacheInvalidationResult> {
+  async invalidateCache(
+    options: CacheInvalidationOptions
+  ): Promise<CacheInvalidationResult> {
     const {
       paths,
-      priority = 'normal',
+      priority = "normal",
       waitForCompletion = false,
       maxWaitTime = 10 * 60 * 1000, // 10 minutes
     } = options;
 
     // Ensure paths start with /
-    const normalizedPaths = paths.map(path => path.startsWith('/') ? path : `/${path}`);
-    
-    const invalidationResult = await cloudFrontManager.createInvalidation(normalizedPaths);
-    
-    let result: CacheInvalidationResult = {
+    const normalizedPaths = paths.map((path) =>
+      path.startsWith("/") ? path : `/${path}`
+    );
+
+    const invalidationResult =
+      await cloudFrontManager.createInvalidation(normalizedPaths);
+
+    const result: CacheInvalidationResult = {
       id: invalidationResult.id,
       status: invalidationResult.status,
       createTime: new Date(),
@@ -205,18 +238,20 @@ export class CDNHelper {
     // Wait for completion if requested
     if (waitForCompletion) {
       const startTime = Date.now();
-      
+
       while (Date.now() - startTime < maxWaitTime) {
-        const status = await cloudFrontManager.getInvalidation(invalidationResult.id);
-        
-        if (status.status === 'Completed') {
+        const status = await cloudFrontManager.getInvalidation(
+          invalidationResult.id
+        );
+
+        if (status.status === "Completed") {
           result.completed = true;
           result.status = status.status;
           break;
         }
-        
+
         // Wait 10 seconds before checking again
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise((resolve) => setTimeout(resolve, 10000));
       }
     }
 
@@ -226,9 +261,11 @@ export class CDNHelper {
   /**
    * Purge entire cache for a distribution
    */
-  async purgeEntireCache(waitForCompletion = false): Promise<CacheInvalidationResult> {
+  async purgeEntireCache(
+    waitForCompletion = false
+  ): Promise<CacheInvalidationResult> {
     return this.invalidateCache({
-      paths: ['/*'],
+      paths: ["/*"],
       waitForCompletion,
     });
   }
@@ -236,7 +273,10 @@ export class CDNHelper {
   /**
    * Purge cache for a specific folder
    */
-  async purgeFolderCache(folder: string, waitForCompletion = false): Promise<CacheInvalidationResult> {
+  async purgeFolderCache(
+    folder: string,
+    waitForCompletion = false
+  ): Promise<CacheInvalidationResult> {
     return this.invalidateCache({
       paths: [`/${folder}/*`],
       waitForCompletion,
@@ -246,43 +286,55 @@ export class CDNHelper {
   /**
    * Get optimized image URL with transformations
    */
-  generateOptimizedImageUrl(key: string, transformations: {
-    width?: number;
-    height?: number;
-    quality?: number;
-    format?: 'jpeg' | 'png' | 'webp';
-    fit?: 'cover' | 'contain' | 'fill';
-  }, options: CDNUrlOptions = {}): string {
+  generateOptimizedImageUrl(
+    key: string,
+    transformations: {
+      width?: number;
+      height?: number;
+      quality?: number;
+      format?: "jpeg" | "png" | "webp";
+      fit?: "cover" | "contain" | "fill";
+    },
+    options: CDNUrlOptions = {}
+  ): string {
     const queryParams = { ...options.queryParams };
-    
+
     // Add transformation parameters
     if (transformations.width) queryParams.w = transformations.width.toString();
-    if (transformations.height) queryParams.h = transformations.height.toString();
-    if (transformations.quality) queryParams.q = transformations.quality.toString();
+    if (transformations.height)
+      queryParams.h = transformations.height.toString();
+    if (transformations.quality)
+      queryParams.q = transformations.quality.toString();
     if (transformations.format) queryParams.f = transformations.format;
     if (transformations.fit) queryParams.fit = transformations.fit;
-    
+
     return this.generateCDNUrl(key, { ...options, queryParams });
   }
 
   /**
    * Generate WebP fallback URLs
    */
-  generateWebPFallbackUrls(key: string, options: CDNUrlOptions = {}): { webp: string; fallback: string } {
-    const webpKey = key.replace(/\.(jpg|jpeg|png)$/i, '.webp');
+  generateWebPFallbackUrls(
+    key: string,
+    options: CDNUrlOptions = {}
+  ): { webp: string; fallback: string } {
+    const webpKey = key.replace(/\.(jpg|jpeg|png)$/i, ".webp");
     const webpUrl = this.generateCDNUrl(webpKey, options);
     const fallbackUrl = this.generateCDNUrl(key, options);
-    
+
     return { webp: webpUrl, fallback: fallbackUrl };
   }
 
   /**
    * Generate progressive loading URLs
    */
-  generateProgressiveUrls(key: string, options: CDNUrlOptions = {}): { blur: string; lowRes: string; highRes: string } {
-    const blurKey = key.replace(/\.[^/.]+$/, '_blur$&');
-    const lowResKey = key.replace(/\.[^/.]+$/, '_small$&');
-    
+  generateProgressiveUrls(
+    key: string,
+    options: CDNUrlOptions = {}
+  ): { blur: string; lowRes: string; highRes: string } {
+    const blurKey = key.replace(/\.[^/.]+$/, "_blur$&");
+    const lowResKey = key.replace(/\.[^/.]+$/, "_small$&");
+
     return {
       blur: this.generateCDNUrl(blurKey, options),
       lowRes: this.generateCDNUrl(lowResKey, options),
@@ -294,7 +346,9 @@ export class CDNHelper {
    * Check if URL is served through CDN
    */
   isFromCDN(url: string): boolean {
-    return url.includes(this.distributionDomain) || url.includes('cloudfront.net');
+    return (
+      url.includes(this.distributionDomain) || url.includes("cloudfront.net")
+    );
   }
 
   /**
@@ -303,7 +357,9 @@ export class CDNHelper {
   extractKeyFromUrl(url: string): string | null {
     try {
       const urlObj = new URL(url);
-      return urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+      return urlObj.pathname.startsWith("/")
+        ? urlObj.pathname.slice(1)
+        : urlObj.pathname;
     } catch (error) {
       return null;
     }
@@ -322,13 +378,17 @@ export class CDNHelper {
   /**
    * Generate URL with custom headers
    */
-  generateUrlWithHeaders(key: string, headers: Record<string, string>, options: CDNUrlOptions = {}): string {
+  generateUrlWithHeaders(
+    key: string,
+    headers: Record<string, string>,
+    options: CDNUrlOptions = {}
+  ): string {
     const headerParams: Record<string, string> = {};
-    
+
     Object.entries(headers).forEach(([key, value]) => {
       headerParams[`header-${key.toLowerCase()}`] = value;
     });
-    
+
     return this.generateCDNUrl(key, {
       ...options,
       queryParams: { ...options.queryParams, ...headerParams },
@@ -338,16 +398,22 @@ export class CDNHelper {
   /**
    * Helper to append query parameters to URL
    */
-  private appendQueryParams(url: string, params: Record<string, string>): string {
+  private appendQueryParams(
+    url: string,
+    params: Record<string, string>
+  ): string {
     if (Object.keys(params).length === 0) {
       return url;
     }
-    
+
     const queryString = Object.entries(params)
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-      .join('&');
-    
-    return `${url}${url.includes('?') ? '&' : '?'}${queryString}`;
+      .map(
+        ([key, value]) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+      )
+      .join("&");
+
+    return `${url}${url.includes("?") ? "&" : "?"}${queryString}`;
   }
 }
 
@@ -355,25 +421,33 @@ export class CDNHelper {
 export const cdnHelper = new CDNHelper();
 
 // Common URL generation helpers
-export const generateVideoUrl = (key: string, options?: CDNUrlOptions) => 
+export const generateVideoUrl = (key: string, options?: CDNUrlOptions) =>
   cdnHelper.generateCDNUrl(key, options);
 
-export const generateThumbnailUrl = (key: string, options?: CDNUrlOptions) => 
+export const generateThumbnailUrl = (key: string, options?: CDNUrlOptions) =>
   cdnHelper.generateCDNUrl(key, options);
 
-export const generateImageUrl = (key: string, options?: CDNUrlOptions) => 
+export const generateImageUrl = (key: string, options?: CDNUrlOptions) =>
   cdnHelper.generateCDNUrl(key, options);
 
-export const generateDownloadUrl = (key: string, filename: string, options?: CDNUrlOptions) => 
+export const generateDownloadUrl = (
+  key: string,
+  filename: string,
+  options?: CDNUrlOptions
+) =>
   cdnHelper.generateCDNUrl(key, {
     ...options,
     queryParams: {
       ...options?.queryParams,
-      'response-content-disposition': `attachment; filename="${filename}"`,
+      "response-content-disposition": `attachment; filename="${filename}"`,
     },
   });
 
-export const generateStreamingUrl = (key: string, quality: string, options?: CDNUrlOptions) => 
+export const generateStreamingUrl = (
+  key: string,
+  quality: string,
+  options?: CDNUrlOptions
+) =>
   cdnHelper.generateCDNUrl(key.replace(/\.[^/.]+$/, `_${quality}$&`), options);
 
 // URL validation helpers
@@ -388,15 +462,15 @@ export const isValidCDNUrl = (url: string): boolean => {
 
 export const extractFileExtension = (key: string): string => {
   const match = key.match(/\.([^/.]+)$/);
-  return match ? match[1].toLowerCase() : '';
+  return match ? match[1].toLowerCase() : "";
 };
 
 export const isVideoFile = (key: string): boolean => {
   const extension = extractFileExtension(key);
-  return ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(extension);
+  return ["mp4", "webm", "mov", "avi", "mkv"].includes(extension);
 };
 
 export const isImageFile = (key: string): boolean => {
   const extension = extractFileExtension(key);
-  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
+  return ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension);
 };

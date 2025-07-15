@@ -15,34 +15,34 @@ import {
   OriginRequestPolicyId,
   ResponseHeadersPolicyId,
   NoSuchDistributionError,
-} from '@aws-sdk/client-cloudfront';
-import { cloudFrontClient, CLOUDFRONT_CONFIG, S3_CONFIG } from './s3-config';
+} from "@aws-sdk/client-cloudfront";
+import { cloudFrontClient, CLOUDFRONT_CONFIG, S3_CONFIG } from "./s3-config";
 
 // CloudFront distribution configuration
 const DISTRIBUTION_CONFIG: DistributionConfig = {
   CallerReference: `viralai-${Date.now()}`,
-  Comment: 'ViralAI Video Distribution',
-  DefaultRootObject: 'index.html',
+  Comment: "ViralAI Video Distribution",
+  DefaultRootObject: "index.html",
   Enabled: true,
-  PriceClass: 'PriceClass_100', // Use only North America and Europe edge locations
-  
+  PriceClass: "PriceClass_100", // Use only North America and Europe edge locations
+
   // Origin configuration
   Origins: {
     Quantity: 1,
     Items: [
       {
-        Id: 'viralai-s3-origin',
+        Id: "viralai-s3-origin",
         DomainName: `${S3_CONFIG.bucketName}.s3.${S3_CONFIG.region}.amazonaws.com`,
         CustomOriginConfig: {
           HTTPPort: 80,
           HTTPSPort: 443,
-          OriginProtocolPolicy: 'https-only',
+          OriginProtocolPolicy: "https-only",
           OriginSslProtocols: {
             Quantity: 3,
-            Items: ['TLSv1', 'TLSv1.1', 'TLSv1.2'],
+            Items: ["TLSv1", "TLSv1.1", "TLSv1.2"],
           },
         },
-        OriginPath: '',
+        OriginPath: "",
         OriginShield: {
           Enabled: false,
         },
@@ -52,18 +52,18 @@ const DISTRIBUTION_CONFIG: DistributionConfig = {
 
   // Default cache behavior
   DefaultCacheBehavior: {
-    TargetOriginId: 'viralai-s3-origin',
+    TargetOriginId: "viralai-s3-origin",
     ViewerProtocolPolicy: ViewerProtocolPolicy.redirect_to_https,
-    CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad', // Managed-CachingOptimized
-    OriginRequestPolicyId: '88a5eaf4-2fd4-4709-b370-b4c650ea3fcf', // Managed-CORS-S3Origin
-    ResponseHeadersPolicyId: '67f7725c-6f97-4210-82d7-5512b31e9d03', // Managed-SecurityHeadersPolicy
+    CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad", // Managed-CachingOptimized
+    OriginRequestPolicyId: "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf", // Managed-CORS-S3Origin
+    ResponseHeadersPolicyId: "67f7725c-6f97-4210-82d7-5512b31e9d03", // Managed-SecurityHeadersPolicy
     Compress: true,
     AllowedMethods: {
       Quantity: 7,
-      Items: ['GET', 'HEAD', 'OPTIONS', 'PUT', 'POST', 'PATCH', 'DELETE'],
+      Items: ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
       CachedMethods: {
         Quantity: 2,
-        Items: ['GET', 'HEAD'],
+        Items: ["GET", "HEAD"],
       },
     },
     TrustedSigners: {
@@ -84,19 +84,19 @@ const DISTRIBUTION_CONFIG: DistributionConfig = {
     Quantity: 3,
     Items: [
       {
-        PathPattern: '/videos/*',
-        TargetOriginId: 'viralai-s3-origin',
+        PathPattern: "/videos/*",
+        TargetOriginId: "viralai-s3-origin",
         ViewerProtocolPolicy: ViewerProtocolPolicy.redirect_to_https,
-        CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad', // Managed-CachingOptimized
-        OriginRequestPolicyId: '88a5eaf4-2fd4-4709-b370-b4c650ea3fcf', // Managed-CORS-S3Origin
-        ResponseHeadersPolicyId: '67f7725c-6f97-4210-82d7-5512b31e9d03', // Managed-SecurityHeadersPolicy
+        CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad", // Managed-CachingOptimized
+        OriginRequestPolicyId: "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf", // Managed-CORS-S3Origin
+        ResponseHeadersPolicyId: "67f7725c-6f97-4210-82d7-5512b31e9d03", // Managed-SecurityHeadersPolicy
         Compress: false, // Don't compress videos
         AllowedMethods: {
           Quantity: 3,
-          Items: ['GET', 'HEAD', 'OPTIONS'],
+          Items: ["GET", "HEAD", "OPTIONS"],
           CachedMethods: {
             Quantity: 2,
-            Items: ['GET', 'HEAD'],
+            Items: ["GET", "HEAD"],
           },
         },
         TrustedSigners: {
@@ -112,19 +112,19 @@ const DISTRIBUTION_CONFIG: DistributionConfig = {
         MaxTTL: 31536000, // 1 year
       },
       {
-        PathPattern: '/thumbnails/*',
-        TargetOriginId: 'viralai-s3-origin',
+        PathPattern: "/thumbnails/*",
+        TargetOriginId: "viralai-s3-origin",
         ViewerProtocolPolicy: ViewerProtocolPolicy.redirect_to_https,
-        CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad', // Managed-CachingOptimized
-        OriginRequestPolicyId: '88a5eaf4-2fd4-4709-b370-b4c650ea3fcf', // Managed-CORS-S3Origin
-        ResponseHeadersPolicyId: '67f7725c-6f97-4210-82d7-5512b31e9d03', // Managed-SecurityHeadersPolicy
+        CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad", // Managed-CachingOptimized
+        OriginRequestPolicyId: "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf", // Managed-CORS-S3Origin
+        ResponseHeadersPolicyId: "67f7725c-6f97-4210-82d7-5512b31e9d03", // Managed-SecurityHeadersPolicy
         Compress: true,
         AllowedMethods: {
           Quantity: 3,
-          Items: ['GET', 'HEAD', 'OPTIONS'],
+          Items: ["GET", "HEAD", "OPTIONS"],
           CachedMethods: {
             Quantity: 2,
-            Items: ['GET', 'HEAD'],
+            Items: ["GET", "HEAD"],
           },
         },
         TrustedSigners: {
@@ -140,19 +140,19 @@ const DISTRIBUTION_CONFIG: DistributionConfig = {
         MaxTTL: 31536000, // 1 year
       },
       {
-        PathPattern: '/processed/*',
-        TargetOriginId: 'viralai-s3-origin',
+        PathPattern: "/processed/*",
+        TargetOriginId: "viralai-s3-origin",
         ViewerProtocolPolicy: ViewerProtocolPolicy.redirect_to_https,
-        CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad', // Managed-CachingOptimized
-        OriginRequestPolicyId: '88a5eaf4-2fd4-4709-b370-b4c650ea3fcf', // Managed-CORS-S3Origin
-        ResponseHeadersPolicyId: '67f7725c-6f97-4210-82d7-5512b31e9d03', // Managed-SecurityHeadersPolicy
+        CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad", // Managed-CachingOptimized
+        OriginRequestPolicyId: "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf", // Managed-CORS-S3Origin
+        ResponseHeadersPolicyId: "67f7725c-6f97-4210-82d7-5512b31e9d03", // Managed-SecurityHeadersPolicy
         Compress: false, // Don't compress processed videos
         AllowedMethods: {
           Quantity: 3,
-          Items: ['GET', 'HEAD', 'OPTIONS'],
+          Items: ["GET", "HEAD", "OPTIONS"],
           CachedMethods: {
             Quantity: 2,
-            Items: ['GET', 'HEAD'],
+            Items: ["GET", "HEAD"],
           },
         },
         TrustedSigners: {
@@ -176,14 +176,14 @@ const DISTRIBUTION_CONFIG: DistributionConfig = {
     Items: [
       {
         ErrorCode: 404,
-        ResponseCode: '404',
-        ResponsePagePath: '/404.html',
+        ResponseCode: "404",
+        ResponsePagePath: "/404.html",
         ErrorCachingMinTTL: 300, // 5 minutes
       },
       {
         ErrorCode: 403,
-        ResponseCode: '403',
-        ResponsePagePath: '/403.html',
+        ResponseCode: "403",
+        ResponsePagePath: "/403.html",
         ErrorCachingMinTTL: 300, // 5 minutes
       },
     ],
@@ -192,7 +192,7 @@ const DISTRIBUTION_CONFIG: DistributionConfig = {
   // Geo restrictions
   Restrictions: {
     GeoRestriction: {
-      RestrictionType: 'none',
+      RestrictionType: "none",
       Quantity: 0,
     },
   },
@@ -200,25 +200,25 @@ const DISTRIBUTION_CONFIG: DistributionConfig = {
   // Viewer certificate (use default CloudFront certificate)
   ViewerCertificate: {
     CloudFrontDefaultCertificate: true,
-    MinimumProtocolVersion: 'TLSv1.2_2021',
-    CertificateSource: 'cloudfront',
+    MinimumProtocolVersion: "TLSv1.2_2021",
+    CertificateSource: "cloudfront",
   },
 
   // HTTP version
-  HttpVersion: 'http2',
+  HttpVersion: "http2",
 
   // IPv6 support
   IsIPV6Enabled: true,
 
   // Web ACL
-  WebACLId: '',
+  WebACLId: "",
 
   // Logging
   Logging: {
     Enabled: false,
     IncludeCookies: false,
-    Bucket: '',
-    Prefix: '',
+    Bucket: "",
+    Prefix: "",
   },
 };
 
@@ -250,7 +250,7 @@ export class CloudFrontManager {
       );
 
       if (!response.Distribution) {
-        throw new Error('Failed to create distribution');
+        throw new Error("Failed to create distribution");
       }
 
       const distribution = response.Distribution;
@@ -265,7 +265,7 @@ export class CloudFrontManager {
         etag: response.ETag!,
       };
     } catch (error) {
-      console.error('Error creating CloudFront distribution:', error);
+      console.error("Error creating CloudFront distribution:", error);
       throw error;
     }
   }
@@ -302,7 +302,7 @@ export class CloudFrontManager {
       if (error instanceof NoSuchDistributionError) {
         return null;
       }
-      console.error('Error getting CloudFront distribution:', error);
+      console.error("Error getting CloudFront distribution:", error);
       throw error;
     }
   }
@@ -310,9 +310,11 @@ export class CloudFrontManager {
   /**
    * Update distribution configuration
    */
-  async updateDistribution(config: Partial<DistributionConfig>): Promise<CloudFrontDistributionInfo> {
+  async updateDistribution(
+    config: Partial<DistributionConfig>
+  ): Promise<CloudFrontDistributionInfo> {
     if (!this.distributionId) {
-      throw new Error('Distribution ID is required');
+      throw new Error("Distribution ID is required");
     }
 
     try {
@@ -324,7 +326,7 @@ export class CloudFrontManager {
       );
 
       if (!currentResponse.Distribution || !currentResponse.ETag) {
-        throw new Error('Failed to get current distribution');
+        throw new Error("Failed to get current distribution");
       }
 
       const updatedConfig = {
@@ -341,7 +343,7 @@ export class CloudFrontManager {
       );
 
       if (!response.Distribution) {
-        throw new Error('Failed to update distribution');
+        throw new Error("Failed to update distribution");
       }
 
       const distribution = response.Distribution;
@@ -354,7 +356,7 @@ export class CloudFrontManager {
         etag: response.ETag!,
       };
     } catch (error) {
-      console.error('Error updating CloudFront distribution:', error);
+      console.error("Error updating CloudFront distribution:", error);
       throw error;
     }
   }
@@ -362,9 +364,11 @@ export class CloudFrontManager {
   /**
    * Create cache invalidation
    */
-  async createInvalidation(paths: string[]): Promise<{ id: string; status: string }> {
+  async createInvalidation(
+    paths: string[]
+  ): Promise<{ id: string; status: string }> {
     if (!this.distributionId) {
-      throw new Error('Distribution ID is required');
+      throw new Error("Distribution ID is required");
     }
 
     try {
@@ -382,7 +386,7 @@ export class CloudFrontManager {
       );
 
       if (!response.Invalidation) {
-        throw new Error('Failed to create invalidation');
+        throw new Error("Failed to create invalidation");
       }
 
       return {
@@ -390,7 +394,7 @@ export class CloudFrontManager {
         status: response.Invalidation.Status!,
       };
     } catch (error) {
-      console.error('Error creating CloudFront invalidation:', error);
+      console.error("Error creating CloudFront invalidation:", error);
       throw error;
     }
   }
@@ -398,9 +402,11 @@ export class CloudFrontManager {
   /**
    * Get invalidation status
    */
-  async getInvalidation(invalidationId: string): Promise<{ id: string; status: string; createTime: Date }> {
+  async getInvalidation(
+    invalidationId: string
+  ): Promise<{ id: string; status: string; createTime: Date }> {
     if (!this.distributionId) {
-      throw new Error('Distribution ID is required');
+      throw new Error("Distribution ID is required");
     }
 
     try {
@@ -412,7 +418,7 @@ export class CloudFrontManager {
       );
 
       if (!response.Invalidation) {
-        throw new Error('Invalidation not found');
+        throw new Error("Invalidation not found");
       }
 
       return {
@@ -421,7 +427,7 @@ export class CloudFrontManager {
         createTime: response.Invalidation.CreateTime!,
       };
     } catch (error) {
-      console.error('Error getting CloudFront invalidation:', error);
+      console.error("Error getting CloudFront invalidation:", error);
       throw error;
     }
   }
@@ -429,9 +435,11 @@ export class CloudFrontManager {
   /**
    * List recent invalidations
    */
-  async listInvalidations(maxItems: number = 10): Promise<Array<{ id: string; status: string; createTime: Date }>> {
+  async listInvalidations(
+    maxItems: number = 10
+  ): Promise<Array<{ id: string; status: string; createTime: Date }>> {
     if (!this.distributionId) {
-      throw new Error('Distribution ID is required');
+      throw new Error("Distribution ID is required");
     }
 
     try {
@@ -452,7 +460,7 @@ export class CloudFrontManager {
         createTime: item.CreateTime!,
       }));
     } catch (error) {
-      console.error('Error listing CloudFront invalidations:', error);
+      console.error("Error listing CloudFront invalidations:", error);
       throw error;
     }
   }
@@ -471,7 +479,7 @@ export class CloudFrontManager {
       // Create new distribution
       return await this.createDistribution();
     } catch (error) {
-      console.error('Error initializing CloudFront distribution:', error);
+      console.error("Error initializing CloudFront distribution:", error);
       throw error;
     }
   }
@@ -479,17 +487,19 @@ export class CloudFrontManager {
   /**
    * Wait for distribution to be deployed
    */
-  async waitForDeployment(maxWaitTime: number = 30 * 60 * 1000): Promise<boolean> {
+  async waitForDeployment(
+    maxWaitTime: number = 30 * 60 * 1000
+  ): Promise<boolean> {
     const startTime = Date.now();
     const pollInterval = 30000; // 30 seconds
 
     while (Date.now() - startTime < maxWaitTime) {
       const distribution = await this.getDistribution();
-      if (distribution && distribution.status === 'Deployed') {
+      if (distribution && distribution.status === "Deployed") {
         return true;
       }
 
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
     }
 
     return false;

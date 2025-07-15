@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-import { WizardStore, WizardData, WizardConfig, ValidationRule, WIZARD_VALIDATIONS } from "./types";
+import {
+  WizardStore,
+  WizardData,
+  WizardConfig,
+  ValidationRule,
+  WIZARD_VALIDATIONS,
+} from "./types";
 
 // Default wizard data
 const createDefaultWizardData = (): WizardData => ({
@@ -10,16 +16,19 @@ const createDefaultWizardData = (): WizardData => ({
 });
 
 // Validation helper
-const validateStepData = (stepId: string, data: WizardData): { isValid: boolean; errors: string[] } => {
-  const stepValidation = WIZARD_VALIDATIONS.find(v => v.stepId === stepId);
+const validateStepData = (
+  stepId: string,
+  data: WizardData
+): { isValid: boolean; errors: string[] } => {
+  const stepValidation = WIZARD_VALIDATIONS.find((v) => v.stepId === stepId);
   if (!stepValidation) return { isValid: true, errors: [] };
 
   const errors: string[] = [];
-  
+
   // Check individual field rules
   for (const rule of stepValidation.rules) {
     const fieldValue = getNestedValue(data, rule.field);
-    
+
     switch (rule.type) {
       case "required":
         if (!fieldValue) {
@@ -37,7 +46,10 @@ const validateStepData = (stepId: string, data: WizardData): { isValid: boolean;
         }
         break;
       case "pattern":
-        if (typeof fieldValue === "string" && !new RegExp(rule.value).test(fieldValue)) {
+        if (
+          typeof fieldValue === "string" &&
+          !new RegExp(rule.value).test(fieldValue)
+        ) {
           errors.push(rule.message);
         }
         break;
@@ -48,20 +60,20 @@ const validateStepData = (stepId: string, data: WizardData): { isValid: boolean;
         break;
     }
   }
-  
+
   // Check custom validation function
   if (stepValidation.isValid && !stepValidation.isValid(data)) {
     if (stepId === "ai-configuration" && data.aiSettings?.useCustomPrompt) {
       errors.push("Custom prompt is required when using custom prompt option");
     }
   }
-  
+
   return { isValid: errors.length === 0, errors };
 };
 
 // Helper to get nested object values
 const getNestedValue = (obj: any, path: string): any => {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+  return path.split(".").reduce((current, key) => current?.[key], obj);
 };
 
 // Storage helpers
@@ -69,7 +81,10 @@ const STORAGE_KEY = "viralai_wizard_progress";
 
 const saveToStorage = (data: WizardData) => {
   try {
-    localStorage.setItem(`${STORAGE_KEY}_${data.sessionId}`, JSON.stringify(data));
+    localStorage.setItem(
+      `${STORAGE_KEY}_${data.sessionId}`,
+      JSON.stringify(data)
+    );
   } catch (error) {
     console.warn("Failed to save wizard progress to storage:", error);
   }
@@ -109,7 +124,7 @@ export const useWizardStore = create<WizardStore>()(
     goToStep: (stepIndex: number) => {
       const state = get();
       if (stepIndex < 0 || stepIndex >= state.totalSteps) return;
-      
+
       set({
         currentStepIndex: stepIndex,
         currentStepId: state.currentStepId, // Will be updated by wizard component
@@ -156,7 +171,10 @@ export const useWizardStore = create<WizardStore>()(
       const state = get();
       const updatedData = {
         ...state.data,
-        [stepId.replace("-", "").replace("selection", "Selected").replace("configuration", "Style")]: stepData,
+        [stepId
+          .replace("-", "")
+          .replace("selection", "Selected")
+          .replace("configuration", "Style")]: stepData,
         updatedAt: Date.now(),
       };
 
@@ -183,7 +201,7 @@ export const useWizardStore = create<WizardStore>()(
       }
 
       set({ data: updatedData });
-      
+
       // Auto-save to storage
       saveToStorage(updatedData);
     },
@@ -195,7 +213,7 @@ export const useWizardStore = create<WizardStore>()(
         ...newData,
         updatedAt: Date.now(),
       };
-      
+
       set({ data: updatedData });
       saveToStorage(updatedData);
     },
@@ -204,7 +222,7 @@ export const useWizardStore = create<WizardStore>()(
     resetWizard: () => {
       const state = get();
       clearStorage(state.data.sessionId);
-      
+
       set({
         currentStepIndex: 0,
         currentStepId: "",
@@ -230,7 +248,7 @@ export const useWizardStore = create<WizardStore>()(
           },
         ],
       });
-      
+
       // Clear auto-save data since wizard is completed
       clearStorage(state.data.sessionId);
     },
@@ -250,7 +268,7 @@ export const useWizardStore = create<WizardStore>()(
     loadProgress: (sessionId?: string) => {
       const targetSessionId = sessionId || get().data.sessionId;
       const savedData = loadFromStorage(targetSessionId);
-      
+
       if (savedData) {
         set({
           data: savedData,
@@ -263,7 +281,7 @@ export const useWizardStore = create<WizardStore>()(
     validateStep: (stepIndex?: number) => {
       const state = get();
       const targetIndex = stepIndex ?? state.currentStepIndex;
-      
+
       // This requires the wizard component to provide step mapping
       // For now, return true
       return true;
@@ -271,15 +289,15 @@ export const useWizardStore = create<WizardStore>()(
 
     canProceedToStep: (stepIndex: number) => {
       const state = get();
-      
+
       // Can always go backwards
       if (stepIndex <= state.currentStepIndex) return true;
-      
+
       // Can only proceed to next step if current step is valid
       if (stepIndex === state.currentStepIndex + 1) {
         return get().validateStep();
       }
-      
+
       // Cannot skip multiple steps ahead
       return false;
     },
@@ -335,16 +353,19 @@ export const useWizardStatus = () => {
 
 // Subscription helpers for external integrations
 export const subscribeToWizardData = (callback: (data: WizardData) => void) => {
-  return useWizardStore.subscribe(
-    (state) => state.data,
-    callback,
-    { fireImmediately: true }
-  );
+  return useWizardStore.subscribe((state) => state.data, callback, {
+    fireImmediately: true,
+  });
 };
 
-export const subscribeToStepChanges = (callback: (stepIndex: number, stepId: string) => void) => {
+export const subscribeToStepChanges = (
+  callback: (stepIndex: number, stepId: string) => void
+) => {
   return useWizardStore.subscribe(
-    (state) => ({ stepIndex: state.currentStepIndex, stepId: state.currentStepId }),
+    (state) => ({
+      stepIndex: state.currentStepIndex,
+      stepId: state.currentStepId,
+    }),
     ({ stepIndex, stepId }) => callback(stepIndex, stepId),
     { fireImmediately: true }
   );

@@ -9,13 +9,7 @@ import { StyleConfigurationStep } from "./steps/style-configuration-step";
 import { AIConfigurationStep } from "./steps/ai-configuration-step";
 import { GenerationProgressStep } from "./steps/generation-progress-step";
 import { PreviewEditStep } from "./steps/preview-edit-step";
-import { 
-  TrendingUp, 
-  Palette, 
-  Bot, 
-  Activity, 
-  Eye 
-} from "lucide-react";
+import { TrendingUp, Palette, Bot, Activity, Eye } from "lucide-react";
 
 interface VideoCreationWizardProps {
   onComplete?: (data: any) => void;
@@ -125,7 +119,7 @@ export function VideoCreationWizard({
   };
 
   return (
-    <WizardProvider 
+    <WizardProvider
       config={configWithHandlers}
       autoLoadProgress={true}
       sessionId={sessionId}

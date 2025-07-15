@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export interface UploadProgress {
   uploadId: string;
@@ -8,7 +8,7 @@ export interface UploadProgress {
   percentage: number;
   speed: number; // bytes per second
   timeRemaining: number; // seconds
-  stage: 'preparing' | 'uploading' | 'processing' | 'completed' | 'failed';
+  stage: "preparing" | "uploading" | "processing" | "completed" | "failed";
   error?: string;
   startTime: number;
   lastUpdate: number;
@@ -41,7 +41,7 @@ export interface UploadSession {
   key: string;
   contentType: string;
   metadata: Record<string, string>;
-  stage: UploadProgress['stage'];
+  stage: UploadProgress["stage"];
   error?: string;
 }
 
@@ -104,20 +104,27 @@ export class UploadProgressTracker extends EventEmitter {
       key,
       contentType,
       metadata,
-      stage: 'preparing',
+      stage: "preparing",
     };
 
     this.sessions.set(uploadId, session);
     this.progressCallbacks.set(uploadId, []);
 
-    console.log(`Created upload session: ${uploadId} (${filename}, ${totalSize} bytes)`);
+    console.log(
+      `Created upload session: ${uploadId} (${filename}, ${totalSize} bytes)`
+    );
     return session;
   }
 
   /**
    * Update chunk progress
    */
-  updateChunkProgress(uploadId: string, chunkIndex: number, uploadedBytes: number, speed: number = 0): void {
+  updateChunkProgress(
+    uploadId: string,
+    chunkIndex: number,
+    uploadedBytes: number,
+    speed: number = 0
+  ): void {
     const session = this.sessions.get(uploadId);
     if (!session) return;
 
@@ -126,7 +133,7 @@ export class UploadProgressTracker extends EventEmitter {
 
     // Update chunk progress
     chunk.uploadSpeed = speed;
-    
+
     // Calculate total uploaded size
     const previousUploadedSize = session.uploadedSize;
     session.uploadedSize = session.chunks.reduce((total, c) => {
@@ -136,7 +143,7 @@ export class UploadProgressTracker extends EventEmitter {
     }, 0);
 
     session.lastActivity = Date.now();
-    session.stage = 'uploading';
+    session.stage = "uploading";
 
     // Emit progress event
     this.emitProgress(session);
@@ -154,15 +161,18 @@ export class UploadProgressTracker extends EventEmitter {
 
     chunk.uploaded = true;
     chunk.etag = etag;
-    session.uploadedSize = session.chunks.reduce((total, c) => c.uploaded ? total + c.size : total, 0);
+    session.uploadedSize = session.chunks.reduce(
+      (total, c) => (c.uploaded ? total + c.size : total),
+      0
+    );
     session.lastActivity = Date.now();
 
     console.log(`Chunk ${chunkIndex} completed for upload ${uploadId}`);
 
     // Check if all chunks are completed
-    const completedChunks = session.chunks.filter(c => c.uploaded).length;
+    const completedChunks = session.chunks.filter((c) => c.uploaded).length;
     if (completedChunks === session.chunks.length) {
-      session.stage = 'processing';
+      session.stage = "processing";
     }
 
     this.emitProgress(session);
@@ -185,7 +195,7 @@ export class UploadProgressTracker extends EventEmitter {
 
     // If too many retries, mark upload as failed
     if (chunk.retryCount >= 3) {
-      session.stage = 'failed';
+      session.stage = "failed";
       session.error = `Chunk ${chunkIndex} failed after 3 retries: ${error}`;
     }
 
@@ -199,7 +209,7 @@ export class UploadProgressTracker extends EventEmitter {
     const session = this.sessions.get(uploadId);
     if (!session) return;
 
-    session.stage = 'completed';
+    session.stage = "completed";
     session.lastActivity = Date.now();
 
     console.log(`Upload session completed: ${uploadId}`);
@@ -218,7 +228,7 @@ export class UploadProgressTracker extends EventEmitter {
     const session = this.sessions.get(uploadId);
     if (!session) return;
 
-    session.stage = 'failed';
+    session.stage = "failed";
     session.error = error;
     session.lastActivity = Date.now();
 
@@ -240,7 +250,9 @@ export class UploadProgressTracker extends EventEmitter {
    * Get all active sessions
    */
   getActiveSessions(): UploadProgress[] {
-    return Array.from(this.sessions.values()).map(session => this.calculateProgress(session));
+    return Array.from(this.sessions.values()).map((session) =>
+      this.calculateProgress(session)
+    );
   }
 
   /**
@@ -280,7 +292,7 @@ export class UploadProgressTracker extends EventEmitter {
     const session = this.sessions.get(uploadId);
     if (!session) return;
 
-    session.stage = 'preparing'; // Paused state
+    session.stage = "preparing"; // Paused state
     session.lastActivity = Date.now();
 
     console.log(`Upload session paused: ${uploadId}`);
@@ -294,7 +306,7 @@ export class UploadProgressTracker extends EventEmitter {
     const session = this.sessions.get(uploadId);
     if (!session) return;
 
-    session.stage = 'uploading';
+    session.stage = "uploading";
     session.lastActivity = Date.now();
 
     console.log(`Upload session resumed: ${uploadId}`);
@@ -308,7 +320,7 @@ export class UploadProgressTracker extends EventEmitter {
     const session = this.sessions.get(uploadId);
     if (!session) return [];
 
-    return session.chunks.filter(chunk => !chunk.uploaded);
+    return session.chunks.filter((chunk) => !chunk.uploaded);
   }
 
   /**
@@ -333,8 +345,11 @@ export class UploadProgressTracker extends EventEmitter {
    * Calculate progress metrics
    */
   private calculateProgress(session: UploadSession): UploadProgress {
-    const completedChunks = session.chunks.filter(c => c.uploaded).length;
-    const percentage = session.totalSize > 0 ? (session.uploadedSize / session.totalSize) * 100 : 0;
+    const completedChunks = session.chunks.filter((c) => c.uploaded).length;
+    const percentage =
+      session.totalSize > 0
+        ? (session.uploadedSize / session.totalSize) * 100
+        : 0;
     const elapsed = Date.now() - session.startTime;
     const speed = elapsed > 0 ? (session.uploadedSize / elapsed) * 1000 : 0; // bytes per second
     const remainingBytes = session.totalSize - session.uploadedSize;
@@ -363,17 +378,17 @@ export class UploadProgressTracker extends EventEmitter {
    */
   private emitProgress(session: UploadSession): void {
     const progress = this.calculateProgress(session);
-    
+
     // Emit global event
-    this.emit('progress', progress);
+    this.emit("progress", progress);
 
     // Call specific callbacks
     const callbacks = this.progressCallbacks.get(session.uploadId) || [];
-    callbacks.forEach(callback => {
+    callbacks.forEach((callback) => {
       try {
         callback(progress);
       } catch (error) {
-        console.error('Error in progress callback:', error);
+        console.error("Error in progress callback:", error);
       }
     });
   }
@@ -382,16 +397,19 @@ export class UploadProgressTracker extends EventEmitter {
    * Setup cleanup interval for old sessions
    */
   private setupCleanupInterval(): void {
-    this.cleanupInterval = setInterval(() => {
-      const now = Date.now();
-      
-      for (const [uploadId, session] of this.sessions) {
-        if (now - session.lastActivity > this.SESSION_TIMEOUT) {
-          console.log(`Cleaning up inactive session: ${uploadId}`);
-          this.removeSession(uploadId);
+    this.cleanupInterval = setInterval(
+      () => {
+        const now = Date.now();
+
+        for (const [uploadId, session] of this.sessions) {
+          if (now - session.lastActivity > this.SESSION_TIMEOUT) {
+            console.log(`Cleaning up inactive session: ${uploadId}`);
+            this.removeSession(uploadId);
+          }
         }
-      }
-    }, 5 * 60 * 1000); // Check every 5 minutes
+      },
+      5 * 60 * 1000
+    ); // Check every 5 minutes
   }
 
   /**
@@ -418,12 +436,12 @@ export class UploadProgressTracker extends EventEmitter {
     uploadedSize: number;
   } {
     const sessions = Array.from(this.sessions.values());
-    
+
     return {
       total: sessions.length,
-      active: sessions.filter(s => s.stage === 'uploading').length,
-      completed: sessions.filter(s => s.stage === 'completed').length,
-      failed: sessions.filter(s => s.stage === 'failed').length,
+      active: sessions.filter((s) => s.stage === "uploading").length,
+      completed: sessions.filter((s) => s.stage === "completed").length,
+      failed: sessions.filter((s) => s.stage === "failed").length,
       totalSize: sessions.reduce((sum, s) => sum + s.totalSize, 0),
       uploadedSize: sessions.reduce((sum, s) => sum + s.uploadedSize, 0),
     };
@@ -443,10 +461,21 @@ export const createUploadSession = (
   contentType: string,
   metadata: Record<string, string> = {}
 ): UploadSession => {
-  return uploadProgressTracker.createSession(uploadId, filename, totalSize, chunkSize, key, contentType, metadata);
+  return uploadProgressTracker.createSession(
+    uploadId,
+    filename,
+    totalSize,
+    chunkSize,
+    key,
+    contentType,
+    metadata
+  );
 };
 
-export const trackUploadProgress = (uploadId: string, callback: ProgressCallback): void => {
+export const trackUploadProgress = (
+  uploadId: string,
+  callback: ProgressCallback
+): void => {
   uploadProgressTracker.addProgressCallback(uploadId, callback);
 };
 
@@ -460,11 +489,11 @@ export const getAllUploadProgress = (): UploadProgress[] => {
 
 // Helper functions for formatting
 export const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
 export const formatSpeed = (bytesPerSecond: number): string => {

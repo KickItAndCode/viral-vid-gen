@@ -53,11 +53,13 @@ export function WizardStepWrapper({
             <div>
               <h3 className="text-lg font-semibold">{step.title}</h3>
               {step.description && (
-                <p className="text-sm text-muted-foreground">{step.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {step.description}
+                </p>
               )}
             </div>
           </div>
-          
+
           {showStatus && (
             <div className="flex items-center space-x-2">
               {step.isOptional && (
@@ -78,10 +80,8 @@ export function WizardStepWrapper({
           )}
         </div>
       )}
-      
-      <div className="space-y-4">
-        {children}
-      </div>
+
+      <div className="space-y-4">{children}</div>
     </div>
   );
 }

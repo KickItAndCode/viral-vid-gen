@@ -1,5 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { UploadProgress, UploadSession, uploadProgressTracker } from '@/lib/upload/progress-tracker';
+import { useState, useEffect, useCallback, useRef } from "react";
+import {
+  UploadProgress,
+  UploadSession,
+  uploadProgressTracker,
+} from "@/lib/upload/progress-tracker";
 
 export interface UseUploadProgressOptions {
   uploadId: string;
@@ -24,8 +28,16 @@ export interface UseUploadProgressReturn {
   retry: () => void;
 }
 
-export const useUploadProgress = (options: UseUploadProgressOptions): UseUploadProgressReturn => {
-  const { uploadId, autoRemove = true, onComplete, onError, onProgress } = options;
+export const useUploadProgress = (
+  options: UseUploadProgressOptions
+): UseUploadProgressReturn => {
+  const {
+    uploadId,
+    autoRemove = true,
+    onComplete,
+    onError,
+    onProgress,
+  } = options;
   const [progress, setProgress] = useState<UploadProgress | null>(null);
   const callbacksRef = useRef({ onComplete, onError, onProgress });
   const mountedRef = useRef(true);
@@ -40,20 +52,20 @@ export const useUploadProgress = (options: UseUploadProgressOptions): UseUploadP
     if (!mountedRef.current) return;
 
     setProgress(newProgress);
-    
+
     // Call progress callback
     if (callbacksRef.current.onProgress) {
       callbacksRef.current.onProgress(newProgress);
     }
 
     // Handle completion
-    if (newProgress.stage === 'completed' && callbacksRef.current.onComplete) {
+    if (newProgress.stage === "completed" && callbacksRef.current.onComplete) {
       callbacksRef.current.onComplete(newProgress);
     }
 
     // Handle failure
-    if (newProgress.stage === 'failed' && callbacksRef.current.onError) {
-      callbacksRef.current.onError(newProgress.error || 'Upload failed');
+    if (newProgress.stage === "failed" && callbacksRef.current.onError) {
+      callbacksRef.current.onError(newProgress.error || "Upload failed");
     }
   }, []);
 
@@ -73,8 +85,8 @@ export const useUploadProgress = (options: UseUploadProgressOptions): UseUploadP
     // Cleanup function
     return () => {
       uploadProgressTracker.removeProgressCallback(uploadId, handleProgress);
-      
-      if (autoRemove && progress?.stage === 'completed') {
+
+      if (autoRemove && progress?.stage === "completed") {
         uploadProgressTracker.removeSession(uploadId);
       }
     };
@@ -97,7 +109,7 @@ export const useUploadProgress = (options: UseUploadProgressOptions): UseUploadP
   }, [uploadId]);
 
   const cancel = useCallback(() => {
-    uploadProgressTracker.failSession(uploadId, 'Upload cancelled by user');
+    uploadProgressTracker.failSession(uploadId, "Upload cancelled by user");
   }, [uploadId]);
 
   const retry = useCallback(() => {
@@ -106,9 +118,9 @@ export const useUploadProgress = (options: UseUploadProgressOptions): UseUploadP
   }, [uploadId]);
 
   // Derived state
-  const isUploading = progress?.stage === 'uploading';
-  const isCompleted = progress?.stage === 'completed';
-  const isFailed = progress?.stage === 'failed';
+  const isUploading = progress?.stage === "uploading";
+  const isCompleted = progress?.stage === "completed";
+  const isFailed = progress?.stage === "failed";
   const error = progress?.error || null;
   const percentage = progress?.percentage || 0;
   const speed = progress?.speed || 0;
@@ -158,7 +170,9 @@ export interface UseMultiUploadProgressReturn {
   retryFailed: () => void;
 }
 
-export const useMultiUploadProgress = (options: UseMultiUploadProgressOptions = {}): UseMultiUploadProgressReturn => {
+export const useMultiUploadProgress = (
+  options: UseMultiUploadProgressOptions = {}
+): UseMultiUploadProgressReturn => {
   const { autoRemove = true, onComplete, onError, onProgress } = options;
   const [uploads, setUploads] = useState<UploadProgress[]>([]);
   const [trackedUploads, setTrackedUploads] = useState<Set<string>>(new Set());
@@ -174,8 +188,8 @@ export const useMultiUploadProgress = (options: UseMultiUploadProgressOptions = 
   const handleProgress = useCallback((progress: UploadProgress) => {
     if (!mountedRef.current) return;
 
-    setUploads(prev => {
-      const index = prev.findIndex(p => p.uploadId === progress.uploadId);
+    setUploads((prev) => {
+      const index = prev.findIndex((p) => p.uploadId === progress.uploadId);
       if (index >= 0) {
         const newUploads = [...prev];
         newUploads[index] = progress;
@@ -190,22 +204,25 @@ export const useMultiUploadProgress = (options: UseMultiUploadProgressOptions = 
     }
 
     // Handle completion
-    if (progress.stage === 'completed' && callbacksRef.current.onComplete) {
+    if (progress.stage === "completed" && callbacksRef.current.onComplete) {
       callbacksRef.current.onComplete(progress.uploadId, progress);
     }
 
     // Handle failure
-    if (progress.stage === 'failed' && callbacksRef.current.onError) {
-      callbacksRef.current.onError(progress.uploadId, progress.error || 'Upload failed');
+    if (progress.stage === "failed" && callbacksRef.current.onError) {
+      callbacksRef.current.onError(
+        progress.uploadId,
+        progress.error || "Upload failed"
+      );
     }
   }, []);
 
   // Set up global progress tracking
   useEffect(() => {
-    uploadProgressTracker.on('progress', handleProgress);
+    uploadProgressTracker.on("progress", handleProgress);
 
     return () => {
-      uploadProgressTracker.off('progress', handleProgress);
+      uploadProgressTracker.off("progress", handleProgress);
     };
   }, [handleProgress]);
 
@@ -217,69 +234,78 @@ export const useMultiUploadProgress = (options: UseMultiUploadProgressOptions = 
   }, []);
 
   // Add upload to tracking
-  const addUpload = useCallback((uploadId: string) => {
-    setTrackedUploads(prev => new Set([...prev, uploadId]));
-    
-    // Get initial progress
-    const initialProgress = uploadProgressTracker.getProgress(uploadId);
-    if (initialProgress) {
-      handleProgress(initialProgress);
-    }
-  }, [handleProgress]);
+  const addUpload = useCallback(
+    (uploadId: string) => {
+      setTrackedUploads((prev) => new Set([...prev, uploadId]));
+
+      // Get initial progress
+      const initialProgress = uploadProgressTracker.getProgress(uploadId);
+      if (initialProgress) {
+        handleProgress(initialProgress);
+      }
+    },
+    [handleProgress]
+  );
 
   // Remove upload from tracking
-  const removeUpload = useCallback((uploadId: string) => {
-    setTrackedUploads(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(uploadId);
-      return newSet;
-    });
-    
-    setUploads(prev => prev.filter(p => p.uploadId !== uploadId));
-    
-    if (autoRemove) {
-      uploadProgressTracker.removeSession(uploadId);
-    }
-  }, [autoRemove]);
+  const removeUpload = useCallback(
+    (uploadId: string) => {
+      setTrackedUploads((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(uploadId);
+        return newSet;
+      });
+
+      setUploads((prev) => prev.filter((p) => p.uploadId !== uploadId));
+
+      if (autoRemove) {
+        uploadProgressTracker.removeSession(uploadId);
+      }
+    },
+    [autoRemove]
+  );
 
   // Control functions
   const pauseAll = useCallback(() => {
-    trackedUploads.forEach(uploadId => {
+    trackedUploads.forEach((uploadId) => {
       uploadProgressTracker.pauseSession(uploadId);
     });
   }, [trackedUploads]);
 
   const resumeAll = useCallback(() => {
-    trackedUploads.forEach(uploadId => {
+    trackedUploads.forEach((uploadId) => {
       uploadProgressTracker.resumeSession(uploadId);
     });
   }, [trackedUploads]);
 
   const cancelAll = useCallback(() => {
-    trackedUploads.forEach(uploadId => {
-      uploadProgressTracker.failSession(uploadId, 'Upload cancelled by user');
+    trackedUploads.forEach((uploadId) => {
+      uploadProgressTracker.failSession(uploadId, "Upload cancelled by user");
     });
   }, [trackedUploads]);
 
   const retryFailed = useCallback(() => {
-    const failedUploads = uploads.filter(p => p.stage === 'failed');
-    failedUploads.forEach(upload => {
+    const failedUploads = uploads.filter((p) => p.stage === "failed");
+    failedUploads.forEach((upload) => {
       uploadProgressTracker.resumeSession(upload.uploadId);
     });
   }, [uploads]);
 
   // Derived state
-  const activeUploads = uploads.filter(p => p.stage === 'uploading');
-  const completedUploads = uploads.filter(p => p.stage === 'completed');
-  const failedUploads = uploads.filter(p => p.stage === 'failed');
+  const activeUploads = uploads.filter((p) => p.stage === "uploading");
+  const completedUploads = uploads.filter((p) => p.stage === "completed");
+  const failedUploads = uploads.filter((p) => p.stage === "failed");
 
   // Calculate total progress
   const totalProgress = {
-    percentage: uploads.length > 0 ? uploads.reduce((sum, p) => sum + p.percentage, 0) / uploads.length : 0,
+    percentage:
+      uploads.length > 0
+        ? uploads.reduce((sum, p) => sum + p.percentage, 0) / uploads.length
+        : 0,
     uploadedSize: uploads.reduce((sum, p) => sum + p.uploadedSize, 0),
     totalSize: uploads.reduce((sum, p) => sum + p.totalSize, 0),
     speed: uploads.reduce((sum, p) => sum + p.speed, 0),
-    timeRemaining: Math.max(...uploads.map(p => p.timeRemaining), 0),
+    timeRemaining: Math.max(...uploads.map((p) => p.timeRemaining), 0),
   };
 
   return {
@@ -318,13 +344,13 @@ export const useUploadStats = () => {
     updateStats();
 
     // Update stats on progress changes
-    uploadProgressTracker.on('progress', updateStats);
+    uploadProgressTracker.on("progress", updateStats);
 
     // Update stats periodically
     const interval = setInterval(updateStats, 5000);
 
     return () => {
-      uploadProgressTracker.off('progress', updateStats);
+      uploadProgressTracker.off("progress", updateStats);
       clearInterval(interval);
     };
   }, []);

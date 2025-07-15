@@ -7,15 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Bot, 
-  Zap, 
-  Settings, 
-  Palette, 
+import {
+  Bot,
+  Zap,
+  Settings,
+  Palette,
   Clock,
   CheckCircle,
   Wand2,
@@ -24,7 +30,7 @@ import {
   Volume2,
   Type,
   Brush,
-  Target
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -125,14 +131,13 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
   const [enableFallback, setEnableFallback] = useState<boolean>(
     wizardData.aiConfiguration?.enableFallback ?? true
   );
-  const [customPromptEnhancement, setCustomPromptEnhancement] = useState<string>(
-    wizardData.aiConfiguration?.customPromptEnhancement || ""
-  );
+  const [customPromptEnhancement, setCustomPromptEnhancement] =
+    useState<string>(wizardData.aiConfiguration?.customPromptEnhancement || "");
 
   // Update step validation when data changes
   useEffect(() => {
     const isValid = !!selectedProvider;
-    
+
     if (isValid) {
       const aiData = {
         provider: selectedProvider,
@@ -142,7 +147,9 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
         enableAdvancedFeatures,
         enableFallback,
         customPromptEnhancement,
-        estimatedGenerationTime: AI_PROVIDERS.find(p => p.id === selectedProvider)?.estimatedTime || "2-4 minutes",
+        estimatedGenerationTime:
+          AI_PROVIDERS.find((p) => p.id === selectedProvider)?.estimatedTime ||
+          "2-4 minutes",
       };
 
       onDataChange("ai-configuration", {
@@ -176,13 +183,18 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
     setCreativityLevel(value[0]);
   };
 
-  const selectedProviderData = AI_PROVIDERS.find(p => p.id === selectedProvider);
-  const selectedQualityData = QUALITY_PRESETS.find(q => q.id === selectedQuality);
+  const selectedProviderData = AI_PROVIDERS.find(
+    (p) => p.id === selectedProvider
+  );
+  const selectedQualityData = QUALITY_PRESETS.find(
+    (q) => q.id === selectedQuality
+  );
 
   // Check if selected duration is compatible with provider
   const videoDuration = wizardData.videoStyle?.duration || 30;
-  const isDurationCompatible = selectedProviderData ? 
-    videoDuration <= selectedProviderData.maxDuration : true;
+  const isDurationCompatible = selectedProviderData
+    ? videoDuration <= selectedProviderData.maxDuration
+    : true;
 
   return (
     <WizardStepWrapper step={props.step}>
@@ -215,18 +227,25 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                 </div>
                 <div>
                   <span className="font-medium text-green-800">Quality:</span>
-                  <p className="text-green-700">{selectedQualityData?.name} ({selectedQualityData?.resolution})</p>
+                  <p className="text-green-700">
+                    {selectedQualityData?.name} (
+                    {selectedQualityData?.resolution})
+                  </p>
                 </div>
                 <div>
                   <span className="font-medium text-green-800">Est. Time:</span>
-                  <p className="text-green-700">{selectedProviderData?.estimatedTime}</p>
+                  <p className="text-green-700">
+                    {selectedProviderData?.estimatedTime}
+                  </p>
                 </div>
               </div>
               {!isDurationCompatible && (
                 <div className="mt-3 p-3 bg-yellow-100 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-800">
-                    ⚠️ Your selected duration ({videoDuration}s) exceeds this provider's limit ({selectedProviderData?.maxDuration}s). 
-                    Consider choosing a different provider or reducing the duration.
+                    ⚠️ Your selected duration ({videoDuration}s) exceeds this
+                    provider's limit ({selectedProviderData?.maxDuration}s).
+                    Consider choosing a different provider or reducing the
+                    duration.
                   </p>
                 </div>
               )}
@@ -246,7 +265,7 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {AI_PROVIDERS.map((provider) => {
               const isCompatible = videoDuration <= provider.maxDuration;
-              
+
               return (
                 <Card
                   key={provider.id}
@@ -254,11 +273,13 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                     "cursor-pointer transition-all hover:shadow-md",
                     selectedProvider === provider.id
                       ? "ring-2 ring-primary border-primary"
-                      : isCompatible 
+                      : isCompatible
                         ? "hover:border-primary/50"
                         : "opacity-60 cursor-not-allowed"
                   )}
-                  onClick={() => isCompatible && handleProviderSelect(provider.id)}
+                  onClick={() =>
+                    isCompatible && handleProviderSelect(provider.id)
+                  }
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -267,7 +288,9 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                           {provider.icon}
                         </div>
                         <div>
-                          <CardTitle className="text-base">{provider.name}</CardTitle>
+                          <CardTitle className="text-base">
+                            {provider.name}
+                          </CardTitle>
                           <div className="flex items-center space-x-2 mt-1">
                             <Badge variant="outline" className="text-xs">
                               {provider.price}
@@ -290,7 +313,11 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                     <div className="space-y-2">
                       <div className="flex flex-wrap gap-1">
                         {provider.features.map((feature) => (
-                          <Badge key={feature} variant="outline" className="text-xs">
+                          <Badge
+                            key={feature}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {feature}
                           </Badge>
                         ))}
@@ -372,7 +399,9 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                     {STYLE_STRENGTH_PRESETS.map((preset) => (
                       <Button
                         key={preset.value}
-                        variant={styleStrength === preset.value ? "default" : "outline"}
+                        variant={
+                          styleStrength === preset.value ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => setStyleStrength(preset.value)}
                       >
@@ -391,7 +420,8 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                   className="w-full"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Higher values apply more styling but may reduce content accuracy
+                  Higher values apply more styling but may reduce content
+                  accuracy
                 </p>
               </div>
 
@@ -406,7 +436,8 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                   className="w-full"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Controls how creative vs. literal the AI interpretation should be
+                  Controls how creative vs. literal the AI interpretation should
+                  be
                 </p>
               </div>
             </CardContent>
@@ -474,7 +505,8 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
                 className="resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                These instructions will be added to the base prompt to fine-tune the AI generation.
+                These instructions will be added to the base prompt to fine-tune
+                the AI generation.
               </p>
             </div>
           </CardContent>
@@ -483,8 +515,9 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
         {/* Help Text */}
         <div className="text-center text-sm text-muted-foreground">
           <p>
-            💡 <strong>Tip:</strong> Veo 3 offers the highest quality but takes longer. 
-            Luma is fastest for previews. Runway provides the best balance of quality and control.
+            💡 <strong>Tip:</strong> Veo 3 offers the highest quality but takes
+            longer. Luma is fastest for previews. Runway provides the best
+            balance of quality and control.
           </p>
         </div>
       </div>
