@@ -133,6 +133,7 @@ CLOUDFRONT_DOMAIN=
 - Keep documentation updated: CLAUDE.md, PRD.md, and TASKS.md files
 - Update session files when running appropriate slash commands
 - Update Claude.md at the start of every new conversation. Always check task.md before starting your work. Mark completed tasks. Mark tasks completed immediately. Add newly discovered tasks to the task.md
+- Always use Puppeteer MCP to look at the actual application while it's running. You can use this to evaluate the UI, identify any issues with the UI, and look for improvements.
 
 ## Session History
 
@@ -189,6 +190,26 @@ CLOUDFRONT_DOMAIN=
 
 **Tasks Completed**: All 19 subtasks across Tasks 4-5 (UI + State Management)
 **Next Priority**: Task 6 - Zustand stores for client state management
+
+## Current Project Status (2025-07-14)
+
+### Infrastructure Completed ✅
+- **Foundation**: Next.js 14+, TypeScript, Convex database, Clerk authentication
+- **UI Library**: Shadcn/ui with custom ViralAI purple/blue gradient theme
+- **State Management**: React Query v5 + Convex integration with optimistic updates
+- **Developer Experience**: Type-safe hooks, DevTools, comprehensive error handling
+
+### Architecture Status
+- **Server State**: React Query + custom Convex hooks (useUser, useTrends, useVideos)
+- **Client State**: Ready for Zustand implementation (Task 6)
+- **Database**: Complete schema with users, videos, trends, analytics, videoJobs
+- **Authentication**: Clerk integration with custom styling
+- **Build System**: Production-ready with TypeScript strict mode
+
+### Phase Progress
+- ✅ **Phase 1 Foundation**: 100% complete (Tasks 1-5)
+- 🚧 **Phase 2 Core Features**: Starting (Tasks 6-8 next)
+- 📋 **Phase 3 Video Generation**: Planned (Tasks 9+)
 
 ## Development Best Practices
 
