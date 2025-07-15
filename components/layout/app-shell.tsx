@@ -28,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
     <div className="min-h-screen bg-background">
       {/* Main Navigation Bar */}
       <MainNavbar />
-      
+
       <div className="flex">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:pt-16 lg:z-40">
@@ -39,20 +39,18 @@ export function AppShell({ children }: AppShellProps) {
         <MobileNav />
 
         {/* Main Content Area */}
-        <main 
+        <main
           className={`
             flex-1 min-h-0 
             lg:pl-64 
             pt-16
             transition-all duration-300 ease-in-out
-            ${sidebarOpen ? 'lg:pl-64' : 'lg:pl-64'}
+            ${sidebarOpen ? "lg:pl-64" : "lg:pl-64"}
           `}
           role="main"
           aria-label="Main content area"
         >
-          <div className="h-full">
-            {children}
-          </div>
+          <div className="h-full">{children}</div>
         </main>
       </div>
     </div>

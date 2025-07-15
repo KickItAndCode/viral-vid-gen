@@ -39,8 +39,11 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
   }
 
   return (
-    <nav 
-      className={cn("flex items-center space-x-1 text-sm text-muted-foreground", className)}
+    <nav
+      className={cn(
+        "flex items-center space-x-1 text-sm text-muted-foreground",
+        className
+      )}
       aria-label="Breadcrumb navigation"
     >
       <ol className="flex items-center space-x-1">
@@ -53,7 +56,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
               {index > 0 && (
                 <ChevronRight className="h-4 w-4 mx-1 text-muted-foreground/50" />
               )}
-              
+
               {item.href && !isLast ? (
                 <Link
                   href={item.href as any}
@@ -63,10 +66,12 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
                   {item.label}
                 </Link>
               ) : (
-                <span 
+                <span
                   className={cn(
                     "flex items-center",
-                    isLast ? "text-foreground font-medium" : "text-muted-foreground"
+                    isLast
+                      ? "text-foreground font-medium"
+                      : "text-muted-foreground"
                   )}
                   aria-current={isLast ? "page" : undefined}
                 >
@@ -83,32 +88,34 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 }
 
 function generateBreadcrumbsFromPath(pathname: string): BreadcrumbItem[] {
-  const segments = pathname.split('/').filter(Boolean);
+  const segments = pathname.split("/").filter(Boolean);
   const breadcrumbs: BreadcrumbItem[] = [];
 
   // Always start with home/dashboard
   breadcrumbs.push({
     label: "Dashboard",
     href: "/dashboard",
-    icon: Home
+    icon: Home,
   });
 
   // Build path progressively
   let currentPath = "";
   for (let i = 0; i < segments.length; i++) {
     currentPath += `/${segments[i]}`;
-    
-    // Skip the first segment if it's 'dashboard' (already added)
-    if (segments[i] === 'dashboard' && i === 0) continue;
 
-    const label = routeMap[currentPath] || 
-      segments[i].split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
+    // Skip the first segment if it's 'dashboard' (already added)
+    if (segments[i] === "dashboard" && i === 0) continue;
+
+    const label =
+      routeMap[currentPath] ||
+      segments[i]
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 
     breadcrumbs.push({
       label,
-      href: i === segments.length - 1 ? undefined : currentPath // No href for current page
+      href: i === segments.length - 1 ? undefined : currentPath, // No href for current page
     });
   }
 

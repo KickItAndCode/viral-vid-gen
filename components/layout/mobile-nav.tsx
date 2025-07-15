@@ -2,7 +2,12 @@
 
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useUIStore } from "@/lib/stores/ui-store";
 import { Sidebar } from "./sidebar";
 
@@ -11,8 +16,8 @@ export function MobileNav() {
 
   return (
     <Sheet open={sidebarOpen} onOpenChange={(open) => !open && closeSidebar()}>
-      <SheetContent 
-        side="left" 
+      <SheetContent
+        side="left"
         className="w-64 p-0 lg:hidden"
         aria-describedby="mobile-navigation-description"
       >
@@ -35,11 +40,12 @@ export function MobileNav() {
             </Button>
           </div>
         </SheetHeader>
-        
+
         <div id="mobile-navigation-description" className="sr-only">
-          Mobile navigation menu with links to dashboard, video creation, trends, and settings
+          Mobile navigation menu with links to dashboard, video creation,
+          trends, and settings
         </div>
-        
+
         <div className="flex-1 overflow-y-auto">
           <Sidebar />
         </div>

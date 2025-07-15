@@ -1,11 +1,15 @@
 /**
  * Twitter/X API Scraper for Trend Discovery
- * 
+ *
  * Scrapes trending content from Twitter/X using various approaches
  * including trending topics and high-engagement tweets
  */
 
-import { calculateViralScore, type EngagementMetrics, type TrendData } from "../viral-score";
+import {
+  calculateViralScore,
+  type EngagementMetrics,
+  type TrendData,
+} from "../viral-score";
 
 export interface TwitterTweet {
   id: string;
@@ -95,27 +99,27 @@ export interface ScrapedTwitterTrend {
 const TWITTER_CATEGORIES: Record<string, string> = {
   // Technology hashtags
   ai: "technology",
-  tech: "technology", 
+  tech: "technology",
   coding: "technology",
   programming: "technology",
   crypto: "finance",
   blockchain: "finance",
   bitcoin: "finance",
   nft: "finance",
-  
+
   // News and politics
   breaking: "news",
   news: "news",
   politics: "politics",
   election: "politics",
-  
+
   // Entertainment
   music: "entertainment",
   movie: "entertainment",
   tv: "entertainment",
   celebrity: "entertainment",
   netflix: "entertainment",
-  
+
   // Sports
   sports: "sports",
   football: "sports",
@@ -123,24 +127,24 @@ const TWITTER_CATEGORIES: Record<string, string> = {
   soccer: "sports",
   nfl: "sports",
   nba: "sports",
-  
+
   // Gaming
   gaming: "gaming",
   esports: "gaming",
   twitch: "gaming",
-  
+
   // Lifestyle
   fashion: "lifestyle",
   food: "food",
   health: "health",
   fitness: "health",
   travel: "lifestyle",
-  
+
   // Viral/Memes
   meme: "memes",
   viral: "viral",
   trending: "viral",
-  
+
   // Business
   business: "business",
   startup: "business",
@@ -160,7 +164,7 @@ function determineTweetCategory(tweet: TwitterTweet): string {
       }
     }
   }
-  
+
   // Check context annotations
   if (tweet.context_annotations) {
     for (const annotation of tweet.context_annotations) {
@@ -172,7 +176,7 @@ function determineTweetCategory(tweet: TwitterTweet): string {
       if (domain.includes("business")) return "business";
     }
   }
-  
+
   // Check tweet text for keywords
   const text = tweet.text.toLowerCase();
   for (const [keyword, category] of Object.entries(TWITTER_CATEGORIES)) {
@@ -180,7 +184,7 @@ function determineTweetCategory(tweet: TwitterTweet): string {
       return category;
     }
   }
-  
+
   return "general";
 }
 
@@ -189,36 +193,41 @@ function determineTweetCategory(tweet: TwitterTweet): string {
  */
 function extractTwitterTags(tweet: TwitterTweet): string[] {
   const tags: string[] = [];
-  
+
   // Add hashtags
   if (tweet.entities?.hashtags) {
-    tags.push(...tweet.entities.hashtags.map(h => h.tag.toLowerCase()));
+    tags.push(...tweet.entities.hashtags.map((h) => h.tag.toLowerCase()));
   }
-  
+
   // Add engagement level tags
   const metrics = tweet.public_metrics;
-  const totalEngagement = metrics.retweet_count + metrics.like_count + metrics.reply_count;
-  
+  const totalEngagement =
+    metrics.retweet_count + metrics.like_count + metrics.reply_count;
+
   if (totalEngagement > 50000) tags.push("viral");
   if (totalEngagement > 10000) tags.push("trending");
   if (metrics.retweet_count > 5000) tags.push("highly-shared");
   if (metrics.reply_count > 1000) tags.push("discussion");
-  
+
   // Add content type tags
   if (tweet.attachments?.media_keys?.length) tags.push("media");
   if (tweet.entities?.urls?.length) tags.push("link");
-  if (tweet.referenced_tweets?.some(r => r.type === "quoted")) tags.push("quote");
-  
+  if (tweet.referenced_tweets?.some((r) => r.type === "quoted"))
+    tags.push("quote");
+
   // Add language tag
   if (tweet.lang && tweet.lang !== "en") tags.push(`lang-${tweet.lang}`);
-  
+
   return [...new Set(tags)];
 }
 
 /**
  * Convert Twitter tweet to ScrapedTwitterTrend
  */
-function convertTweetToTrend(tweet: TwitterTweet, author?: TwitterUser): ScrapedTwitterTrend {
+function convertTweetToTrend(
+  tweet: TwitterTweet,
+  author?: TwitterUser
+): ScrapedTwitterTrend {
   const engagementMetrics: EngagementMetrics = {
     likes: tweet.public_metrics.like_count,
     shares: tweet.public_metrics.retweet_count,
@@ -227,7 +236,7 @@ function convertTweetToTrend(tweet: TwitterTweet, author?: TwitterUser): Scraped
     replies: tweet.public_metrics.reply_count,
     views: tweet.public_metrics.impression_count,
   };
-  
+
   const trendData: TrendData = {
     platform: "twitter",
     engagementMetrics,
@@ -235,11 +244,14 @@ function convertTweetToTrend(tweet: TwitterTweet, author?: TwitterUser): Scraped
     createdAt: new Date(tweet.created_at).getTime(),
     category: determineTweetCategory(tweet),
   };
-  
+
   const viralScore = calculateViralScore(trendData);
-  
+
   return {
-    title: tweet.text.length > 100 ? tweet.text.substring(0, 97) + "..." : tweet.text,
+    title:
+      tweet.text.length > 100
+        ? tweet.text.substring(0, 97) + "..."
+        : tweet.text,
     description: tweet.text,
     platform: "twitter",
     category: determineTweetCategory(tweet),
@@ -247,8 +259,8 @@ function convertTweetToTrend(tweet: TwitterTweet, author?: TwitterUser): Scraped
     platformMetadata: {
       authorId: author ? `@${author.username}` : tweet.author_id,
       postId: tweet.id,
-      hashtags: tweet.entities?.hashtags?.map(h => h.tag),
-      mentions: tweet.entities?.mentions?.map(m => m.username),
+      hashtags: tweet.entities?.hashtags?.map((h) => h.tag),
+      mentions: tweet.entities?.mentions?.map((m) => m.username),
     },
     tags: extractTwitterTags(tweet),
     sourceUrl: `https://twitter.com/i/status/${tweet.id}`,
@@ -263,7 +275,12 @@ function convertTweetToTrend(tweet: TwitterTweet, author?: TwitterUser): Scraped
 function getMockTrendingTopics(): TwitterTrendingTopic[] {
   return [
     { trend: "#AI", url: "", query: "#AI", tweet_volume: 50000 },
-    { trend: "#Technology", url: "", query: "#Technology", tweet_volume: 30000 },
+    {
+      trend: "#Technology",
+      url: "",
+      query: "#Technology",
+      tweet_volume: 30000,
+    },
     { trend: "#Breaking", url: "", query: "#Breaking", tweet_volume: 25000 },
     { trend: "#Gaming", url: "", query: "#Gaming", tweet_volume: 20000 },
     { trend: "#Crypto", url: "", query: "#Crypto", tweet_volume: 18000 },
@@ -288,27 +305,29 @@ export async function searchTwitterTrends(
     console.warn("Twitter API bearer token not provided, returning mock data");
     return generateMockTwitterTrends(query, maxResults);
   }
-  
+
   const url = `https://api.twitter.com/2/tweets/search/recent?query=${encodeURIComponent(query)}&max_results=${maxResults}&tweet.fields=created_at,author_id,context_annotations,entities,public_metrics,referenced_tweets,attachments,lang,possibly_sensitive,source&user.fields=name,username,verified,public_metrics&expansions=author_id`;
-  
+
   try {
     const response = await fetch(url, {
       headers: {
-        "Authorization": `Bearer ${bearerToken}`,
+        Authorization: `Bearer ${bearerToken}`,
         "User-Agent": "ViralAI/1.0 (Trend Discovery Bot)",
       },
     });
-    
+
     if (!response.ok) {
-      throw new Error(`Twitter API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Twitter API error: ${response.status} ${response.statusText}`
+      );
     }
-    
+
     const data = await response.json();
-    
+
     if (!data.data || data.data.length === 0) {
       return [];
     }
-    
+
     // Create user lookup map
     const userMap = new Map<string, TwitterUser>();
     if (data.includes?.users) {
@@ -316,18 +335,18 @@ export async function searchTwitterTrends(
         userMap.set(user.id, user);
       });
     }
-    
+
     // Filter out potentially sensitive content and convert to trends
-    const validTweets = data.data.filter((tweet: TwitterTweet) => 
-      !tweet.possibly_sensitive &&
-      tweet.lang === "en" && // Focus on English content for now
-      tweet.public_metrics.like_count > 50 // Minimum engagement threshold
+    const validTweets = data.data.filter(
+      (tweet: TwitterTweet) =>
+        !tweet.possibly_sensitive &&
+        tweet.lang === "en" && // Focus on English content for now
+        tweet.public_metrics.like_count > 50 // Minimum engagement threshold
     );
-    
-    return validTweets.map((tweet: TwitterTweet) => 
+
+    return validTweets.map((tweet: TwitterTweet) =>
       convertTweetToTrend(tweet, userMap.get(tweet.author_id))
     );
-    
   } catch (error) {
     console.error(`Error searching Twitter for "${query}":`, error);
     // Fallback to mock data
@@ -338,10 +357,13 @@ export async function searchTwitterTrends(
 /**
  * Generate mock Twitter trends for development/testing
  */
-function generateMockTwitterTrends(query: string, count: number): ScrapedTwitterTrend[] {
+function generateMockTwitterTrends(
+  query: string,
+  count: number
+): ScrapedTwitterTrend[] {
   const mockTrends: ScrapedTwitterTrend[] = [];
   const now = Date.now();
-  
+
   for (let i = 0; i < count; i++) {
     const mockEngagement = {
       likes: Math.floor(Math.random() * 10000) + 100,
@@ -351,12 +373,13 @@ function generateMockTwitterTrends(query: string, count: number): ScrapedTwitter
       replies: Math.floor(Math.random() * 500) + 10,
       views: Math.floor(Math.random() * 100000) + 5000,
     };
-    
+
     const mockTrend: ScrapedTwitterTrend = {
       title: `${query} trending topic ${i + 1}`,
       description: `This is a mock trending topic about ${query} with high engagement metrics`,
       platform: "twitter",
-      category: TWITTER_CATEGORIES[query.toLowerCase().replace("#", "")] || "general",
+      category:
+        TWITTER_CATEGORIES[query.toLowerCase().replace("#", "")] || "general",
       engagementMetrics: mockEngagement,
       platformMetadata: {
         authorId: `@user${i + 1}`,
@@ -368,10 +391,10 @@ function generateMockTwitterTrends(query: string, count: number): ScrapedTwitter
       viralScore: Math.floor(Math.random() * 40) + 60, // 60-100 for trending content
       createdAt: now - Math.random() * 86400000, // Random time in last 24 hours
     };
-    
+
     mockTrends.push(mockTrend);
   }
-  
+
   return mockTrends;
 }
 
@@ -384,22 +407,23 @@ export async function scrapeTwitterTrending(
 ): Promise<ScrapedTwitterTrend[]> {
   // Get trending topics (mock for now since API requires paid access)
   const trendingTopics = getMockTrendingTopics();
-  
+
   const allTrends: ScrapedTwitterTrend[] = [];
-  
+
   // Search for tweets for each trending topic
-  for (const topic of trendingTopics.slice(0, 5)) { // Limit to top 5 to avoid rate limits
+  for (const topic of trendingTopics.slice(0, 5)) {
+    // Limit to top 5 to avoid rate limits
     try {
       const trends = await searchTwitterTrends(topic.trend, 5, bearerToken);
       allTrends.push(...trends);
-      
+
       // Rate limiting delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
       console.warn(`Failed to scrape trends for ${topic.trend}:`, error);
     }
   }
-  
+
   // Sort by viral score
   return allTrends.sort((a, b) => b.viralScore - a.viralScore);
 }
@@ -409,10 +433,26 @@ export async function scrapeTwitterTrending(
  */
 export function getHighImpactHashtags(): string[] {
   return [
-    "#AI", "#Technology", "#Crypto", "#Bitcoin", "#Gaming",
-    "#Sports", "#Music", "#Politics", "#Business", "#Health",
-    "#Breaking", "#News", "#Viral", "#Trending", "#Meme",
-    "#Entertainment", "#Movies", "#TV", "#Fashion", "#Food"
+    "#AI",
+    "#Technology",
+    "#Crypto",
+    "#Bitcoin",
+    "#Gaming",
+    "#Sports",
+    "#Music",
+    "#Politics",
+    "#Business",
+    "#Health",
+    "#Breaking",
+    "#News",
+    "#Viral",
+    "#Trending",
+    "#Meme",
+    "#Entertainment",
+    "#Movies",
+    "#TV",
+    "#Fashion",
+    "#Food",
   ];
 }
 
@@ -425,34 +465,39 @@ export async function scrapeTwitterHashtagTrends(
   bearerToken?: string
 ): Promise<ScrapedTwitterTrend[]> {
   const allTrends: ScrapedTwitterTrend[] = [];
-  
+
   // Process hashtags in batches
   const batchSize = 3;
   for (let i = 0; i < hashtags.length; i += batchSize) {
     const batch = hashtags.slice(i, i + batchSize);
-    
-    const batchPromises = batch.map(async hashtag => {
+
+    const batchPromises = batch.map(async (hashtag) => {
       try {
-        return await searchTwitterTrends(hashtag, tweetsPerHashtag, bearerToken);
+        return await searchTwitterTrends(
+          hashtag,
+          tweetsPerHashtag,
+          bearerToken
+        );
       } catch (error) {
         console.warn(`Failed to scrape ${hashtag}:`, error);
         return [];
       }
     });
-    
+
     const batchResults = await Promise.all(batchPromises);
     allTrends.push(...batchResults.flat());
-    
+
     // Rate limiting delay between batches
     if (i + batchSize < hashtags.length) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
-  
+
   // Remove duplicates and sort by viral score
-  const uniqueTrends = allTrends.filter((trend, index, self) => 
-    index === self.findIndex(t => t.sourceUrl === trend.sourceUrl)
+  const uniqueTrends = allTrends.filter(
+    (trend, index, self) =>
+      index === self.findIndex((t) => t.sourceUrl === trend.sourceUrl)
   );
-  
+
   return uniqueTrends.sort((a, b) => b.viralScore - a.viralScore);
 }

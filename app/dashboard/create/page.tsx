@@ -1,5 +1,11 @@
 import { Breadcrumb } from "@/components/layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Target, Zap } from "lucide-react";
 
@@ -7,9 +13,11 @@ export default function CreateVideoPage() {
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb />
-      
+
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Create Viral Video</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          Create Viral Video
+        </h1>
         <p className="text-muted-foreground text-lg">
           Turn trending topics into engaging videos with AI-powered generation
         </p>
@@ -35,7 +43,9 @@ export default function CreateVideoPage() {
                   </div>
                   <div>
                     <h3 className="font-medium">Select Trending Topic</h3>
-                    <p className="text-sm text-muted-foreground">Choose from viral content</p>
+                    <p className="text-sm text-muted-foreground">
+                      Choose from viral content
+                    </p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -44,11 +54,17 @@ export default function CreateVideoPage() {
               <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-muted-foreground">2</span>
+                    <span className="text-sm font-bold text-muted-foreground">
+                      2
+                    </span>
                   </div>
                   <div>
-                    <h3 className="font-medium text-muted-foreground">Customize Style</h3>
-                    <p className="text-sm text-muted-foreground">Set tone and format</p>
+                    <h3 className="font-medium text-muted-foreground">
+                      Customize Style
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Set tone and format
+                    </p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -57,11 +73,17 @@ export default function CreateVideoPage() {
               <div className="flex items-center justify-between p-4 border border-border rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-muted-foreground">3</span>
+                    <span className="text-sm font-bold text-muted-foreground">
+                      3
+                    </span>
                   </div>
                   <div>
-                    <h3 className="font-medium text-muted-foreground">Generate & Review</h3>
-                    <p className="text-sm text-muted-foreground">AI creates your video</p>
+                    <h3 className="font-medium text-muted-foreground">
+                      Generate & Review
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      AI creates your video
+                    </p>
                   </div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
@@ -86,7 +108,10 @@ export default function CreateVideoPage() {
             <div className="space-y-3 text-sm">
               <div className="flex items-start space-x-2">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                <p>Choose trending topics with high viral scores for maximum reach</p>
+                <p>
+                  Choose trending topics with high viral scores for maximum
+                  reach
+                </p>
               </div>
               <div className="flex items-start space-x-2">
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0" />

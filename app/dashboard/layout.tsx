@@ -8,9 +8,7 @@ export default function DashboardLayout({
 }) {
   return (
     <ProtectedRoute>
-      <AppShell>
-        {children}
-      </AppShell>
+      <AppShell>{children}</AppShell>
     </ProtectedRoute>
   );
 }

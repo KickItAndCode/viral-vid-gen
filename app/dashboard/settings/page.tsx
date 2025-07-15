@@ -1,5 +1,11 @@
 import { Breadcrumb } from "@/components/layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +17,7 @@ export default function SettingsPage() {
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb />
-      
+
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Settings</h1>
         <p className="text-muted-foreground text-lg">
@@ -27,23 +33,38 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="p-0">
             <nav className="space-y-1">
-              <a href="#general" className="flex items-center px-4 py-2 text-sm font-medium bg-primary/10 text-primary rounded-lg">
+              <a
+                href="#general"
+                className="flex items-center px-4 py-2 text-sm font-medium bg-primary/10 text-primary rounded-lg"
+              >
                 <Settings className="h-4 w-4 mr-3" />
                 General
               </a>
-              <a href="#notifications" className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg">
+              <a
+                href="#notifications"
+                className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg"
+              >
                 <Bell className="h-4 w-4 mr-3" />
                 Notifications
               </a>
-              <a href="#security" className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg">
+              <a
+                href="#security"
+                className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg"
+              >
                 <Shield className="h-4 w-4 mr-3" />
                 Security
               </a>
-              <a href="#appearance" className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg">
+              <a
+                href="#appearance"
+                className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg"
+              >
                 <Palette className="h-4 w-4 mr-3" />
                 Appearance
               </a>
-              <a href="#advanced" className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg">
+              <a
+                href="#advanced"
+                className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg"
+              >
                 <Zap className="h-4 w-4 mr-3" />
                 Advanced
               </a>
@@ -72,10 +93,14 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                  <Input
+                    id="email"
+                    type="email"
+                    defaultValue="john.doe@example.com"
+                  />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
                 <Input id="bio" placeholder="Tell us about yourself..." />

@@ -1,15 +1,32 @@
 import { Breadcrumb } from "@/components/layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart3, TrendingUp, Users, Eye, Heart, Share, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  Eye,
+  Heart,
+  Share,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 
 export default function AnalyticsPage() {
   return (
     <div className="p-6 space-y-6">
       <Breadcrumb />
-      
+
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Analytics Dashboard</h1>
+        <h1 className="text-3xl font-bold text-foreground">
+          Analytics Dashboard
+        </h1>
         <p className="text-muted-foreground text-lg">
           Track your video performance and audience engagement
         </p>
@@ -33,7 +50,9 @@ export default function AnalyticsPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Engagement Rate
+            </CardTitle>
             <Heart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -83,15 +102,15 @@ export default function AnalyticsPage() {
               <BarChart3 className="h-5 w-5 mr-2" />
               Performance Over Time
             </CardTitle>
-            <CardDescription>
-              Video views and engagement trends
-            </CardDescription>
+            <CardDescription>Video views and engagement trends</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
               <div className="text-center">
                 <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">Chart visualization coming soon</p>
+                <p className="text-sm text-muted-foreground">
+                  Chart visualization coming soon
+                </p>
               </div>
             </div>
           </CardContent>
@@ -104,9 +123,7 @@ export default function AnalyticsPage() {
               <TrendingUp className="h-5 w-5 mr-2" />
               Top Performing Videos
             </CardTitle>
-            <CardDescription>
-              Your most successful content
-            </CardDescription>
+            <CardDescription>Your most successful content</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -174,7 +191,10 @@ export default function AnalyticsPage() {
                   <span>35%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: '35%' }} />
+                  <div
+                    className="bg-primary h-2 rounded-full"
+                    style={{ width: "35%" }}
+                  />
                 </div>
               </div>
 
@@ -184,7 +204,10 @@ export default function AnalyticsPage() {
                   <span>42%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '42%' }} />
+                  <div
+                    className="bg-blue-500 h-2 rounded-full"
+                    style={{ width: "42%" }}
+                  />
                 </div>
               </div>
 
@@ -194,7 +217,10 @@ export default function AnalyticsPage() {
                   <span>18%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-orange-500 h-2 rounded-full" style={{ width: '18%' }} />
+                  <div
+                    className="bg-orange-500 h-2 rounded-full"
+                    style={{ width: "18%" }}
+                  />
                 </div>
               </div>
 
@@ -204,7 +230,10 @@ export default function AnalyticsPage() {
                   <span>5%</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-purple-500 h-2 rounded-full" style={{ width: '5%' }} />
+                  <div
+                    className="bg-purple-500 h-2 rounded-full"
+                    style={{ width: "5%" }}
+                  />
                 </div>
               </div>
             </div>
@@ -215,9 +244,7 @@ export default function AnalyticsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent Performance</CardTitle>
-            <CardDescription>
-              Latest video analytics updates
-            </CardDescription>
+            <CardDescription>Latest video analytics updates</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -226,7 +253,9 @@ export default function AnalyticsPage() {
                   <div className="w-2 h-2 bg-green-500 rounded-full" />
                   <div>
                     <p className="text-sm font-medium">Video hit 500K views</p>
-                    <p className="text-xs text-muted-foreground">AI Productivity Hacks</p>
+                    <p className="text-xs text-muted-foreground">
+                      AI Productivity Hacks
+                    </p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">2h ago</span>
@@ -237,7 +266,9 @@ export default function AnalyticsPage() {
                   <div className="w-2 h-2 bg-blue-500 rounded-full" />
                   <div>
                     <p className="text-sm font-medium">Viral score increased</p>
-                    <p className="text-xs text-muted-foreground">Sustainable Living (+0.3)</p>
+                    <p className="text-xs text-muted-foreground">
+                      Sustainable Living (+0.3)
+                    </p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">1d ago</span>
@@ -248,7 +279,9 @@ export default function AnalyticsPage() {
                   <div className="w-2 h-2 bg-orange-500 rounded-full" />
                   <div>
                     <p className="text-sm font-medium">High engagement rate</p>
-                    <p className="text-xs text-muted-foreground">Remote Work Tips (12.4%)</p>
+                    <p className="text-xs text-muted-foreground">
+                      Remote Work Tips (12.4%)
+                    </p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">2d ago</span>

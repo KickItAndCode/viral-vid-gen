@@ -19,6 +19,8 @@ import type * as seedTrends from "../seedTrends.js";
 import type * as trendScraper from "../trendScraper.js";
 import type * as trends from "../trends.js";
 import type * as users from "../users.js";
+import type * as videoGeneration from "../videoGeneration.js";
+import type * as videoGenerationProgress from "../videoGenerationProgress.js";
 import type * as videos from "../videos.js";
 
 /**
@@ -36,6 +38,8 @@ declare const fullApi: ApiFromModules<{
   trendScraper: typeof trendScraper;
   trends: typeof trends;
   users: typeof users;
+  videoGeneration: typeof videoGeneration;
+  videoGenerationProgress: typeof videoGenerationProgress;
   videos: typeof videos;
 }>;
 export declare const api: FilterApi<

@@ -5,14 +5,17 @@ export default function ProfilePage() {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Account Settings</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            Account Settings
+          </h1>
           <p className="text-muted-foreground mt-2">
-            Manage your account settings, security preferences, and connected accounts.
+            Manage your account settings, security preferences, and connected
+            accounts.
           </p>
         </div>
 
         <div className="bg-card rounded-lg border border-border overflow-hidden">
-          <UserProfile 
+          <UserProfile
             appearance={{
               elements: {
                 rootBox: "w-full",

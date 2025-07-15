@@ -68,7 +68,8 @@ export default function RootLayout({
             backgroundColor: "hsl(222.2 84% 4.9%)",
             borderRadius: "1rem",
             border: "1px solid hsl(217.2 32.6% 17.5%)",
-            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05)",
+            boxShadow:
+              "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05)",
           },
           headerTitle: {
             color: "hsl(210 40% 98%)",

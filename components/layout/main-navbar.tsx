@@ -60,7 +60,7 @@ export function MainNavbar() {
                 Create
               </Link>
             </Button>
-            
+
             <Button variant="ghost" size="sm" asChild>
               <Link href="/dashboard/trends">
                 <TrendingUp className="h-4 w-4 mr-2" />
