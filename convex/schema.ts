@@ -60,26 +60,42 @@ export default defineSchema({
       v.literal("reddit"),
       v.literal("twitter"),
       v.literal("tiktok"),
-      v.literal("youtube")
+      v.literal("youtube"),
+      v.literal("manual") // For manually added trends
     ),
     category: v.string(),
     viralScore: v.number(), // 0-100
+    trending: v.boolean(), // Currently trending flag
     engagementMetrics: v.object({
       likes: v.optional(v.number()),
       shares: v.optional(v.number()),
       comments: v.optional(v.number()),
       views: v.optional(v.number()),
+      upvotes: v.optional(v.number()), // Reddit specific
+      score: v.optional(v.number()), // Reddit score
+      retweets: v.optional(v.number()), // Twitter specific
+      replies: v.optional(v.number()), // Twitter specific
     }),
+    platformMetadata: v.optional(v.object({
+      subreddit: v.optional(v.string()), // Reddit
+      authorId: v.optional(v.string()),
+      postId: v.optional(v.string()),
+      hashtags: v.optional(v.array(v.string())), // Twitter
+      mentions: v.optional(v.array(v.string())), // Twitter
+    })),
     tags: v.array(v.string()),
     sourceUrl: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     scrapedAt: v.number(),
+    lastUpdated: v.number(),
     createdAt: v.number(),
   })
     .index("by_platform", ["platform"])
     .index("by_category", ["category"])
     .index("by_viral_score", ["viralScore"])
-    .index("by_created_at", ["createdAt"]),
+    .index("by_trending", ["trending"])
+    .index("by_created_at", ["createdAt"])
+    .index("by_platform_category", ["platform", "category"]),
 
   videoJobs: defineTable({
     userId: v.id("users"),

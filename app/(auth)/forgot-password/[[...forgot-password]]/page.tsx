@@ -1,7 +1,7 @@
 import { SignIn } from "@clerk/nextjs";
 import Link from "next/link";
 
-export default function Page() {
+export default function ForgotPasswordPage() {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Left side - Branding */}
@@ -17,36 +17,35 @@ export default function Page() {
 
         <div className="space-y-6">
           <h1 className="text-4xl font-bold text-white leading-tight">
-            Welcome back to
+            Reset your password
             <br />
             <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-              ViralAI
+              securely
             </span>
           </h1>
           <p className="text-white/80 text-lg">
-            Continue creating viral videos with AI-powered content generation.
-            Analyze trends, create scripts, and produce professional videos
-            automatically.
+            Don't worry, we'll help you get back to creating viral content in no
+            time. Enter your email and we'll send you a reset link.
           </p>
 
           <div className="space-y-4">
             <div className="flex items-center space-x-3 text-white/80">
               <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-sm">✓</span>
+                <span className="text-sm">🔒</span>
               </div>
-              <span>Generate videos in under 2 minutes</span>
+              <span>Secure password reset process</span>
             </div>
             <div className="flex items-center space-x-3 text-white/80">
               <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-sm">✓</span>
+                <span className="text-sm">⚡</span>
               </div>
-              <span>AI-powered trend analysis</span>
+              <span>Get back to creating in minutes</span>
             </div>
             <div className="flex items-center space-x-3 text-white/80">
               <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-sm">✓</span>
+                <span className="text-sm">📧</span>
               </div>
-              <span>90% success rate with multiple AI providers</span>
+              <span>Reset link sent instantly</span>
             </div>
           </div>
         </div>
@@ -56,7 +55,7 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Right side - Sign In Form */}
+      {/* Right side - Password Reset Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-6">
           {/* Mobile Logo */}
@@ -70,9 +69,12 @@ export default function Page() {
           </div>
 
           <div className="text-center lg:text-left space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
+            <h2 className="text-2xl font-bold text-foreground">
+              Reset your password
+            </h2>
             <p className="text-muted-foreground">
-              Sign in to your account to continue creating viral videos
+              Enter your email address and we'll send you a link to reset your
+              password
             </p>
           </div>
 
@@ -84,17 +86,20 @@ export default function Page() {
               },
             }}
             routing="hash"
+            initialValues={{
+              emailAddress: "",
+            }}
             redirectUrl="/dashboard"
           />
 
           <div className="text-center text-sm text-muted-foreground">
             <p>
-              New to ViralAI?{" "}
+              Remember your password?{" "}
               <Link
-                href={"/sign-up" as any}
+                href={"/sign-in" as any}
                 className="text-primary hover:text-primary/80 font-medium"
               >
-                Create an account
+                Sign in
               </Link>
             </p>
           </div>

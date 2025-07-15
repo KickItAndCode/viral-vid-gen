@@ -46,6 +46,8 @@ export interface UIState {
   setResolvedTheme: (theme: "light" | "dark") => void;
 
   toggleSidebar: () => void;
+  openSidebar: () => void;
+  closeSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
 
@@ -94,6 +96,18 @@ export const useUIStore = create<UIState>()(
       toggleSidebar: () => {
         set((state) => {
           state.sidebarOpen = !state.sidebarOpen;
+        });
+      },
+
+      openSidebar: () => {
+        set((state) => {
+          state.sidebarOpen = true;
+        });
+      },
+
+      closeSidebar: () => {
+        set((state) => {
+          state.sidebarOpen = false;
         });
       },
 
@@ -234,6 +248,8 @@ export const useSidebar = () =>
     sidebarOpen: state.sidebarOpen,
     sidebarCollapsed: state.sidebarCollapsed,
     toggleSidebar: state.toggleSidebar,
+    openSidebar: state.openSidebar,
+    closeSidebar: state.closeSidebar,
     setSidebarOpen: state.setSidebarOpen,
     setSidebarCollapsed: state.setSidebarCollapsed,
   }));
