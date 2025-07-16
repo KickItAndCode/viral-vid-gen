@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { WizardConfig } from "./types";
 import { useWizardStore } from "./wizard-store";
 
@@ -43,12 +43,12 @@ export function WizardProvider({
     }
 
     setIsInitialized(true);
-  }, [config.steps.length, autoLoadProgress, sessionId]);
+  }, [config.steps.length, config.steps[0]?.id, autoLoadProgress, sessionId]);
 
-  const contextValue: WizardContextValue = {
+  const contextValue: WizardContextValue = useMemo(() => ({
     config,
     isInitialized,
-  };
+  }), [config, isInitialized]);
 
   return (
     <WizardContext.Provider value={contextValue}>
