@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { WizardContainer } from "./wizard-container";
 import { WizardProvider } from "./wizard-provider";
 import { WizardConfig } from "./types";
@@ -83,40 +83,40 @@ export function VideoCreationWizard({
   className,
   sessionId,
 }: VideoCreationWizardProps) {
-  const handleComplete = async (data: any) => {
+  const handleComplete = useCallback(async (data: any) => {
     console.log("Video creation completed:", data);
     if (onComplete) {
       await onComplete(data);
     }
-  };
+  }, [onComplete]);
 
-  const handleCancel = (data: any) => {
+  const handleCancel = useCallback((data: any) => {
     console.log("Video creation cancelled:", data);
     if (onCancel) {
       onCancel();
     }
-  };
+  }, [onCancel]);
 
-  const handleStepChange = (stepIndex: number, stepId: string, data: any) => {
+  const handleStepChange = useCallback((stepIndex: number, stepId: string, data: any) => {
     console.log(`Step changed to ${stepIndex} (${stepId}):`, data);
-  };
+  }, []);
 
-  const handleDataChange = (data: any) => {
+  const handleDataChange = useCallback((data: any) => {
     console.log("Wizard data changed:", data);
-  };
+  }, []);
 
-  const handleError = (error: Error, stepIndex: number) => {
+  const handleError = useCallback((error: Error, stepIndex: number) => {
     console.error(`Error in step ${stepIndex}:`, error);
-  };
+  }, []);
 
-  const configWithHandlers: WizardConfig = {
+  const configWithHandlers: WizardConfig = useMemo(() => ({
     ...wizardConfig,
     onComplete: handleComplete,
     onCancel: handleCancel,
     onStepChange: handleStepChange,
     onDataChange: handleDataChange,
     onError: handleError,
-  };
+  }), [handleComplete, handleCancel, handleStepChange, handleDataChange, handleError]);
 
   return (
     <WizardProvider
