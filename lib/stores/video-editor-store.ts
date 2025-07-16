@@ -530,6 +530,90 @@ export const useVideoEditorStore = create<VideoEditorState>()(
         get().pushToHistory();
       },
 
+      // Audio synchronization functions
+      syncAudioWithVideo: (audioTrackId, videoTime) => {
+        set((state) => {
+          const audioTrack = state.audioTracks.find(
+            (track) => track.id === audioTrackId
+          );
+          if (audioTrack) {
+            // Calculate audio time relative to video timeline
+            const audioTime = videoTime - audioTrack.startTime;
+
+            // Update audio track progress if within bounds
+            if (audioTime >= 0 && audioTime <= audioTrack.duration) {
+              // This would trigger audio player seek in components
+              state.timeline.currentTime = videoTime;
+            }
+          }
+        });
+      },
+
+      getActiveAudioTracks: () => {
+        const state = get();
+        const currentTime = state.timeline.currentTime;
+
+        return state.audioTracks.filter((track) => {
+          const trackEndTime = track.startTime + track.duration;
+          return currentTime >= track.startTime && currentTime <= trackEndTime;
+        });
+      },
+
+      getAudioTrackAtTime: (time) => {
+        const state = get();
+        return state.audioTracks.find((track) => {
+          const trackEndTime = track.startTime + track.duration;
+          return time >= track.startTime && time <= trackEndTime;
+        });
+      },
+
+      calculateAudioMix: (time) => {
+        const state = get();
+        const activeTracks = state.audioTracks.filter((track) => {
+          const trackEndTime = track.startTime + track.duration;
+          return time >= track.startTime && time <= trackEndTime;
+        });
+
+        // Calculate volume mix considering track types and volumes
+        let backgroundVolume = 0;
+        let voiceoverVolume = 0;
+        let sfxVolume = 0;
+
+        activeTracks.forEach((track) => {
+          const relativeTime = time - track.startTime;
+          let trackVolume = track.volume;
+
+          // Apply fade in/out effects
+          if (track.fadeIn && relativeTime < track.fadeIn) {
+            trackVolume *= relativeTime / track.fadeIn;
+          }
+          if (track.fadeOut && relativeTime > track.duration - track.fadeOut) {
+            const fadeOutTime = track.duration - relativeTime;
+            trackVolume *= fadeOutTime / track.fadeOut;
+          }
+
+          // Accumulate volume by track type
+          switch (track.type) {
+            case "background":
+              backgroundVolume += trackVolume;
+              break;
+            case "voiceover":
+              voiceoverVolume += trackVolume;
+              break;
+            case "sfx":
+              sfxVolume += trackVolume;
+              break;
+          }
+        });
+
+        return {
+          background: Math.min(backgroundVolume, 1),
+          voiceover: Math.min(voiceoverVolume, 1),
+          sfx: Math.min(sfxVolume, 1),
+          total: Math.min(backgroundVolume + voiceoverVolume + sfxVolume, 1),
+        };
+      },
+
       // UI actions
       setActivePanel: (panel) => {
         set((state) => {
@@ -687,93 +771,117 @@ export const useVideoEditorStore = create<VideoEditorState>()(
 
 // Selectors for common use cases
 export const usePlayback = () =>
-  useVideoEditorStore((state) => ({
-    isPlaying: state.isPlaying,
-    isMuted: state.isMuted,
-    volume: state.volume,
-    playbackRate: state.playbackRate,
-    currentTime: state.timeline.currentTime,
-    duration: state.timeline.duration,
-    play: state.play,
-    pause: state.pause,
-    stop: state.stop,
-    seek: state.seek,
-    setVolume: state.setVolume,
-    setPlaybackRate: state.setPlaybackRate,
-    toggleMute: state.toggleMute,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      isPlaying: state.isPlaying,
+      isMuted: state.isMuted,
+      volume: state.volume,
+      playbackRate: state.playbackRate,
+      currentTime: state.timeline.currentTime,
+      duration: state.timeline.duration,
+      play: state.play,
+      pause: state.pause,
+      stop: state.stop,
+      seek: state.seek,
+      setVolume: state.setVolume,
+      setPlaybackRate: state.setPlaybackRate,
+      toggleMute: state.toggleMute,
+    }),
+    shallow
+  );
 
 export const useTimeline = () =>
-  useVideoEditorStore((state) => ({
-    timeline: state.timeline,
-    setCurrentTime: state.setCurrentTime,
-    setZoom: state.setZoom,
-    setScrollPosition: state.setScrollPosition,
-    selectClip: state.selectClip,
-    selectEffect: state.selectEffect,
-    selectText: state.selectText,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      timeline: state.timeline,
+      setCurrentTime: state.setCurrentTime,
+      setZoom: state.setZoom,
+      setScrollPosition: state.setScrollPosition,
+      selectClip: state.selectClip,
+      selectEffect: state.selectEffect,
+      selectText: state.selectText,
+    }),
+    shallow
+  );
 
 export const useClips = () =>
-  useVideoEditorStore((state) => ({
-    clips: state.clips,
-    addClip: state.addClip,
-    removeClip: state.removeClip,
-    updateClip: state.updateClip,
-    reorderClips: state.reorderClips,
-    trimClip: state.trimClip,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      clips: state.clips,
+      addClip: state.addClip,
+      removeClip: state.removeClip,
+      updateClip: state.updateClip,
+      reorderClips: state.reorderClips,
+      trimClip: state.trimClip,
+    }),
+    shallow
+  );
 
 export const useEffects = () =>
-  useVideoEditorStore((state) => ({
-    clips: state.clips,
-    addEffect: state.addEffect,
-    removeEffect: state.removeEffect,
-    updateEffect: state.updateEffect,
-    toggleEffect: state.toggleEffect,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      clips: state.clips,
+      addEffect: state.addEffect,
+      removeEffect: state.removeEffect,
+      updateEffect: state.updateEffect,
+      toggleEffect: state.toggleEffect,
+    }),
+    shallow
+  );
 
 export const useTextOverlays = () =>
-  useVideoEditorStore((state) => ({
-    textOverlays: state.textOverlays,
-    addTextOverlay: state.addTextOverlay,
-    removeTextOverlay: state.removeTextOverlay,
-    updateTextOverlay: state.updateTextOverlay,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      textOverlays: state.textOverlays,
+      addTextOverlay: state.addTextOverlay,
+      removeTextOverlay: state.removeTextOverlay,
+      updateTextOverlay: state.updateTextOverlay,
+    }),
+    shallow
+  );
 
 export const useAudioTracks = () =>
-  useVideoEditorStore((state) => ({
-    audioTracks: state.audioTracks,
-    addAudioTrack: state.addAudioTrack,
-    removeAudioTrack: state.removeAudioTrack,
-    updateAudioTrack: state.updateAudioTrack,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      audioTracks: state.audioTracks,
+      addAudioTrack: state.addAudioTrack,
+      removeAudioTrack: state.removeAudioTrack,
+      updateAudioTrack: state.updateAudioTrack,
+    }),
+    shallow
+  );
 
 export const useExport = () =>
-  useVideoEditorStore((state) => ({
-    exportSettings: state.exportSettings,
-    isExporting: state.isExporting,
-    exportProgress: state.exportProgress,
-    exportStage: state.exportStage,
-    exportError: state.exportError,
-    exportedVideoUrl: state.exportedVideoUrl,
-    setExportSettings: state.setExportSettings,
-    startExport: state.startExport,
-    updateExportProgress: state.updateExportProgress,
-    setExportStage: state.setExportStage,
-    setExportError: state.setExportError,
-    completeExport: state.completeExport,
-    cancelExport: state.cancelExport,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      exportSettings: state.exportSettings,
+      isExporting: state.isExporting,
+      exportProgress: state.exportProgress,
+      exportStage: state.exportStage,
+      exportError: state.exportError,
+      exportedVideoUrl: state.exportedVideoUrl,
+      setExportSettings: state.setExportSettings,
+      startExport: state.startExport,
+      updateExportProgress: state.updateExportProgress,
+      setExportStage: state.setExportStage,
+      setExportError: state.setExportError,
+      completeExport: state.completeExport,
+      cancelExport: state.cancelExport,
+    }),
+    shallow
+  );
 
 export const useProjectActions = () =>
-  useVideoEditorStore((state) => ({
-    projectName: state.projectName,
-    loadProject: state.loadProject,
-    saveProject: state.saveProject,
-    resetProject: state.resetProject,
-    undo: state.undo,
-    redo: state.redo,
-    canUndo: state.historyIndex > 0,
-    canRedo: state.historyIndex < state.history.length - 1,
-  }), shallow);
+  useVideoEditorStore(
+    (state) => ({
+      projectName: state.projectName,
+      loadProject: state.loadProject,
+      saveProject: state.saveProject,
+      resetProject: state.resetProject,
+      undo: state.undo,
+      redo: state.redo,
+      canUndo: state.historyIndex > 0,
+      canRedo: state.historyIndex < state.history.length - 1,
+    }),
+    shallow
+  );

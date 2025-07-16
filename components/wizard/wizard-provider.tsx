@@ -27,17 +27,17 @@ export function WizardProvider({
   // Use a ref to track if we've initialized
   const initRef = React.useRef(false);
   const [isInitialized, setIsInitialized] = React.useState(false);
-  
+
   // Initialize only once when component mounts
   React.useLayoutEffect(() => {
     if (initRef.current) return;
-    
+
     initRef.current = true;
-    
+
     // Initialize wizard store with config - do this synchronously
     const store = useWizardStore.getState();
     store.resetWizard(); // Start with clean state
-    
+
     // Set initial config without triggering re-renders
     const initialState = {
       totalSteps: config.steps.length,
@@ -45,22 +45,25 @@ export function WizardProvider({
       currentStepIndex: 0,
       data: store.data, // Keep existing data
     };
-    
+
     // Use direct store update to avoid triggering subscribers during render
     Object.assign(store, initialState);
-    
+
     // Auto-load progress if enabled
     if (autoLoadProgress && sessionId) {
       store.loadProgress(sessionId);
     }
-    
+
     setIsInitialized(true);
   }, []); // Only run once on mount
 
-  const contextValue: WizardContextValue = useMemo(() => ({
-    config,
-    isInitialized,
-  }), [config, isInitialized]);
+  const contextValue: WizardContextValue = useMemo(
+    () => ({
+      config,
+      isInitialized,
+    }),
+    [config, isInitialized]
+  );
 
   return (
     <WizardContext.Provider value={contextValue}>

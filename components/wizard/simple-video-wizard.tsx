@@ -4,7 +4,15 @@ import React, { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, TrendingUp, Palette, Bot, Activity, Eye } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  Palette,
+  Bot,
+  Activity,
+  Eye,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WizardData, WizardStep } from "./types";
 import { TrendSelectionStep } from "./steps/trend-selection-step";
@@ -30,7 +38,7 @@ const STEPS: WizardStep[] = [
     isValid: false,
   },
   {
-    id: "style-configuration", 
+    id: "style-configuration",
     title: "Configure Style",
     description: "Customize the visual style and platform settings",
     icon: <Palette className="h-5 w-5 text-primary" />,
@@ -40,7 +48,7 @@ const STEPS: WizardStep[] = [
   {
     id: "ai-configuration",
     title: "AI Settings",
-    description: "Configure AI provider and generation options", 
+    description: "Configure AI provider and generation options",
     icon: <Bot className="h-5 w-5 text-primary" />,
     component: AIConfigurationStep,
     isValid: false,
@@ -55,7 +63,7 @@ const STEPS: WizardStep[] = [
   },
   {
     id: "preview-edit",
-    title: "Preview & Finalize", 
+    title: "Preview & Finalize",
     description: "Review your video and make final adjustments",
     icon: <Eye className="h-5 w-5 text-primary" />,
     component: PreviewEditStep,
@@ -79,7 +87,7 @@ export function SimpleVideoWizard({
 
   const handleNext = useCallback(() => {
     if (currentStep < STEPS.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     } else {
       // Wizard completed
       onComplete?.(wizardData);
@@ -88,7 +96,7 @@ export function SimpleVideoWizard({
 
   const handlePrevious = useCallback(() => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   }, [currentStep]);
 
@@ -96,18 +104,21 @@ export function SimpleVideoWizard({
     onCancel?.();
   }, [onCancel]);
 
-  const handleDataChange = useCallback((stepId: string, data: Record<string, any>) => {
-    setWizardData(prev => ({
-      ...prev,
-      ...data,
-      updatedAt: Date.now(),
-    }));
-  }, []);
+  const handleDataChange = useCallback(
+    (stepId: string, data: Record<string, any>) => {
+      setWizardData((prev) => ({
+        ...prev,
+        ...data,
+        updatedAt: Date.now(),
+      }));
+    },
+    []
+  );
 
   const handleStepComplete = useCallback(() => {
     // Automatically move to next step when current step is completed
     if (currentStep < STEPS.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     } else {
       onComplete?.(wizardData);
     }
@@ -152,11 +163,13 @@ export function SimpleVideoWizard({
               Cancel
             </Button>
           </div>
-          
+
           {/* Progress */}
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>Step {currentStep + 1} of {STEPS.length}</span>
+              <span>
+                Step {currentStep + 1} of {STEPS.length}
+              </span>
               <span>{Math.round(progress)}% complete</span>
             </div>
             <Progress value={progress} className="h-2" />
@@ -202,14 +215,14 @@ export function SimpleVideoWizard({
                     index < currentStep
                       ? "bg-primary"
                       : index === currentStep
-                      ? "bg-primary/70"
-                      : "bg-muted-foreground/20"
+                        ? "bg-primary/70"
+                        : "bg-muted-foreground/20"
                   )}
                 />
               ))}
             </div>
 
-            <Button 
+            <Button
               onClick={handleNext}
               disabled={!canProceed && currentStep < STEPS.length - 1}
             >

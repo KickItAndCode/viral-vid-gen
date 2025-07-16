@@ -155,9 +155,7 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
   const [resolution, setResolution] = useState<string>(
     wizardData.videoStyle?.resolution || "1080p"
   );
-  const [fps, setFps] = useState<number>(
-    wizardData.videoStyle?.fps || 30
-  );
+  const [fps, setFps] = useState<number>(wizardData.videoStyle?.fps || 30);
 
   // Update step validation when data changes
   useEffect(() => {
@@ -165,11 +163,29 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
 
     if (isValid) {
       const styleData = {
-        style: selectedStyle as "educational" | "entertaining" | "dramatic" | "minimalist" | "cinematic",
-        tone: selectedTone as "professional" | "casual" | "humorous" | "serious" | "inspiring",
-        visualStyle: selectedVisualStyle as "realistic" | "animated" | "abstract" | "documentary",
+        style: selectedStyle as
+          | "educational"
+          | "entertaining"
+          | "dramatic"
+          | "minimalist"
+          | "cinematic",
+        tone: selectedTone as
+          | "professional"
+          | "casual"
+          | "humorous"
+          | "serious"
+          | "inspiring",
+        visualStyle: selectedVisualStyle as
+          | "realistic"
+          | "animated"
+          | "abstract"
+          | "documentary",
         duration,
-        targetPlatform: selectedPlatform as "youtube" | "tiktok" | "instagram" | "twitter",
+        targetPlatform: selectedPlatform as
+          | "youtube"
+          | "tiktok"
+          | "instagram"
+          | "twitter",
         aspectRatio: aspectRatio as "16:9" | "9:16" | "1:1",
         resolution: resolution as "720p" | "1080p" | "4k",
         fps: fps as 24 | 30 | 60,

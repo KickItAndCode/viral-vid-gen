@@ -28,7 +28,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useUser } from "@/hooks/use-user";
+import { useUser } from "@/hooks/use-users";
 
 interface GenerationProgressStepProps extends WizardStepProps {}
 
@@ -88,7 +88,7 @@ interface GenerationState {
 export function GenerationProgressStep(props: GenerationProgressStepProps) {
   const { wizardData, onDataChange } = props;
   const convex = useConvex();
-  const { data: user } = useUser();
+  const { data: user } = useUser("temp-user-id");
 
   // State for generation progress
   const [generationState, setGenerationState] = useState<GenerationState>({
@@ -113,7 +113,9 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
     queryKey: ["videoJob", jobId],
     queryFn: async () => {
       if (!jobId) return null;
-      return await convex.query(api.videoGeneration.getVideoJobWithDetails, { jobId });
+      return await convex.query(api.videoGeneration.getVideoJobWithDetails, {
+        jobId,
+      });
     },
     enabled: !!jobId,
     refetchInterval: 2000, // Poll every 2 seconds
@@ -151,7 +153,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
       });
     },
     onError: (error) => {
-      setGenerationState(prev => ({
+      setGenerationState((prev) => ({
         ...prev,
         hasError: true,
         errorMessage: error.message,
@@ -161,7 +163,13 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
 
   // Start generation when component loads
   useEffect(() => {
-    if (!isGenerating && !generationState.isCompleted && !jobId && user && wizardData.selectedTrend) {
+    if (
+      !isGenerating &&
+      !generationState.isCompleted &&
+      !jobId &&
+      user &&
+      wizardData.selectedTrend
+    ) {
       startGeneration();
     }
   }, [user, wizardData.selectedTrend]);
@@ -171,17 +179,17 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
     if (jobDetails?.job) {
       const job = jobDetails.job;
       const progress = job.progress || 0;
-      
+
       // Map job status to generation state
       if (job.status === "completed") {
-        setGenerationState(prev => ({
+        setGenerationState((prev) => ({
           ...prev,
           isCompleted: true,
           canPreview: true,
           overallProgress: 100,
           videoUrl: jobDetails.video?.url || undefined,
         }));
-        
+
         onDataChange("generation-progress", {
           generation: {
             jobId: job._id,
@@ -192,7 +200,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
           },
         });
       } else if (job.status === "failed") {
-        setGenerationState(prev => ({
+        setGenerationState((prev) => ({
           ...prev,
           hasError: true,
           errorMessage: job.errorMessage || "Generation failed",
@@ -200,14 +208,24 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
       } else if (job.status === "processing") {
         // Update progress based on job progress
         const stageIndex = Math.floor(progress / 25); // 4 stages, so 25% each
-        setGenerationState(prev => ({
+        setGenerationState((prev) => ({
           ...prev,
           currentStage: stageIndex,
           overallProgress: progress,
           stages: prev.stages.map((stage, index) => ({
             ...stage,
-            status: index < stageIndex ? "completed" : index === stageIndex ? "running" : "pending",
-            progress: index < stageIndex ? 100 : index === stageIndex ? (progress % 25) * 4 : 0,
+            status:
+              index < stageIndex
+                ? "completed"
+                : index === stageIndex
+                  ? "running"
+                  : "pending",
+            progress:
+              index < stageIndex
+                ? 100
+                : index === stageIndex
+                  ? (progress % 25) * 4
+                  : 0,
           })),
         }));
       }
@@ -216,7 +234,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
 
   const startGeneration = async () => {
     setIsGenerating(true);
-    
+
     try {
       // Trigger real video generation
       await generateVideoMutation.mutateAsync();
@@ -260,9 +278,11 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
   const handleRetry = async () => {
     if (jobId) {
       try {
-        await convex.mutation(api.videoGeneration.retryVideoGenerationJob, { jobId });
+        await convex.mutation(api.videoGeneration.retryVideoGenerationJob, {
+          jobId,
+        });
         // Reset UI state
-        setGenerationState(prev => ({
+        setGenerationState((prev) => ({
           ...prev,
           hasError: false,
           errorMessage: undefined,
@@ -486,9 +506,7 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
                 <p>{wizardData.videoStyle?.targetPlatform || "youtube"}</p>
               </div>
               <div>
-                <span className="font-medium text-muted-foreground">
-                  Tone:
-                </span>
+                <span className="font-medium text-muted-foreground">Tone:</span>
                 <p>{wizardData.videoStyle?.tone || "casual"}</p>
               </div>
               <div>

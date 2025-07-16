@@ -105,7 +105,9 @@ export const VideoLibraryGrid = ({
 }: VideoLibraryGridProps) => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilters, setActiveFilters] = useState<VideoLibraryFiltersType>({});
+  const [activeFilters, setActiveFilters] = useState<VideoLibraryFiltersType>(
+    {}
+  );
   const [sortOption, setSortOption] = useState<VideoLibrarySortOption>({
     field: "createdAt",
     direction: "desc",
@@ -246,12 +248,10 @@ export const VideoLibraryGrid = ({
         <LoadingGrid viewMode={viewMode} />
       ) : videos.length === 0 ? (
         <EmptyState
-          hasFilters={Object.keys(activeFilters).some(
-            (key) => {
-              const value = activeFilters[key as keyof VideoLibraryFiltersType];
-              return Array.isArray(value) ? value.length > 0 : Boolean(value);
-            }
-          )}
+          hasFilters={Object.keys(activeFilters).some((key) => {
+            const value = activeFilters[key as keyof VideoLibraryFiltersType];
+            return Array.isArray(value) ? value.length > 0 : Boolean(value);
+          })}
           onClearFilters={() => handleFilter({})}
         />
       ) : (

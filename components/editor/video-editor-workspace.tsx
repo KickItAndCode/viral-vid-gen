@@ -27,6 +27,7 @@ import {
   useClips,
   useProjectActions,
   useExport,
+  useAudioTracks,
 } from "@/lib/stores/video-editor-store";
 import {
   Play,
@@ -86,6 +87,8 @@ export const VideoEditorWorkspace = ({
 
   const { clips, addClip } = useClips();
 
+  const { audioTracks, addAudioTrack, updateAudioTrack } = useAudioTracks();
+
   const { undo, redo, canUndo, canRedo } = useProjectActions();
 
   const {
@@ -106,7 +109,7 @@ export const VideoEditorWorkspace = ({
   const selectedClip =
     clips.find((clip) => clip.id === timeline.selectedClipId) || null;
 
-  // Add demo clips on component mount for testing
+  // Add demo clips and audio tracks on component mount for testing
   useEffect(() => {
     if (clips.length === 0) {
       // Add a demo video clip
@@ -131,7 +134,34 @@ export const VideoEditorWorkspace = ({
         });
       }, 100);
     }
-  }, [clips.length, addClip]);
+
+    // Add demo audio tracks for testing
+    if (audioTracks.length === 0) {
+      setTimeout(() => {
+        addAudioTrack({
+          url: "/api/placeholder/audio/background.mp3",
+          type: "background",
+          volume: 0.6,
+          startTime: 0,
+          duration: 30,
+          fadeIn: 2,
+          fadeOut: 2,
+        });
+      }, 200);
+
+      setTimeout(() => {
+        addAudioTrack({
+          url: "/api/placeholder/audio/voiceover.mp3",
+          type: "voiceover",
+          volume: 0.8,
+          startTime: 5,
+          duration: 20,
+          fadeIn: 0.5,
+          fadeOut: 1,
+        });
+      }, 300);
+    }
+  }, [clips.length, audioTracks.length, addClip, addAudioTrack]);
 
   // Auto-show export progress modal when export starts
   useEffect(() => {
@@ -401,8 +431,10 @@ export const VideoEditorWorkspace = ({
                   clips={clips}
                   selectedClip={selectedClip}
                   zoom={zoom}
+                  audioTracks={audioTracks}
                   onTimeChange={setCurrentTime}
                   onZoomChange={setZoom}
+                  onAudioTrackUpdate={updateAudioTrack}
                   className="h-full"
                 />
               </div>

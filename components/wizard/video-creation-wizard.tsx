@@ -34,7 +34,9 @@ const WIZARD_CONFIG: WizardConfig = {
       id: "trend-selection",
       title: "Select Trend",
       description: "Choose trending content to base your video on",
-      icon: React.createElement(TrendingUp, { className: "h-5 w-5 text-primary" }),
+      icon: React.createElement(TrendingUp, {
+        className: "h-5 w-5 text-primary",
+      }),
       component: TrendSelectionStep,
       isOptional: false,
       isSkippable: false,
@@ -61,7 +63,9 @@ const WIZARD_CONFIG: WizardConfig = {
       id: "generation-progress",
       title: "Generate Video",
       description: "Watch your video being created in real-time",
-      icon: React.createElement(Activity, { className: "h-5 w-5 text-primary" }),
+      icon: React.createElement(Activity, {
+        className: "h-5 w-5 text-primary",
+      }),
       component: GenerationProgressStep,
       isOptional: false,
       isSkippable: false,
@@ -84,23 +88,32 @@ export function VideoCreationWizard({
   className,
   sessionId,
 }: VideoCreationWizardProps) {
-  const handleComplete = useCallback(async (data: any) => {
-    console.log("Video creation completed:", data);
-    if (onComplete) {
-      await onComplete(data);
-    }
-  }, [onComplete]);
+  const handleComplete = useCallback(
+    async (data: any) => {
+      console.log("Video creation completed:", data);
+      if (onComplete) {
+        await onComplete(data);
+      }
+    },
+    [onComplete]
+  );
 
-  const handleCancel = useCallback((data: any) => {
-    console.log("Video creation cancelled:", data);
-    if (onCancel) {
-      onCancel();
-    }
-  }, [onCancel]);
+  const handleCancel = useCallback(
+    (data: any) => {
+      console.log("Video creation cancelled:", data);
+      if (onCancel) {
+        onCancel();
+      }
+    },
+    [onCancel]
+  );
 
-  const handleStepChange = useCallback((stepIndex: number, stepId: string, data: any) => {
-    console.log(`Step changed to ${stepIndex} (${stepId}):`, data);
-  }, []);
+  const handleStepChange = useCallback(
+    (stepIndex: number, stepId: string, data: any) => {
+      console.log(`Step changed to ${stepIndex} (${stepId}):`, data);
+    },
+    []
+  );
 
   const handleDataChange = useCallback((data: any) => {
     console.log("Wizard data changed:", data);
@@ -110,14 +123,23 @@ export function VideoCreationWizard({
     console.error(`Error in step ${stepIndex}:`, error);
   }, []);
 
-  const configWithHandlers: WizardConfig = useMemo(() => ({
-    ...WIZARD_CONFIG,
-    onComplete: handleComplete,
-    onCancel: handleCancel,
-    onStepChange: handleStepChange,
-    onDataChange: handleDataChange,
-    onError: handleError,
-  }), [handleComplete, handleCancel, handleStepChange, handleDataChange, handleError]);
+  const configWithHandlers: WizardConfig = useMemo(
+    () => ({
+      ...WIZARD_CONFIG,
+      onComplete: handleComplete,
+      onCancel: handleCancel,
+      onStepChange: handleStepChange,
+      onDataChange: handleDataChange,
+      onError: handleError,
+    }),
+    [
+      handleComplete,
+      handleCancel,
+      handleStepChange,
+      handleDataChange,
+      handleError,
+    ]
+  );
 
   return (
     <WizardProvider

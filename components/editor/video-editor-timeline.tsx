@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TimelineClipEditor } from "./timeline-clip-editor";
+import { AudioTimelineTrack } from "./audio-timeline-track";
 import {
   ZoomIn,
   ZoomOut,
@@ -54,6 +55,8 @@ export interface VideoEditorTimelineProps {
   selectedClip: VideoClip | null;
   /** Timeline zoom level */
   zoom: number;
+  /** Audio tracks data */
+  audioTracks?: any[];
   /** Callback for time changes */
   onTimeChange?: (time: number) => void;
   /** Callback for zoom changes */
@@ -62,6 +65,8 @@ export interface VideoEditorTimelineProps {
   onClipSelect?: (clip: VideoClip | null) => void;
   /** Callback for clip updates */
   onClipUpdate?: (clip: VideoClip) => void;
+  /** Callback for audio track updates */
+  onAudioTrackUpdate?: (track: any) => void;
   /** Custom CSS class */
   className?: string;
 }
@@ -72,10 +77,12 @@ export const VideoEditorTimeline = ({
   clips,
   selectedClip,
   zoom,
+  audioTracks = [],
   onTimeChange,
   onZoomChange,
   onClipSelect,
   onClipUpdate,
+  onAudioTrackUpdate,
   className,
 }: VideoEditorTimelineProps) => {
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -119,6 +126,20 @@ export const VideoEditorTimeline = ({
       },
     ],
     [clips]
+  );
+
+  // Audio tracks section
+  const audioTrackSection = useMemo(
+    () => ({
+      id: "audio-tracks-section",
+      name: "Audio Tracks",
+      type: "audio" as const,
+      clips: [],
+      isVisible: true,
+      isMuted: false,
+      height: 60,
+    }),
+    []
   );
 
   // Calculate timeline dimensions
@@ -302,6 +323,36 @@ export const VideoEditorTimeline = ({
               </div>
             </div>
           ))}
+
+          {/* Audio Tracks Headers */}
+          {audioTracks.length > 0 && (
+            <div
+              className="border-b border-border bg-muted/30"
+              style={{
+                height: `${audioTrackSection.height * audioTracks.length}px`,
+              }}
+            >
+              {audioTracks.map((audioTrack, index) => (
+                <div
+                  key={audioTrack.id}
+                  className="flex items-center justify-between px-3 border-b border-border/50"
+                  style={{ height: `${audioTrackSection.height}px` }}
+                >
+                  <div className="flex items-center space-x-2">
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      <Eye className="h-3 w-3" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                      <Volume2 className="h-3 w-3" />
+                    </Button>
+                    <span className="text-xs font-medium truncate">
+                      {audioTrack.type} - {audioTrack.id}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Timeline Scroll Area */}
@@ -378,6 +429,38 @@ export const VideoEditorTimeline = ({
                 ))}
               </div>
             ))}
+
+            {/* Audio Tracks Section */}
+            {audioTracks.length > 0 && (
+              <div
+                className="border-b border-border bg-muted/5 relative"
+                style={{
+                  height: `${audioTrackSection.height * audioTracks.length}px`,
+                }}
+              >
+                {audioTracks.map((audioTrack, index) => (
+                  <div
+                    key={audioTrack.id}
+                    className="absolute w-full"
+                    style={{
+                      top: `${index * audioTrackSection.height}px`,
+                      height: `${audioTrackSection.height}px`,
+                    }}
+                  >
+                    <AudioTimelineTrack
+                      audioTrack={audioTrack}
+                      duration={duration}
+                      currentTime={currentTime}
+                      zoom={zoom}
+                      pixelsPerSecond={pixelsPerSecond}
+                      isSelected={false}
+                      onTrackUpdate={onAudioTrackUpdate}
+                      onTimeChange={onTimeChange}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>

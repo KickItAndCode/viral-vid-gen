@@ -12,6 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { VideoEditorAssets } from "./video-editor-assets";
 import { CaptionEditor } from "./caption-editor";
 import { VisualEffectsPanel } from "./visual-effects-panel";
+import { AudioControlsPanel } from "./audio-controls-panel";
 import {
   FolderOpen,
   Palette,
@@ -196,86 +197,9 @@ export const VideoEditorSidebar = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="audio" className="mt-0">
-            <div className="px-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm">Audio Controls</h3>
-                <Button variant="outline" size="sm">
-                  <Upload className="h-3 w-3 mr-1" />
-                  Import
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="master-volume" className="text-xs">
-                    Master Volume
-                  </Label>
-                  <Slider
-                    id="master-volume"
-                    min={0}
-                    max={100}
-                    step={1}
-                    defaultValue={[80]}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="video-volume" className="text-xs">
-                    Video Track Volume
-                  </Label>
-                  <Slider
-                    id="video-volume"
-                    min={0}
-                    max={100}
-                    step={1}
-                    defaultValue={[100]}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="background-volume" className="text-xs">
-                    Background Music
-                  </Label>
-                  <Slider
-                    id="background-volume"
-                    min={0}
-                    max={100}
-                    step={1}
-                    defaultValue={[50]}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <h4 className="text-xs font-medium mb-2">Audio Effects</h4>
-                  <div className="space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
-                      Noise Reduction
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
-                      Audio Fade
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
-                      Equalizer
-                    </Button>
-                  </div>
-                </div>
-              </div>
+          <TabsContent value="audio" className="mt-0 h-full">
+            <div className="h-full overflow-hidden">
+              <AudioControlsPanel className="h-full rounded-none border-0" />
             </div>
           </TabsContent>
         </Tabs>

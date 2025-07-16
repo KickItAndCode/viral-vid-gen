@@ -9,9 +9,9 @@ ViralAI is an AI-powered video generation platform that creates viral-ready 15-3
 ## Tech Stack
 
 - **Frontend**: Next.js 14+ with App Router, TypeScript, Tailwind CSS, Shadcn/ui
-- **Backend**: Convex database, NextAuth.js authentication
+- **Backend**: Convex database, Clerk authentication, Convex file storage
 - **AI Services**: Veo 3, Runway, Luma APIs for video generation
-- **Infrastructure**: Vercel hosting, AWS S3 storage, CloudFront CDN
+- **Infrastructure**: Vercel hosting, Convex storage with built-in CDN
 
 ## Development Commands
 
@@ -98,11 +98,12 @@ lib/
 ### Key Data Flow
 
 1. **Trend Discovery**: External APIs → Convex trends table → TrendGrid UI → User selection
-2. **Video Generation**: User input → Wizard steps → Convex mutation → AI provider queue → Real-time progress → Video storage
-3. **Video Management**: Convex video table → S3 storage → CloudFront delivery → Video player
-4. **Client State**: Zustand stores manage UI state, wizard progress, editor timeline, user preferences
-5. **Theme Management**: Cross-store synchronization between UI store and preferences with persistence
-6. **Wizard Flow**: Trend selection → Style configuration → AI settings → Generation progress → Preview & export
+2. **Video Generation**: User input → Wizard steps → Convex mutation → AI provider queue → Real-time progress → Convex storage
+3. **Video Management**: Convex video table → Convex file storage → Built-in CDN → Video player
+4. **File Storage**: Direct client uploads → Convex storage → Public URLs → Global CDN delivery
+5. **Client State**: Zustand stores manage UI state, wizard progress, editor timeline, user preferences
+6. **Theme Management**: Cross-store synchronization between UI store and preferences with persistence
+7. **Wizard Flow**: Trend selection → Style configuration → AI settings → Generation progress → Preview & export
 
 ### Database Schema (Convex)
 
@@ -121,13 +122,13 @@ Clerk authentication with Convex integration for session management. User authen
 1. Trend analysis and script generation
 2. Queue job creation in Convex
 3. Background processing with AI video APIs
-4. Video upload to S3 with CDN distribution
-5. Database update with final video URLs
+4. Video storage in Convex with automatic CDN distribution
+5. Database update with final video storage IDs and public URLs
 
 ## Environment Variables Required
 
 ```
-# Convex
+# Convex (includes database and file storage)
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
 
@@ -146,11 +147,7 @@ TWITTER_BEARER_TOKEN=
 REDDIT_CLIENT_ID=
 REDDIT_CLIENT_SECRET=
 
-# Storage
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_S3_BUCKET=
-CLOUDFRONT_DOMAIN=
+# Note: File storage is handled by Convex - no additional storage configuration needed
 ```
 
 ## Testing Strategy
@@ -165,7 +162,8 @@ CLOUDFRONT_DOMAIN=
 - All video generation is asynchronous with job tracking
 - Implement fallback providers for AI video generation
 - Use Convex real-time subscriptions for progress updates
-- Video files stored in S3 with CloudFront CDN for global delivery
+- Video files stored in Convex storage with built-in CDN for global delivery
+- File uploads use Convex storage API with direct client uploads and secure URLs
 - Analytics tracking requires both client-side and server-side events
 - Never commit API keys or sensitive data to the repository
 - Use TypeScript strictly - all components and functions should be properly typed
@@ -355,6 +353,34 @@ CLOUDFRONT_DOMAIN=
 **Tasks Completed**: All 10 subtasks in Task 12 (Video Creation Wizard)
 **Next Priority**: Task 13 - File storage system (AWS S3 + CloudFront)
 
+### 2025-07-16-0800 Session (Video Creation Wizard Integration)
+**Status**: Completed
+**Duration**: ~2 hours
+**Focus**: Complete functional integration of wizard with real data pipeline
+
+**Major Accomplishments**:
+- Integrated TrendSelectionStep with real trends data using existing useTrends hook
+- Connected GenerationProgressStep to actual video generation pipeline via Convex
+- Updated StyleConfigurationStep to use proper WizardData interface structure
+- Fixed AIConfigurationStep to use aiSettings instead of aiConfiguration
+- Enhanced SimpleVideoWizard with proper step validation and data flow
+- Added React Query integration for real-time job monitoring in generation step
+- Implemented proper error handling, retry logic, and progress tracking
+- Updated all wizard components to match WizardData TypeScript interface
+- Added real video generation job creation with Convex mutations and actions
+- Fixed wizard state management and persistence across all steps
+
+**Technical Implementation**:
+- Real-time job monitoring with React Query polling every 2 seconds
+- Convex action integration for video generation (initiateVideoGeneration)
+- Proper wizard data flow with WizardData interface compliance
+- Error handling and retry mechanisms using Convex mutations
+- Step validation logic updated to check for proper completion states
+- Progress tracking mapped from job status to UI generation stages
+
+**Tasks Completed**: All 5 wizard integration tasks (wizard-fix-1 through wizard-fix-5)
+**Next Priority**: Task 17.6 - Audio controls and waveform display (80% complete)
+
 ### 2025-07-16-1400 Session (Video Editor Interface Implementation)
 **Status**: 80% Complete (8/10 subtasks)
 **Duration**: ~4 hours
@@ -413,7 +439,7 @@ CLOUDFRONT_DOMAIN=
 
 ### Dashboard Implementation
 - **Main Dashboard**: Statistics, quick actions, recent activity with mock data
-- **Create Page**: Complete 5-step video creation wizard with trend selection and AI generation
+- **Create Page**: Complete 5-step video creation wizard with real trend selection, AI generation pipeline integration, and functional end-to-end workflow
 - **Trends Page**: Trending content discovery with viral scores and engagement metrics
 - **Library Page**: Complete video management with search, filters, sorting, and bulk operations
 - **Analytics Page**: Performance metrics, audience insights, and activity feeds
@@ -435,7 +461,7 @@ CLOUDFRONT_DOMAIN=
 - ✅ **Phase 2 Core Features**: 100% complete (Tasks 10-12)
   - ✅ Trend Discovery UI: Complete trend browsing, filtering, search, and selection system
   - ✅ AI Video Generation Pipeline: Complete AI provider system with Veo 3, Runway, and Luma integration
-  - ✅ Video Creation Wizard: Complete 5-step wizard with trend selection, style config, AI settings, progress tracking, and preview
+  - ✅ Video Creation Wizard: Complete 5-step wizard with REAL trend selection, AI generation pipeline integration, and functional end-to-end workflow
 - ✅ **Phase 3 Infrastructure**: Complete (Tasks 14-16)
   - ✅ Video Player Components: Custom controls with mobile support and accessibility
   - ✅ Video Library Dashboard: Complete management system with search, filtering, sorting, and bulk operations

@@ -11,9 +11,5 @@ interface ConvexClientProviderProps {
 }
 
 export function ConvexClientProvider({ children }: ConvexClientProviderProps) {
-  return (
-    <ConvexProvider client={convex}>
-      {children}
-    </ConvexProvider>
-  );
+  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
 }
