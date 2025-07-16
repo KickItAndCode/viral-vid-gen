@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { VideoCard } from "./video-card";
-import type { VideoLibraryFilters } from "./video-library-filters";
+import { VideoLibraryFilters } from "./video-library-filters";
+import type { VideoLibraryFilters as VideoLibraryFiltersType } from "./video-library-filters";
 import { VideoLibrarySearch } from "./video-library-search";
 import { VideoLibrarySort } from "./video-library-sort";
 import { VideoLibraryStats } from "./video-library-stats";
@@ -75,7 +76,7 @@ export interface VideoLibraryGridProps {
   /** Callback for search */
   onSearch?: (query: string) => void;
   /** Callback for filtering */
-  onFilter?: (filters: VideoLibraryFilters) => void;
+  onFilter?: (filters: VideoLibraryFiltersType) => void;
   /** Callback for sorting */
   onSort?: (sort: VideoLibrarySortOption) => void;
   /** Callback for pagination */
@@ -104,7 +105,7 @@ export const VideoLibraryGrid = ({
 }: VideoLibraryGridProps) => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilters, setActiveFilters] = useState<VideoLibraryFilters>({});
+  const [activeFilters, setActiveFilters] = useState<VideoLibraryFiltersType>({});
   const [sortOption, setSortOption] = useState<VideoLibrarySortOption>({
     field: "createdAt",
     direction: "desc",
@@ -144,7 +145,7 @@ export const VideoLibraryGrid = ({
   };
 
   // Handle filtering
-  const handleFilter = (filters: VideoLibraryFilters) => {
+  const handleFilter = (filters: VideoLibraryFiltersType) => {
     setActiveFilters(filters);
     onFilter?.(filters);
   };
@@ -232,7 +233,7 @@ export const VideoLibraryGrid = ({
           {selectedVideoIds.length > 0 && (
             <BulkActions
               selectedCount={selectedVideoIds.length}
-              onAction={onBulkAction}
+              onAction={(action) => onBulkAction?.(action, selectedVideoIds)}
               onSelectAll={handleSelectAll}
               onClearSelection={() => onBulkSelect?.([])}
             />
@@ -246,7 +247,10 @@ export const VideoLibraryGrid = ({
       ) : videos.length === 0 ? (
         <EmptyState
           hasFilters={Object.keys(activeFilters).some(
-            (key) => activeFilters[key as keyof VideoLibraryFilters]?.length > 0
+            (key) => {
+              const value = activeFilters[key as keyof VideoLibraryFiltersType];
+              return Array.isArray(value) ? value.length > 0 : Boolean(value);
+            }
           )}
           onClearFilters={() => handleFilter({})}
         />

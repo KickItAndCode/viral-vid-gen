@@ -253,8 +253,8 @@ export default function LibraryPage() {
         onVideoAction={handleVideoAction}
         onBulkAction={(action) => handleBulkAction(action)}
         onSearch={handleSearch}
-        onFilterChange={handleFilterChange}
-        onSortChange={handleSortChange}
+        onFilter={handleFilterChange}
+        onSort={handleSortChange}
         onPageChange={handlePageChange}
         onCreateVideo={handleCreateVideo}
         onSelectAll={handleSelectAll}
