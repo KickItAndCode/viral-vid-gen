@@ -94,6 +94,9 @@ export interface VideoEditorState {
   exportSettings: ExportSettings;
   isExporting: boolean;
   exportProgress: number;
+  exportStage: "prepare" | "render" | "encode" | "upload";
+  exportError?: string;
+  exportedVideoUrl?: string;
 
   // History for undo/redo
   history: any[];
@@ -147,7 +150,10 @@ export interface VideoEditorState {
   setExportSettings: (settings: Partial<ExportSettings>) => void;
   startExport: () => void;
   updateExportProgress: (progress: number) => void;
-  completeExport: () => void;
+  setExportStage: (stage: VideoEditorState["exportStage"]) => void;
+  setExportError: (error: string) => void;
+  completeExport: (videoUrl?: string) => void;
+  cancelExport: () => void;
 
   // Actions - Project
   loadProject: (projectData: any) => void;
@@ -195,6 +201,9 @@ export const useVideoEditorStore = create<VideoEditorState>()(
       exportSettings: defaultExportSettings,
       isExporting: false,
       exportProgress: 0,
+      exportStage: "prepare",
+      exportError: undefined,
+      exportedVideoUrl: undefined,
 
       history: [],
       historyIndex: -1,
@@ -544,6 +553,9 @@ export const useVideoEditorStore = create<VideoEditorState>()(
         set((state) => {
           state.isExporting = true;
           state.exportProgress = 0;
+          state.exportStage = "prepare";
+          state.exportError = undefined;
+          state.exportedVideoUrl = undefined;
         });
       },
 
@@ -553,10 +565,34 @@ export const useVideoEditorStore = create<VideoEditorState>()(
         });
       },
 
-      completeExport: () => {
+      setExportStage: (stage) => {
+        set((state) => {
+          state.exportStage = stage;
+        });
+      },
+
+      setExportError: (error) => {
+        set((state) => {
+          state.isExporting = false;
+          state.exportError = error;
+        });
+      },
+
+      completeExport: (videoUrl) => {
         set((state) => {
           state.isExporting = false;
           state.exportProgress = 100;
+          state.exportedVideoUrl = videoUrl;
+        });
+      },
+
+      cancelExport: () => {
+        set((state) => {
+          state.isExporting = false;
+          state.exportProgress = 0;
+          state.exportStage = "prepare";
+          state.exportError = undefined;
+          state.exportedVideoUrl = undefined;
         });
       },
 
@@ -717,10 +753,16 @@ export const useExport = () =>
     exportSettings: state.exportSettings,
     isExporting: state.isExporting,
     exportProgress: state.exportProgress,
+    exportStage: state.exportStage,
+    exportError: state.exportError,
+    exportedVideoUrl: state.exportedVideoUrl,
     setExportSettings: state.setExportSettings,
     startExport: state.startExport,
     updateExportProgress: state.updateExportProgress,
+    setExportStage: state.setExportStage,
+    setExportError: state.setExportError,
     completeExport: state.completeExport,
+    cancelExport: state.cancelExport,
   }));
 
 export const useProjectActions = () =>

@@ -71,12 +71,8 @@ export const VideoLibraryFilters = ({
   const filterOptions = {
     statuses: ["completed", "generating", "failed", "queued"],
     styles: [...new Set(videos.map((v) => v.style).filter(Boolean))],
-    platforms: [
-      ...new Set(videos.map((v) => v.platform).filter(Boolean)),
-    ],
-    aiProviders: [
-      ...new Set(videos.map((v) => v.aiProvider).filter(Boolean)),
-    ],
+    platforms: [...new Set(videos.map((v) => v.platform).filter(Boolean))],
+    aiProviders: [...new Set(videos.map((v) => v.aiProvider).filter(Boolean))],
     tags: [...new Set(videos.flatMap((v) => v.tags || []))],
   };
 

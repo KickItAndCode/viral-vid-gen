@@ -38,7 +38,6 @@ export interface VideoLibraryItem {
   progress?: number;
 }
 
-
 export interface VideoLibrarySortOption {
   field:
     | "createdAt"
@@ -115,16 +114,12 @@ export const VideoLibraryGrid = ({
   const stats = useMemo(() => {
     const total = videos.length;
     const completed = videos.filter((v) => v.status === "completed").length;
-    const generating = videos.filter((v) => v.status === "generating" || v.status === "processing").length;
+    const generating = videos.filter(
+      (v) => v.status === "generating" || v.status === "processing"
+    ).length;
     const failed = videos.filter((v) => v.status === "failed").length;
-    const totalViews = videos.reduce(
-      (sum, v) => sum + (v.views || 0),
-      0
-    );
-    const totalLikes = videos.reduce(
-      (sum, v) => sum + (v.likes || 0),
-      0
-    );
+    const totalViews = videos.reduce((sum, v) => sum + (v.views || 0), 0);
+    const totalLikes = videos.reduce((sum, v) => sum + (v.likes || 0), 0);
     const averageViralScore =
       videos.length > 0
         ? videos.reduce((sum, v) => sum + (v.viralScore || 0), 0) /

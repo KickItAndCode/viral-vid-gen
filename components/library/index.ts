@@ -12,7 +12,10 @@ export { VideoLibrarySearch } from "./video-library-search";
 export type { VideoLibrarySearchProps } from "./video-library-search";
 
 export { VideoLibraryFilters } from "./video-library-filters";
-export type { VideoLibraryFiltersProps, VideoLibraryFilters as VideoLibraryFiltersType } from "./video-library-filters";
+export type {
+  VideoLibraryFiltersProps,
+  VideoLibraryFilters as VideoLibraryFiltersType,
+} from "./video-library-filters";
 
 export { VideoLibrarySort } from "./video-library-sort";
 export type { VideoLibrarySortProps } from "./video-library-sort";

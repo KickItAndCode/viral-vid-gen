@@ -11,6 +11,7 @@ import {
   Library,
   Zap,
   Crown,
+  Scissors,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,12 @@ const mainNavigation = [
     href: "/dashboard/library",
     icon: Library,
     description: "Manage your videos",
+  },
+  {
+    name: "Video Editor",
+    href: "/dashboard/editor",
+    icon: Scissors,
+    description: "Edit and enhance videos",
   },
   {
     name: "Analytics",
