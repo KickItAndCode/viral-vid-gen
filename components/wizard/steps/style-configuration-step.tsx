@@ -137,23 +137,26 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
   const [selectedStyle, setSelectedStyle] = useState<string>(
     wizardData.videoStyle?.style || ""
   );
+  const [selectedTone, setSelectedTone] = useState<string>(
+    wizardData.videoStyle?.tone || "casual"
+  );
+  const [selectedVisualStyle, setSelectedVisualStyle] = useState<string>(
+    wizardData.videoStyle?.visualStyle || "realistic"
+  );
   const [selectedPlatform, setSelectedPlatform] = useState<string>(
-    wizardData.videoStyle?.platform || ""
+    wizardData.videoStyle?.targetPlatform || ""
   );
   const [duration, setDuration] = useState<number>(
     wizardData.videoStyle?.duration || 30
   );
-  const [customPrompt, setCustomPrompt] = useState<string>(
-    wizardData.videoStyle?.customPrompt || ""
+  const [aspectRatio, setAspectRatio] = useState<string>(
+    wizardData.videoStyle?.aspectRatio || "9:16"
   );
-  const [includeSubtitles, setIncludeSubtitles] = useState<boolean>(
-    wizardData.videoStyle?.includeSubtitles ?? true
+  const [resolution, setResolution] = useState<string>(
+    wizardData.videoStyle?.resolution || "1080p"
   );
-  const [includeMusicOverlay, setIncludeMusicOverlay] = useState<boolean>(
-    wizardData.videoStyle?.includeMusicOverlay ?? true
-  );
-  const [voiceNarration, setVoiceNarration] = useState<boolean>(
-    wizardData.videoStyle?.voiceNarration ?? false
+  const [fps, setFps] = useState<number>(
+    wizardData.videoStyle?.fps || 30
   );
 
   // Update step validation when data changes
@@ -162,16 +165,14 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
 
     if (isValid) {
       const styleData = {
-        style: selectedStyle,
-        platform: selectedPlatform,
+        style: selectedStyle as "educational" | "entertaining" | "dramatic" | "minimalist" | "cinematic",
+        tone: selectedTone as "professional" | "casual" | "humorous" | "serious" | "inspiring",
+        visualStyle: selectedVisualStyle as "realistic" | "animated" | "abstract" | "documentary",
         duration,
-        customPrompt,
-        includeSubtitles,
-        includeMusicOverlay,
-        voiceNarration,
-        aspectRatio:
-          PLATFORMS.find((p) => p.id === selectedPlatform)?.aspectRatio ||
-          "9:16",
+        targetPlatform: selectedPlatform as "youtube" | "tiktok" | "instagram" | "twitter",
+        aspectRatio: aspectRatio as "16:9" | "9:16" | "1:1",
+        resolution: resolution as "720p" | "1080p" | "4k",
+        fps: fps as 24 | 30 | 60,
       };
 
       onDataChange("style-configuration", {
@@ -180,12 +181,13 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
     }
   }, [
     selectedStyle,
+    selectedTone,
+    selectedVisualStyle,
     selectedPlatform,
     duration,
-    customPrompt,
-    includeSubtitles,
-    includeMusicOverlay,
-    voiceNarration,
+    aspectRatio,
+    resolution,
+    fps,
     onDataChange,
   ]);
 

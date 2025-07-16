@@ -24,6 +24,11 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useConvex } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
+import { useUser } from "@/hooks/use-user";
 
 interface GenerationProgressStepProps extends WizardStepProps {}
 
@@ -82,6 +87,8 @@ interface GenerationState {
 
 export function GenerationProgressStep(props: GenerationProgressStepProps) {
   const { wizardData, onDataChange } = props;
+  const convex = useConvex();
+  const { data: user } = useUser();
 
   // State for generation progress
   const [generationState, setGenerationState] = useState<GenerationState>({
@@ -99,96 +106,125 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [jobId, setJobId] = useState<Id<"videoJobs"> | null>(null);
 
-  // Start generation when component loads (simulate)
+  // Real-time job monitoring
+  const { data: jobDetails } = useQuery({
+    queryKey: ["videoJob", jobId],
+    queryFn: async () => {
+      if (!jobId) return null;
+      return await convex.query(api.videoGeneration.getVideoJobWithDetails, { jobId });
+    },
+    enabled: !!jobId,
+    refetchInterval: 2000, // Poll every 2 seconds
+  });
+
+  // Video generation mutation
+  const generateVideoMutation = useMutation({
+    mutationFn: async () => {
+      if (!user || !wizardData.selectedTrend) {
+        throw new Error("Missing required data");
+      }
+
+      return await convex.action(api.videoGeneration.initiateVideoGeneration, {
+        userId: user._id,
+        trendId: wizardData.selectedTrend.id,
+        options: {
+          style: wizardData.videoStyle?.style || "entertaining",
+          duration: wizardData.videoStyle?.duration || 15,
+          provider: wizardData.aiSettings?.provider || "runway",
+          priority: wizardData.aiSettings?.priority || "normal",
+          targetPlatform: wizardData.videoStyle?.targetPlatform || "youtube",
+          tone: wizardData.videoStyle?.tone || "casual",
+          visualStyle: wizardData.videoStyle?.visualStyle || "realistic",
+        },
+      });
+    },
+    onSuccess: (result) => {
+      setJobId(result.jobId);
+      onDataChange("generation-progress", {
+        generation: {
+          jobId: result.jobId,
+          status: "queued",
+          progress: 0,
+        },
+      });
+    },
+    onError: (error) => {
+      setGenerationState(prev => ({
+        ...prev,
+        hasError: true,
+        errorMessage: error.message,
+      }));
+    },
+  });
+
+  // Start generation when component loads
   useEffect(() => {
-    if (!isGenerating && !generationState.isCompleted) {
+    if (!isGenerating && !generationState.isCompleted && !jobId && user && wizardData.selectedTrend) {
       startGeneration();
     }
-  }, []);
+  }, [user, wizardData.selectedTrend]);
+
+  // Update generation state based on job details
+  useEffect(() => {
+    if (jobDetails?.job) {
+      const job = jobDetails.job;
+      const progress = job.progress || 0;
+      
+      // Map job status to generation state
+      if (job.status === "completed") {
+        setGenerationState(prev => ({
+          ...prev,
+          isCompleted: true,
+          canPreview: true,
+          overallProgress: 100,
+          videoUrl: jobDetails.video?.url || undefined,
+        }));
+        
+        onDataChange("generation-progress", {
+          generation: {
+            jobId: job._id,
+            status: "completed",
+            progress: 100,
+            videoId: jobDetails.video?._id,
+            videoUrl: jobDetails.video?.url,
+          },
+        });
+      } else if (job.status === "failed") {
+        setGenerationState(prev => ({
+          ...prev,
+          hasError: true,
+          errorMessage: job.errorMessage || "Generation failed",
+        }));
+      } else if (job.status === "processing") {
+        // Update progress based on job progress
+        const stageIndex = Math.floor(progress / 25); // 4 stages, so 25% each
+        setGenerationState(prev => ({
+          ...prev,
+          currentStage: stageIndex,
+          overallProgress: progress,
+          stages: prev.stages.map((stage, index) => ({
+            ...stage,
+            status: index < stageIndex ? "completed" : index === stageIndex ? "running" : "pending",
+            progress: index < stageIndex ? 100 : index === stageIndex ? (progress % 25) * 4 : 0,
+          })),
+        }));
+      }
+    }
+  }, [jobDetails, onDataChange]);
 
   const startGeneration = async () => {
     setIsGenerating(true);
-
-    // Simulate generation process
-    for (
-      let stageIndex = 0;
-      stageIndex < GENERATION_STAGES.length;
-      stageIndex++
-    ) {
-      const stage = GENERATION_STAGES[stageIndex];
-
-      // Update current stage
-      setGenerationState((prev) => ({
-        ...prev,
-        currentStage: stageIndex,
-        stages: prev.stages.map((s, i) => ({
-          ...s,
-          status:
-            i === stageIndex
-              ? "running"
-              : i < stageIndex
-                ? "completed"
-                : "pending",
-          progress: i < stageIndex ? 100 : 0,
-        })),
-      }));
-
-      // Simulate stage progress
-      const stageDuration = getRandomDuration(stage.id);
-      const progressSteps = 10;
-      const stepDelay = stageDuration / progressSteps;
-
-      for (let step = 0; step <= progressSteps; step++) {
-        const progress = (step / progressSteps) * 100;
-        const overallProgress =
-          (stageIndex * 100 + progress) / GENERATION_STAGES.length;
-
-        setGenerationState((prev) => ({
-          ...prev,
-          stages: prev.stages.map((s, i) => ({
-            ...s,
-            progress: i === stageIndex ? progress : i < stageIndex ? 100 : 0,
-          })),
-          overallProgress,
-          estimatedTimeRemaining: calculateTimeRemaining(
-            stageIndex,
-            step,
-            progressSteps
-          ),
-        }));
-
-        await new Promise((resolve) => setTimeout(resolve, stepDelay));
-      }
-
-      // Mark stage as completed
-      setGenerationState((prev) => ({
-        ...prev,
-        stages: prev.stages.map((s, i) => ({
-          ...s,
-          status: i <= stageIndex ? "completed" : "pending",
-          progress: i <= stageIndex ? 100 : 0,
-        })),
-      }));
+    
+    try {
+      // Trigger real video generation
+      await generateVideoMutation.mutateAsync();
+    } catch (error) {
+      console.error("Failed to start video generation:", error);
+    } finally {
+      setIsGenerating(false);
     }
-
-    // Generation completed
-    setGenerationState((prev) => ({
-      ...prev,
-      isCompleted: true,
-      canPreview: true,
-      overallProgress: 100,
-      videoUrl: "/api/mock-video-url",
-    }));
-
-    setIsGenerating(false);
-
-    // Update wizard data
-    onDataChange("generation-progress", {
-      generationCompleted: true,
-      videoUrl: "/api/mock-video-url",
-      generatedAt: new Date().toISOString(),
-    });
   };
 
   const getRandomDuration = (stageId: string): number => {
@@ -221,20 +257,30 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
     }
   };
 
-  const handleRetry = () => {
-    setGenerationState({
-      currentStage: 0,
-      stages: GENERATION_STAGES.map((stage) => ({
-        id: stage.id,
-        status: "pending" as GenerationStatus,
-        progress: 0,
-      })),
-      overallProgress: 0,
-      isCompleted: false,
-      hasError: false,
-      canPreview: false,
-    });
-    startGeneration();
+  const handleRetry = async () => {
+    if (jobId) {
+      try {
+        await convex.mutation(api.videoGeneration.retryVideoGenerationJob, { jobId });
+        // Reset UI state
+        setGenerationState(prev => ({
+          ...prev,
+          hasError: false,
+          errorMessage: undefined,
+          overallProgress: 0,
+          currentStage: 0,
+          stages: GENERATION_STAGES.map((stage) => ({
+            id: stage.id,
+            status: "pending" as GenerationStatus,
+            progress: 0,
+          })),
+        }));
+      } catch (error) {
+        console.error("Failed to retry generation:", error);
+      }
+    } else {
+      // If no job ID, start fresh generation
+      await startGeneration();
+    }
   };
 
   const handlePreview = () => {
@@ -419,19 +465,37 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
                 <span className="font-medium text-muted-foreground">
                   Provider:
                 </span>
-                <p>{wizardData.aiConfiguration?.provider || "Veo 3"}</p>
+                <p>{wizardData.aiSettings?.provider || "Runway"}</p>
               </div>
               <div>
                 <span className="font-medium text-muted-foreground">
                   Style:
                 </span>
-                <p>{wizardData.videoStyle?.style || "Educational"}</p>
+                <p>{wizardData.videoStyle?.style || "entertaining"}</p>
               </div>
               <div>
                 <span className="font-medium text-muted-foreground">
                   Duration:
                 </span>
-                <p>{wizardData.videoStyle?.duration || 30} seconds</p>
+                <p>{wizardData.videoStyle?.duration || 15} seconds</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">
+                  Platform:
+                </span>
+                <p>{wizardData.videoStyle?.targetPlatform || "youtube"}</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">
+                  Tone:
+                </span>
+                <p>{wizardData.videoStyle?.tone || "casual"}</p>
+              </div>
+              <div>
+                <span className="font-medium text-muted-foreground">
+                  Trend:
+                </span>
+                <p>{wizardData.selectedTrend?.title || "None selected"}</p>
               </div>
             </div>
           </CardContent>

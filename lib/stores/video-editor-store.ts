@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
+import { shallow } from "zustand/shallow";
 
 export interface VideoClip {
   id: string;
@@ -700,7 +701,7 @@ export const usePlayback = () =>
     setVolume: state.setVolume,
     setPlaybackRate: state.setPlaybackRate,
     toggleMute: state.toggleMute,
-  }));
+  }), shallow);
 
 export const useTimeline = () =>
   useVideoEditorStore((state) => ({
@@ -711,7 +712,7 @@ export const useTimeline = () =>
     selectClip: state.selectClip,
     selectEffect: state.selectEffect,
     selectText: state.selectText,
-  }));
+  }), shallow);
 
 export const useClips = () =>
   useVideoEditorStore((state) => ({
@@ -721,7 +722,7 @@ export const useClips = () =>
     updateClip: state.updateClip,
     reorderClips: state.reorderClips,
     trimClip: state.trimClip,
-  }));
+  }), shallow);
 
 export const useEffects = () =>
   useVideoEditorStore((state) => ({
@@ -730,7 +731,7 @@ export const useEffects = () =>
     removeEffect: state.removeEffect,
     updateEffect: state.updateEffect,
     toggleEffect: state.toggleEffect,
-  }));
+  }), shallow);
 
 export const useTextOverlays = () =>
   useVideoEditorStore((state) => ({
@@ -738,7 +739,7 @@ export const useTextOverlays = () =>
     addTextOverlay: state.addTextOverlay,
     removeTextOverlay: state.removeTextOverlay,
     updateTextOverlay: state.updateTextOverlay,
-  }));
+  }), shallow);
 
 export const useAudioTracks = () =>
   useVideoEditorStore((state) => ({
@@ -746,7 +747,7 @@ export const useAudioTracks = () =>
     addAudioTrack: state.addAudioTrack,
     removeAudioTrack: state.removeAudioTrack,
     updateAudioTrack: state.updateAudioTrack,
-  }));
+  }), shallow);
 
 export const useExport = () =>
   useVideoEditorStore((state) => ({
@@ -763,7 +764,7 @@ export const useExport = () =>
     setExportError: state.setExportError,
     completeExport: state.completeExport,
     cancelExport: state.cancelExport,
-  }));
+  }), shallow);
 
 export const useProjectActions = () =>
   useVideoEditorStore((state) => ({
@@ -775,4 +776,4 @@ export const useProjectActions = () =>
     redo: state.redo,
     canUndo: state.historyIndex > 0,
     canRedo: state.historyIndex < state.history.length - 1,
-  }));
+  }), shallow);

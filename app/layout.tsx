@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { ConvexClientProvider } from "@/components/providers/convex-provider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -116,7 +117,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <QueryProvider>{children}</QueryProvider>
+            <ConvexClientProvider>
+              <QueryProvider>{children}</QueryProvider>
+            </ConvexClientProvider>
           </ThemeProvider>
         </body>
       </html>

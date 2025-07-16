@@ -114,25 +114,20 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
 
   // State for AI configuration
   const [selectedProvider, setSelectedProvider] = useState<string>(
-    wizardData.aiConfiguration?.provider || ""
+    wizardData.aiSettings?.provider || ""
   );
-  const [selectedQuality, setSelectedQuality] = useState<string>(
-    wizardData.aiConfiguration?.quality || "standard"
+  const [priority, setPriority] = useState<string>(
+    wizardData.aiSettings?.priority || "normal"
   );
-  const [styleStrength, setStyleStrength] = useState<number>(
-    wizardData.aiConfiguration?.styleStrength || 50
+  const [customPrompt, setCustomPrompt] = useState<string>(
+    wizardData.aiSettings?.customPrompt || ""
   );
-  const [creativityLevel, setCreativityLevel] = useState<number>(
-    wizardData.aiConfiguration?.creativityLevel || 70
+  const [useCustomPrompt, setUseCustomPrompt] = useState<boolean>(
+    wizardData.aiSettings?.useCustomPrompt ?? false
   );
-  const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState<boolean>(
-    wizardData.aiConfiguration?.enableAdvancedFeatures ?? true
+  const [generatedScript, setGeneratedScript] = useState<any>(
+    wizardData.aiSettings?.generatedScript || null
   );
-  const [enableFallback, setEnableFallback] = useState<boolean>(
-    wizardData.aiConfiguration?.enableFallback ?? true
-  );
-  const [customPromptEnhancement, setCustomPromptEnhancement] =
-    useState<string>(wizardData.aiConfiguration?.customPromptEnhancement || "");
 
   // Update step validation when data changes
   useEffect(() => {
@@ -140,30 +135,23 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
 
     if (isValid) {
       const aiData = {
-        provider: selectedProvider,
-        quality: selectedQuality,
-        styleStrength,
-        creativityLevel,
-        enableAdvancedFeatures,
-        enableFallback,
-        customPromptEnhancement,
-        estimatedGenerationTime:
-          AI_PROVIDERS.find((p) => p.id === selectedProvider)?.estimatedTime ||
-          "2-4 minutes",
+        provider: selectedProvider as "veo" | "runway" | "luma" | "auto",
+        priority: priority as "low" | "normal" | "high",
+        customPrompt,
+        useCustomPrompt,
+        generatedScript,
       };
 
       onDataChange("ai-configuration", {
-        aiConfiguration: aiData,
+        aiSettings: aiData,
       });
     }
   }, [
     selectedProvider,
-    selectedQuality,
-    styleStrength,
-    creativityLevel,
-    enableAdvancedFeatures,
-    enableFallback,
-    customPromptEnhancement,
+    priority,
+    customPrompt,
+    useCustomPrompt,
+    generatedScript,
     onDataChange,
   ]);
 
