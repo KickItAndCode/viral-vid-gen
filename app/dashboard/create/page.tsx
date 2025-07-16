@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Target, Zap } from "lucide-react";
-import { VideoCreationWizard } from "@/components/wizard/video-creation-wizard";
+import { SimpleVideoWizard } from "@/components/wizard/simple-video-wizard";
 
 export default function CreateVideoPage() {
   const [showWizard, setShowWizard] = useState(false);
@@ -35,10 +35,9 @@ export default function CreateVideoPage() {
   if (showWizard) {
     return (
       <div className="p-6">
-        <VideoCreationWizard
+        <SimpleVideoWizard
           onComplete={handleWizardComplete}
           onCancel={handleWizardCancel}
-          sessionId={`create_${Date.now()}`}
         />
       </div>
     );
