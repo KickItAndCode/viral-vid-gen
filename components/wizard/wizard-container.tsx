@@ -14,6 +14,8 @@ import {
   AlertCircle,
   Save,
   RotateCcw,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WizardConfig, WizardStep, WizardStepProps } from "./types";
@@ -64,6 +66,21 @@ export function WizardContainer({
   const [stepValidations, setStepValidations] = useState<
     Record<string, boolean>
   >({});
+
+  // Mobile-responsive state
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileSteps, setShowMobileSteps] = useState(false);
+
+  // Check if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Initialize wizard
   useEffect(() => {
@@ -299,23 +316,33 @@ export function WizardContainer({
   };
 
   return (
-    <div className={cn("w-full max-w-6xl mx-auto space-y-6", className)}>
+    <div
+      className={cn(
+        "w-full max-w-6xl mx-auto space-y-4 md:space-y-6",
+        className
+      )}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{config.title}</h1>
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl md:text-2xl font-bold truncate">
+            {config.title}
+          </h1>
           {config.description && (
-            <p className="text-muted-foreground mt-1">{config.description}</p>
+            <p className="text-sm md:text-base text-muted-foreground mt-1 line-clamp-2">
+              {config.description}
+            </p>
           )}
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2 flex-shrink-0">
           {persistProgress && (
             <Button
               variant="outline"
               size="sm"
               onClick={saveProgress}
               disabled={isLoading}
+              className="hidden md:flex"
             >
               <Save className="h-4 w-4 mr-2" />
               Save Progress
@@ -330,7 +357,7 @@ export function WizardContainer({
               disabled={isLoading}
             >
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              {isMobile ? "" : "Cancel"}
             </Button>
           )}
         </div>
@@ -354,41 +381,122 @@ export function WizardContainer({
 
       {/* Step Navigation */}
       {showStepNumbers && (
-        <div className="flex items-center justify-center space-x-2 overflow-x-auto pb-2">
-          {config.steps.map((step, index) => {
-            const isActive = index === currentStepIndex;
-            const isCompleted = index < currentStepIndex;
-            const isAccessible = canProceedToStep(index);
-            const isValid = stepValidations[step.id] !== false;
-
-            return (
-              <div key={step.id} className="flex items-center">
-                <button
-                  onClick={() => handleStepClick(index)}
-                  disabled={!isAccessible || isLoading}
-                  className={cn(
-                    "flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors",
-                    isActive && "bg-primary text-primary-foreground",
-                    isCompleted && "bg-green-500 text-white",
-                    !isActive &&
-                      !isCompleted &&
-                      isAccessible &&
-                      "bg-muted hover:bg-muted/80",
-                    !isAccessible &&
-                      "bg-muted/50 text-muted-foreground cursor-not-allowed",
-                    !isValid &&
-                      index <= currentStepIndex &&
-                      "bg-red-500 text-white"
-                  )}
-                >
-                  {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
-                </button>
-                {index < config.steps.length - 1 && (
-                  <div className="w-8 h-px bg-muted mx-1" />
+        <div className="block">
+          {/* Mobile Step Navigation */}
+          {isMobile ? (
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowMobileSteps(!showMobileSteps)}
+                className="w-full justify-between"
+              >
+                <span>
+                  Step {currentStepIndex + 1}: {currentStep.title}
+                </span>
+                {showMobileSteps ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
                 )}
-              </div>
-            );
-          })}
+              </Button>
+
+              {showMobileSteps && (
+                <div className="border rounded-lg bg-card p-2 space-y-1">
+                  {config.steps.map((step, index) => {
+                    const isActive = index === currentStepIndex;
+                    const isCompleted = index < currentStepIndex;
+                    const isAccessible = canProceedToStep(index);
+                    const isValid = stepValidations[step.id] !== false;
+
+                    return (
+                      <button
+                        key={step.id}
+                        onClick={() => {
+                          handleStepClick(index);
+                          setShowMobileSteps(false);
+                        }}
+                        disabled={!isAccessible || isLoading}
+                        className={cn(
+                          "w-full text-left px-3 py-2 rounded-md text-sm flex items-center space-x-3 transition-colors",
+                          isActive && "bg-primary/10 text-primary font-medium",
+                          isCompleted && "bg-green-50 text-green-700",
+                          !isActive &&
+                            !isCompleted &&
+                            isAccessible &&
+                            "hover:bg-muted/50",
+                          !isAccessible && "opacity-50 cursor-not-allowed",
+                          !isValid &&
+                            index <= currentStepIndex &&
+                            "bg-red-50 text-red-700"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium flex-shrink-0",
+                            isActive && "bg-primary text-primary-foreground",
+                            isCompleted && "bg-green-500 text-white",
+                            !isActive &&
+                              !isCompleted &&
+                              isAccessible &&
+                              "bg-muted",
+                            !isAccessible && "bg-muted/50",
+                            !isValid &&
+                              index <= currentStepIndex &&
+                              "bg-red-500 text-white"
+                          )}
+                        >
+                          {isCompleted ? (
+                            <Check className="h-3 w-3" />
+                          ) : (
+                            index + 1
+                          )}
+                        </div>
+                        <span className="truncate">{step.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Desktop Step Navigation */
+            <div className="flex items-center justify-center space-x-2 overflow-x-auto pb-2">
+              {config.steps.map((step, index) => {
+                const isActive = index === currentStepIndex;
+                const isCompleted = index < currentStepIndex;
+                const isAccessible = canProceedToStep(index);
+                const isValid = stepValidations[step.id] !== false;
+
+                return (
+                  <div key={step.id} className="flex items-center">
+                    <button
+                      onClick={() => handleStepClick(index)}
+                      disabled={!isAccessible || isLoading}
+                      className={cn(
+                        "flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium transition-colors",
+                        isActive && "bg-primary text-primary-foreground",
+                        isCompleted && "bg-green-500 text-white",
+                        !isActive &&
+                          !isCompleted &&
+                          isAccessible &&
+                          "bg-muted hover:bg-muted/80",
+                        !isAccessible &&
+                          "bg-muted/50 text-muted-foreground cursor-not-allowed",
+                        !isValid &&
+                          index <= currentStepIndex &&
+                          "bg-red-500 text-white"
+                      )}
+                    >
+                      {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
+                    </button>
+                    {index < config.steps.length - 1 && (
+                      <div className="w-8 h-px bg-muted mx-1" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

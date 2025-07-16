@@ -47,10 +47,11 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
   }, [selectedTrendId, props.step]);
 
   const handleTrendSelect = (trend: any) => {
+    console.log("[TrendSelection] Trend selected:", trend);
     setSelectedTrendId(trend._id);
 
-    // Update wizard data
-    onDataChange("trend-selection", {
+    // Update wizard data with complete trend information
+    const trendData = {
       selectedTrend: {
         id: trend._id,
         title: trend.title,
@@ -58,10 +59,13 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
         platform: trend.platform,
         category: trend.category,
         viralScore: trend.viralScore,
-        tags: trend.tags,
-        engagementMetrics: trend.engagementMetrics,
+        tags: trend.tags || [],
+        engagementMetrics: trend.engagementMetrics || {},
       },
-    });
+    };
+
+    console.log("[TrendSelection] Updating wizard data with:", trendData);
+    onDataChange("trend-selection", trendData);
   };
 
   const handleTrendPreview = (trend: any) => {

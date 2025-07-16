@@ -9,6 +9,11 @@ const isProtectedRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
+    // Skip auth protection in development for testing
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode: Skipping auth protection for', req.url);
+      return;
+    }
     await auth.protect();
   }
 });

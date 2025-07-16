@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
   ResizablePanel,
   ResizablePanelGroup,
   ResizableHandle,
@@ -45,6 +52,10 @@ import {
   Type,
   Palette,
   Music,
+  Menu,
+  Settings,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 export interface VideoEditorWorkspaceProps {
@@ -69,6 +80,26 @@ export const VideoEditorWorkspace = ({
   const [showExportProgress, setShowExportProgress] = useState(false);
   const [showPerformanceDashboard, setShowPerformanceDashboard] =
     useState(false);
+
+  // Mobile-specific state
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileTimeline, setShowMobileTimeline] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showMobileControls, setShowMobileControls] = useState(false);
+  const [mobileLayout, setMobileLayout] = useState<
+    "preview" | "timeline" | "controls"
+  >("preview");
+
+  // Check if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Video editor store selectors
   const {
@@ -299,6 +330,258 @@ export const VideoEditorWorkspace = ({
       selectedClip && console.log("Delete clip triggered:", selectedClip.id),
   });
 
+  // Mobile render method
+  if (isMobile) {
+    return (
+      <div className={cn("h-full flex flex-col bg-background", className)}>
+        {/* Performance Dashboard Overlay */}
+        {showPerformanceDashboard && (
+          <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm">
+            <div className="h-full overflow-y-auto p-4">
+              <PerformanceDashboard
+                isOpen={showPerformanceDashboard}
+                onClose={() => setShowPerformanceDashboard(false)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Top Toolbar */}
+        <div className="flex items-center justify-between p-2 bg-background border-b border-border">
+          <div className="flex items-center space-x-2">
+            <Sheet open={showMobileSidebar} onOpenChange={setShowMobileSidebar}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80">
+                <SheetHeader>
+                  <SheetTitle>Assets & Tools</SheetTitle>
+                </SheetHeader>
+                <VideoEditorSidebar
+                  activePanel={activePanel}
+                  onPanelChange={setActivePanel}
+                  duration={duration}
+                  className="h-full mt-4"
+                />
+              </SheetContent>
+            </Sheet>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={undo}
+              disabled={!canUndo}
+            >
+              <Undo className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={redo}
+              disabled={!canRedo}
+            >
+              <Redo className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button variant="outline" size="sm" onClick={handleSave}>
+              <Save className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <Download className="h-4 w-4" />
+            </Button>
+            <Sheet
+              open={showMobileControls}
+              onOpenChange={setShowMobileControls}
+            >
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <SheetHeader>
+                  <SheetTitle>Clip Controls</SheetTitle>
+                </SheetHeader>
+                <ClipEditorControls
+                  selectedClip={selectedClip}
+                  currentTime={currentTime}
+                  onClipUpdate={(clipId, updates) => {
+                    console.log("Updating clip:", clipId, updates);
+                  }}
+                  onClipSplit={(clipId, splitTime) => {
+                    console.log(
+                      "Splitting clip:",
+                      clipId,
+                      "at time:",
+                      splitTime
+                    );
+                  }}
+                  onClipDelete={(clipId) => {
+                    console.log("Deleting clip:", clipId);
+                  }}
+                  className="h-full mt-4"
+                />
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+
+        {/* Mobile Layout Switcher */}
+        <div className="flex bg-muted/20 border-b border-border">
+          <Button
+            variant={mobileLayout === "preview" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setMobileLayout("preview")}
+            className="flex-1 rounded-none"
+          >
+            Preview
+          </Button>
+          <Button
+            variant={mobileLayout === "timeline" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setMobileLayout("timeline")}
+            className="flex-1 rounded-none"
+          >
+            Timeline
+          </Button>
+          <Button
+            variant={mobileLayout === "controls" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setMobileLayout("controls")}
+            className="flex-1 rounded-none"
+          >
+            Controls
+          </Button>
+        </div>
+
+        {/* Mobile Content Area */}
+        <div className="flex-1 overflow-hidden">
+          {mobileLayout === "preview" && (
+            <div className="h-full flex flex-col">
+              {/* Video Preview */}
+              <div className="flex-1 p-4 flex items-center justify-center bg-muted/20">
+                <VideoEditorPreview
+                  video={mockVideo}
+                  currentTime={currentTime}
+                  isPlaying={isPlaying}
+                  onTimeUpdate={handleTimeUpdate}
+                  onPlayPause={handlePlayPause}
+                  className="max-w-full max-h-full"
+                />
+              </div>
+
+              {/* Mobile Playback Controls */}
+              <div className="p-4 bg-muted/50">
+                <div className="flex items-center justify-center space-x-4 mb-3">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() =>
+                      setCurrentTime(Math.max(0, currentTime - 10))
+                    }
+                    className="h-12 w-12"
+                  >
+                    <SkipBack className="h-6 w-6" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={handlePlayPause}
+                    className="h-16 w-16"
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-8 w-8" />
+                    ) : (
+                      <Play className="h-8 w-8" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() =>
+                      setCurrentTime(Math.min(duration, currentTime + 10))
+                    }
+                    className="h-12 w-12"
+                  >
+                    <SkipForward className="h-6 w-6" />
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {Math.floor(currentTime)}s / {Math.floor(duration)}s
+                  </span>
+
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm" onClick={toggleMute}>
+                      {isMuted ? (
+                        <VolumeX className="h-5 w-5" />
+                      ) : (
+                        <Volume2 className="h-5 w-5" />
+                      )}
+                    </Button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={volume}
+                      onChange={(e) =>
+                        handleVolumeChange(parseFloat(e.target.value))
+                      }
+                      className="w-24"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {mobileLayout === "timeline" && (
+            <div className="h-full bg-background">
+              <VideoEditorTimeline
+                duration={duration}
+                currentTime={currentTime}
+                clips={clips}
+                selectedClip={selectedClip}
+                zoom={zoom}
+                audioTracks={audioTracks}
+                onTimeChange={setCurrentTime}
+                onZoomChange={setZoom}
+                onAudioTrackUpdate={updateAudioTrack}
+                className="h-full"
+              />
+            </div>
+          )}
+
+          {mobileLayout === "controls" && (
+            <div className="h-full overflow-y-auto p-4">
+              <ClipEditorControls
+                selectedClip={selectedClip}
+                currentTime={currentTime}
+                onClipUpdate={(clipId, updates) => {
+                  console.log("Updating clip:", clipId, updates);
+                }}
+                onClipSplit={(clipId, splitTime) => {
+                  console.log("Splitting clip:", clipId, "at time:", splitTime);
+                }}
+                onClipDelete={(clipId) => {
+                  console.log("Deleting clip:", clipId);
+                }}
+                className="h-full"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop layout
   return (
     <div className={cn("h-full flex flex-col bg-background", className)}>
       {/* Performance Dashboard Overlay */}

@@ -106,11 +106,19 @@ export function SimpleVideoWizard({
 
   const handleDataChange = useCallback(
     (stepId: string, data: Record<string, any>) => {
-      setWizardData((prev) => ({
-        ...prev,
-        ...data,
-        updatedAt: Date.now(),
-      }));
+      setWizardData((prev) => {
+        const updatedData = {
+          ...prev,
+          ...data,
+          updatedAt: Date.now(),
+        };
+
+        // Log for debugging
+        console.log(`[Wizard] Step ${stepId} data updated:`, data);
+        console.log(`[Wizard] Full wizard data:`, updatedData);
+
+        return updatedData;
+      });
     },
     []
   );
@@ -132,13 +140,18 @@ export function SimpleVideoWizard({
   const isCurrentStepValid = () => {
     switch (currentStepData.id) {
       case "trend-selection":
-        return !!wizardData.selectedTrend;
+        return !!wizardData.selectedTrend?.id;
       case "style-configuration":
-        return !!wizardData.videoStyle?.style;
+        return (
+          !!wizardData.videoStyle?.style && !!wizardData.videoStyle?.duration
+        );
       case "ai-configuration":
         return !!wizardData.aiSettings?.provider;
       case "generation-progress":
-        return wizardData.generation?.status === "completed";
+        return (
+          wizardData.generation?.status === "completed" ||
+          wizardData.generation?.status === "processing"
+        );
       case "preview-edit":
         return !!wizardData.generation?.videoUrl; // Valid if video was generated
       default:

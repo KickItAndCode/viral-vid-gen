@@ -770,8 +770,8 @@ export const useVideoEditorStore = create<VideoEditorState>()(
 );
 
 // Selectors for common use cases
-export const usePlayback = () =>
-  useVideoEditorStore(
+export const usePlayback = () => {
+  const playbackState = useVideoEditorStore(
     (state) => ({
       isPlaying: state.isPlaying,
       isMuted: state.isMuted,
@@ -779,30 +779,37 @@ export const usePlayback = () =>
       playbackRate: state.playbackRate,
       currentTime: state.timeline.currentTime,
       duration: state.timeline.duration,
-      play: state.play,
-      pause: state.pause,
-      stop: state.stop,
-      seek: state.seek,
-      setVolume: state.setVolume,
-      setPlaybackRate: state.setPlaybackRate,
-      toggleMute: state.toggleMute,
     }),
     shallow
   );
 
-export const useTimeline = () =>
-  useVideoEditorStore(
-    (state) => ({
-      timeline: state.timeline,
-      setCurrentTime: state.setCurrentTime,
-      setZoom: state.setZoom,
-      setScrollPosition: state.setScrollPosition,
-      selectClip: state.selectClip,
-      selectEffect: state.selectEffect,
-      selectText: state.selectText,
-    }),
-    shallow
-  );
+  const playbackActions = useVideoEditorStore((state) => ({
+    play: state.play,
+    pause: state.pause,
+    stop: state.stop,
+    seek: state.seek,
+    setVolume: state.setVolume,
+    setPlaybackRate: state.setPlaybackRate,
+    toggleMute: state.toggleMute,
+  }));
+
+  return { ...playbackState, ...playbackActions };
+};
+
+export const useTimeline = () => {
+  const timelineState = useVideoEditorStore((state) => state.timeline, shallow);
+
+  const timelineActions = useVideoEditorStore((state) => ({
+    setCurrentTime: state.setCurrentTime,
+    setZoom: state.setZoom,
+    setScrollPosition: state.setScrollPosition,
+    selectClip: state.selectClip,
+    selectEffect: state.selectEffect,
+    selectText: state.selectText,
+  }));
+
+  return { timeline: timelineState, ...timelineActions };
+};
 
 export const useClips = () =>
   useVideoEditorStore(

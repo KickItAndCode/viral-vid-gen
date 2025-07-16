@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as analytics from "../analytics.js";
 import type * as scrapeReddit from "../scrapeReddit.js";
 import type * as scrapeTwitter from "../scrapeTwitter.js";
 import type * as seedTrends from "../seedTrends.js";
@@ -32,6 +33,7 @@ import type * as videos from "../videos.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  analytics: typeof analytics;
   scrapeReddit: typeof scrapeReddit;
   scrapeTwitter: typeof scrapeTwitter;
   seedTrends: typeof seedTrends;

@@ -15,18 +15,26 @@ interface TrendGridProps {
   trends: Trend[];
   isLoading?: boolean;
   onTrendSelect?: (trend: Trend) => void;
+  onTrendPreview?: (trend: Trend) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
   className?: string;
+  selectedTrendId?: string | null;
+  showSelectionMode?: boolean;
+  selectionVariant?: "default" | "wizard";
 }
 
 export function TrendGrid({
   trends,
   isLoading = false,
   onTrendSelect,
+  onTrendPreview,
   onLoadMore,
   hasMore = false,
   className = "",
+  selectedTrendId = null,
+  showSelectionMode = false,
+  selectionVariant = "default",
 }: TrendGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
@@ -143,6 +151,10 @@ export function TrendGrid({
                 key={trend._id}
                 trend={trend}
                 onSelect={onTrendSelect}
+                onPreview={onTrendPreview}
+                isSelected={selectedTrendId === trend._id}
+                showSelectionMode={showSelectionMode}
+                selectionVariant={selectionVariant}
               />
             ))}
           </div>

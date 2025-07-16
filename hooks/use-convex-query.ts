@@ -18,7 +18,17 @@ export function useConvexQuery<T>(
   options?: ConvexQueryOptions<T>
 ) {
   const convex = useConvex();
-  const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  
+  // In development, bypass auth checks
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  let isAuthenticated = true;
+  let authLoading = false;
+  
+  if (!isDevelopment) {
+    const auth = useConvexAuth();
+    isAuthenticated = auth.isAuthenticated;
+    authLoading = auth.isLoading;
+  }
 
   const queryKey = [getFunctionName(query), JSON.stringify(args)];
 

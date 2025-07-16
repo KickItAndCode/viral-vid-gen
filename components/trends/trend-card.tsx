@@ -22,20 +22,32 @@ type Trend = Doc<"trends">;
 interface TrendCardProps {
   trend: Trend;
   onSelect?: (trend: Trend) => void;
+  onPreview?: (trend: Trend) => void;
   variant?: "default" | "compact" | "featured";
   showCreateButton?: boolean;
   className?: string;
+  isSelected?: boolean;
+  showSelectionMode?: boolean;
+  selectionVariant?: "default" | "wizard";
 }
 
 export function TrendCard({
   trend,
   onSelect,
+  onPreview,
   variant = "default",
   showCreateButton = true,
   className,
+  isSelected = false,
+  showSelectionMode = false,
+  selectionVariant = "default",
 }: TrendCardProps) {
   const handleCardClick = () => {
-    onSelect?.(trend);
+    if (showSelectionMode) {
+      onSelect?.(trend);
+    } else {
+      onPreview?.(trend);
+    }
   };
 
   const handleCreateVideo = (e: React.MouseEvent) => {
@@ -92,6 +104,7 @@ export function TrendCard({
       <Card
         className={cn(
           "cursor-pointer hover:shadow-md transition-all duration-200 hover:scale-[1.02]",
+          isSelected && showSelectionMode && "ring-2 ring-primary bg-primary/5",
           className
         )}
         onClick={handleCardClick}

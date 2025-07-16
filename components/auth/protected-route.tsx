@@ -19,6 +19,12 @@ export function ProtectedRoute({
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
 
+  // Skip authentication in development for testing
+  if (process.env.NODE_ENV === "development") {
+    console.log("Development mode: Bypassing ProtectedRoute authentication");
+    return <>{children}</>;
+  }
+
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
       router.push(redirectTo as any);
