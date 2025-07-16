@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { VideoEditorAssets } from "./video-editor-assets";
+import { CaptionEditor } from "./caption-editor";
+import { VisualEffectsPanel } from "./visual-effects-panel";
 import {
   FolderOpen,
   Palette,
@@ -27,6 +29,8 @@ export interface VideoEditorSidebarProps {
   activePanel: "assets" | "effects" | "captions" | "audio";
   /** Callback for panel changes */
   onPanelChange?: (panel: "assets" | "effects" | "captions" | "audio") => void;
+  /** Current video duration for caption editor */
+  duration?: number;
   /** Custom CSS class */
   className?: string;
 }
@@ -34,6 +38,7 @@ export interface VideoEditorSidebarProps {
 export const VideoEditorSidebar = ({
   activePanel,
   onPanelChange,
+  duration = 30,
   className,
 }: VideoEditorSidebarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -176,129 +181,18 @@ export const VideoEditorSidebar = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="effects" className="mt-0">
-            <div className="px-4 space-y-4">
-              <h3 className="font-semibold text-sm">Video Effects</h3>
-
-              <ScrollArea className="h-96">
-                <div className="space-y-3">
-                  {["Transition", "Filter", "Color", "Transform"].map(
-                    (category) => (
-                      <div key={category}>
-                        <h4 className="text-xs font-medium text-muted-foreground mb-2">
-                          {category}
-                        </h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {mockEffects
-                            .filter((effect) => effect.category === category)
-                            .map((effect) => (
-                              <Button
-                                key={effect.id}
-                                variant="outline"
-                                size="sm"
-                                className="h-16 flex flex-col items-center justify-center"
-                                draggable
-                                onDragStart={(e) => {
-                                  e.dataTransfer.setData(
-                                    "text/plain",
-                                    JSON.stringify(effect)
-                                  );
-                                }}
-                              >
-                                <Palette className="h-4 w-4 mb-1" />
-                                <span className="text-xs">{effect.name}</span>
-                              </Button>
-                            ))}
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </ScrollArea>
+          <TabsContent value="effects" className="mt-0 h-full">
+            <div className="h-full overflow-hidden">
+              <VisualEffectsPanel className="h-full rounded-none border-0" />
             </div>
           </TabsContent>
 
-          <TabsContent value="captions" className="mt-0">
-            <div className="px-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-sm">Text & Captions</h3>
-                <Button variant="outline" size="sm">
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Text
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="text-content" className="text-xs">
-                    Text Content
-                  </Label>
-                  <Input
-                    id="text-content"
-                    placeholder="Enter your text..."
-                    className="mt-1"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="font-family" className="text-xs">
-                    Font Family
-                  </Label>
-                  <select
-                    id="font-family"
-                    className="mt-1 w-full p-2 border rounded"
-                  >
-                    {mockFonts.map((font) => (
-                      <option key={font.id} value={font.name}>
-                        {font.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <Label htmlFor="font-size" className="text-xs">
-                    Font Size
-                  </Label>
-                  <Slider
-                    id="font-size"
-                    min={12}
-                    max={72}
-                    step={1}
-                    defaultValue={[24]}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" size="sm">
-                    <strong>B</strong>
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <em>I</em>
-                  </Button>
-                </div>
-
-                <div>
-                  <Label className="text-xs">Text Color</Label>
-                  <div className="grid grid-cols-6 gap-1 mt-1">
-                    {[
-                      "#000000",
-                      "#ffffff",
-                      "#ff0000",
-                      "#00ff00",
-                      "#0000ff",
-                      "#ffff00",
-                    ].map((color) => (
-                      <button
-                        key={color}
-                        className="w-6 h-6 rounded border"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+          <TabsContent value="captions" className="mt-0 h-full">
+            <div className="h-full overflow-hidden">
+              <CaptionEditor
+                duration={duration}
+                className="h-full rounded-none border-0"
+              />
             </div>
           </TabsContent>
 

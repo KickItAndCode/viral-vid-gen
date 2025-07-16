@@ -19,7 +19,13 @@ import {
 } from "lucide-react";
 import { PerformanceMonitor } from "./performance-monitor";
 import { PerformanceTestPanel } from "./performance-test-panel";
-import { useClips, useEffects, useTextOverlays, useAudioTracks, useTimeline } from "@/lib/stores/video-editor-store";
+import {
+  useClips,
+  useEffects,
+  useTextOverlays,
+  useAudioTracks,
+  useTimeline,
+} from "@/lib/stores/video-editor-store";
 
 export interface PerformanceDashboardProps {
   /** Whether the dashboard is visible */
@@ -46,7 +52,9 @@ export const PerformanceDashboard = ({
 }: PerformanceDashboardProps) => {
   const [activeTab, setActiveTab] = useState("monitor");
   const [performanceIssues, setPerformanceIssues] = useState<string[]>([]);
-  const [recommendations, setRecommendations] = useState<PerformanceRecommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<
+    PerformanceRecommendation[]
+  >([]);
   const [testResults, setTestResults] = useState<any[]>([]);
 
   const { clips } = useClips();
@@ -59,7 +67,10 @@ export const PerformanceDashboard = ({
   const projectMetrics = {
     clipCount: clips.length,
     trackCount: 3, // Default tracks
-    effectCount: clipsWithEffects.reduce((total, clip) => total + clip.effects.length, 0),
+    effectCount: clipsWithEffects.reduce(
+      (total, clip) => total + clip.effects.length,
+      0
+    ),
     textOverlayCount: textOverlays.length,
     audioTrackCount: audioTracks.length,
     timelineZoom: timeline.zoom,
@@ -111,7 +122,8 @@ export const PerformanceDashboard = ({
       newRecommendations.push({
         id: "high-zoom",
         title: "High Timeline Zoom",
-        description: "Very high zoom levels can impact timeline performance. Consider lower zoom for better responsiveness.",
+        description:
+          "Very high zoom levels can impact timeline performance. Consider lower zoom for better responsiveness.",
         severity: "low",
         category: "optimization",
         action: "Reduce timeline zoom",
@@ -123,7 +135,8 @@ export const PerformanceDashboard = ({
       newRecommendations.push({
         id: "memory-optimization",
         title: "Memory Optimization",
-        description: "Consider enabling proxy media for better performance with large projects.",
+        description:
+          "Consider enabling proxy media for better performance with large projects.",
         severity: "medium",
         category: "memory",
         action: "Enable proxy media",
@@ -135,7 +148,8 @@ export const PerformanceDashboard = ({
       newRecommendations.push({
         id: "complex-project",
         title: "Complex Project Detected",
-        description: "This is a complex project. Consider breaking it into smaller sections for better performance.",
+        description:
+          "This is a complex project. Consider breaking it into smaller sections for better performance.",
         severity: "medium",
         category: "optimization",
         action: "Break into sections",
@@ -151,17 +165,20 @@ export const PerformanceDashboard = ({
   }, [generateRecommendations]);
 
   // Handle performance issues from monitor
-  const handlePerformanceIssue = useCallback((issue: string, severity: "low" | "medium" | "high") => {
-    setPerformanceIssues(prev => {
-      const newIssues = [...prev, `${severity.toUpperCase()}: ${issue}`];
-      return newIssues.slice(-10); // Keep last 10 issues
-    });
-  }, []);
+  const handlePerformanceIssue = useCallback(
+    (issue: string, severity: "low" | "medium" | "high") => {
+      setPerformanceIssues((prev) => {
+        const newIssues = [...prev, `${severity.toUpperCase()}: ${issue}`];
+        return newIssues.slice(-10); // Keep last 10 issues
+      });
+    },
+    []
+  );
 
   // Handle test completion
   const handleTestComplete = useCallback((result: any) => {
-    setTestResults(prev => [result, ...prev.slice(0, 4)]); // Keep last 5 results
-    
+    setTestResults((prev) => [result, ...prev.slice(0, 4)]); // Keep last 5 results
+
     // Switch to monitor tab to show results
     setActiveTab("monitor");
   }, []);
@@ -176,14 +193,19 @@ export const PerformanceDashboard = ({
       testResults,
       summary: {
         projectComplexity: projectMetrics.projectComplexity,
-        riskLevel: recommendations.some(r => r.severity === "high") ? "high" :
-                   recommendations.some(r => r.severity === "medium") ? "medium" : "low",
+        riskLevel: recommendations.some((r) => r.severity === "high")
+          ? "high"
+          : recommendations.some((r) => r.severity === "medium")
+            ? "medium"
+            : "low",
         recommendationCount: recommendations.length,
         testCount: testResults.length,
       },
     };
 
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(report, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -196,20 +218,29 @@ export const PerformanceDashboard = ({
 
   const getSeverityColor = (severity: "low" | "medium" | "high") => {
     switch (severity) {
-      case "high": return "text-red-600 bg-red-50 border-red-200";
-      case "medium": return "text-yellow-600 bg-yellow-50 border-yellow-200";
-      case "low": return "text-blue-600 bg-blue-50 border-blue-200";
-      default: return "text-gray-600 bg-gray-50 border-gray-200";
+      case "high":
+        return "text-red-600 bg-red-50 border-red-200";
+      case "medium":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+      case "low":
+        return "text-blue-600 bg-blue-50 border-blue-200";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200";
     }
   };
 
   const getCategoryIcon = (category: PerformanceRecommendation["category"]) => {
     switch (category) {
-      case "memory": return <Activity className="h-4 w-4" />;
-      case "cpu": return <TrendingUp className="h-4 w-4" />;
-      case "rendering": return <Settings className="h-4 w-4" />;
-      case "optimization": return <CheckCircle2 className="h-4 w-4" />;
-      default: return <Info className="h-4 w-4" />;
+      case "memory":
+        return <Activity className="h-4 w-4" />;
+      case "cpu":
+        return <TrendingUp className="h-4 w-4" />;
+      case "rendering":
+        return <Settings className="h-4 w-4" />;
+      case "optimization":
+        return <CheckCircle2 className="h-4 w-4" />;
+      default:
+        return <Info className="h-4 w-4" />;
     }
   };
 
@@ -224,7 +255,8 @@ export const PerformanceDashboard = ({
               <Activity className="h-5 w-5" />
               <span>Performance Dashboard</span>
               <Badge variant="outline">
-                {projectMetrics.clipCount} clips, {projectMetrics.effectCount} effects
+                {projectMetrics.clipCount} clips, {projectMetrics.effectCount}{" "}
+                effects
               </Badge>
             </div>
             <div className="flex items-center space-x-2">
@@ -241,7 +273,11 @@ export const PerformanceDashboard = ({
         </CardHeader>
 
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="monitor">Monitor</TabsTrigger>
               <TabsTrigger value="testing">Testing</TabsTrigger>
@@ -254,7 +290,7 @@ export const PerformanceDashboard = ({
                 metrics={projectMetrics}
                 onPerformanceIssue={handlePerformanceIssue}
               />
-              
+
               {performanceIssues.length > 0 && (
                 <Card>
                   <CardHeader>
@@ -266,7 +302,10 @@ export const PerformanceDashboard = ({
                   <CardContent>
                     <div className="space-y-1 max-h-32 overflow-y-auto">
                       {performanceIssues.slice(-5).map((issue, index) => (
-                        <div key={index} className="text-xs text-muted-foreground">
+                        <div
+                          key={index}
+                          className="text-xs text-muted-foreground"
+                        >
                           {issue}
                         </div>
                       ))}
@@ -286,14 +325,18 @@ export const PerformanceDashboard = ({
             <TabsContent value="recommendations" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Performance Recommendations</CardTitle>
+                  <CardTitle className="text-sm">
+                    Performance Recommendations
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {recommendations.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" />
                       <p>No performance issues detected!</p>
-                      <p className="text-xs">Your project is optimized for good performance.</p>
+                      <p className="text-xs">
+                        Your project is optimized for good performance.
+                      </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -310,7 +353,9 @@ export const PerformanceDashboard = ({
                               {getCategoryIcon(rec.category)}
                             </div>
                             <div className="flex-1">
-                              <h4 className="text-sm font-medium">{rec.title}</h4>
+                              <h4 className="text-sm font-medium">
+                                {rec.title}
+                              </h4>
                               <p className="text-xs mt-1">{rec.description}</p>
                               {rec.action && (
                                 <div className="mt-2">
@@ -320,9 +365,14 @@ export const PerformanceDashboard = ({
                                 </div>
                               )}
                             </div>
-                            <Badge 
-                              variant={rec.severity === "high" ? "destructive" : 
-                                       rec.severity === "medium" ? "default" : "secondary"}
+                            <Badge
+                              variant={
+                                rec.severity === "high"
+                                  ? "destructive"
+                                  : rec.severity === "medium"
+                                    ? "default"
+                                    : "secondary"
+                              }
                               className="text-xs"
                             >
                               {rec.severity}
@@ -341,25 +391,35 @@ export const PerformanceDashboard = ({
                 {/* Project Stats */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Project Statistics</CardTitle>
+                    <CardTitle className="text-sm">
+                      Project Statistics
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">Total Clips:</span>
-                        <span className="text-sm font-medium">{projectMetrics.clipCount}</span>
+                        <span className="text-sm font-medium">
+                          {projectMetrics.clipCount}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Applied Effects:</span>
-                        <span className="text-sm font-medium">{projectMetrics.effectCount}</span>
+                        <span className="text-sm font-medium">
+                          {projectMetrics.effectCount}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Text Overlays:</span>
-                        <span className="text-sm font-medium">{projectMetrics.textOverlayCount}</span>
+                        <span className="text-sm font-medium">
+                          {projectMetrics.textOverlayCount}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Audio Tracks:</span>
-                        <span className="text-sm font-medium">{projectMetrics.audioTrackCount}</span>
+                        <span className="text-sm font-medium">
+                          {projectMetrics.audioTrackCount}
+                        </span>
                       </div>
                       <Separator />
                       <div className="flex justify-between">
@@ -375,33 +435,51 @@ export const PerformanceDashboard = ({
                 {/* Performance Summary */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Performance Summary</CardTitle>
+                    <CardTitle className="text-sm">
+                      Performance Summary
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">Risk Level:</span>
-                        <Badge 
+                        <Badge
                           variant={
-                            recommendations.some(r => r.severity === "high") ? "destructive" :
-                            recommendations.some(r => r.severity === "medium") ? "default" : "secondary"
+                            recommendations.some((r) => r.severity === "high")
+                              ? "destructive"
+                              : recommendations.some(
+                                    (r) => r.severity === "medium"
+                                  )
+                                ? "default"
+                                : "secondary"
                           }
                         >
-                          {recommendations.some(r => r.severity === "high") ? "High" :
-                           recommendations.some(r => r.severity === "medium") ? "Medium" : "Low"}
+                          {recommendations.some((r) => r.severity === "high")
+                            ? "High"
+                            : recommendations.some(
+                                  (r) => r.severity === "medium"
+                                )
+                              ? "Medium"
+                              : "Low"}
                         </Badge>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Recommendations:</span>
-                        <span className="text-sm font-medium">{recommendations.length}</span>
+                        <span className="text-sm font-medium">
+                          {recommendations.length}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Tests Run:</span>
-                        <span className="text-sm font-medium">{testResults.length}</span>
+                        <span className="text-sm font-medium">
+                          {testResults.length}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Recent Issues:</span>
-                        <span className="text-sm font-medium">{performanceIssues.length}</span>
+                        <span className="text-sm font-medium">
+                          {performanceIssues.length}
+                        </span>
                       </div>
                     </div>
                   </CardContent>
@@ -412,12 +490,17 @@ export const PerformanceDashboard = ({
               {testResults.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-sm">Recent Test Results</CardTitle>
+                    <CardTitle className="text-sm">
+                      Recent Test Results
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       {testResults.slice(0, 3).map((result, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 rounded border">
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-2 rounded border"
+                        >
                           <div className="flex items-center space-x-2">
                             <TestTube className="h-4 w-4" />
                             <span className="text-sm">
@@ -428,7 +511,13 @@ export const PerformanceDashboard = ({
                             <span className="text-xs text-muted-foreground">
                               {result.metrics.avgFps?.toFixed(1)} FPS avg
                             </span>
-                            <Badge variant={result.metrics.successRate > 80 ? "default" : "secondary"}>
+                            <Badge
+                              variant={
+                                result.metrics.successRate > 80
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
                               {result.metrics.successRate?.toFixed(0)}%
                             </Badge>
                           </div>

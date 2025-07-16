@@ -48,7 +48,10 @@ export interface PerformanceMonitorProps {
   /** Whether monitoring is active */
   isActive?: boolean;
   /** Callback when performance issues detected */
-  onPerformanceIssue?: (issue: string, severity: "low" | "medium" | "high") => void;
+  onPerformanceIssue?: (
+    issue: string,
+    severity: "low" | "medium" | "high"
+  ) => void;
   /** Custom CSS class */
   className?: string;
 }
@@ -78,24 +81,37 @@ export const PerformanceMonitor = ({
     timelineZoom: 1,
     timestamp: Date.now(),
   });
-  const [metricsHistory, setMetricsHistory] = useState<PerformanceMetrics[]>([]);
+  const [metricsHistory, setMetricsHistory] = useState<PerformanceMetrics[]>(
+    []
+  );
   const [performanceScore, setPerformanceScore] = useState(100);
-  const [issues, setIssues] = useState<Array<{ message: string; severity: "low" | "medium" | "high" }>>([]);
-  
+  const [issues, setIssues] = useState<
+    Array<{ message: string; severity: "low" | "medium" | "high" }>
+  >([]);
+
   const intervalRef = useRef<NodeJS.Timeout>();
   const frameCountRef = useRef(0);
   const lastFrameTimeRef = useRef(performance.now());
 
   // Simulate performance metrics for development
   const simulateMetrics = useCallback(() => {
-    const baseLoad = Math.max(0, (currentMetrics.clipCount * 5) + (currentMetrics.effectCount * 10));
+    const baseLoad = Math.max(
+      0,
+      currentMetrics.clipCount * 5 + currentMetrics.effectCount * 10
+    );
     const randomVariance = () => (Math.random() - 0.5) * 10;
 
     return {
       fps: Math.max(15, 60 - baseLoad + randomVariance()),
-      memoryUsage: Math.max(100, 200 + (currentMetrics.clipCount * 50) + (currentMetrics.effectCount * 25) + randomVariance() * 50),
+      memoryUsage: Math.max(
+        100,
+        200 +
+          currentMetrics.clipCount * 50 +
+          currentMetrics.effectCount * 25 +
+          randomVariance() * 50
+      ),
       cpuUsage: Math.max(10, 20 + baseLoad + randomVariance()),
-      renderTime: Math.max(8, 16 + (baseLoad * 0.5) + randomVariance()),
+      renderTime: Math.max(8, 16 + baseLoad * 0.5 + randomVariance()),
       clipCount: metrics.clipCount || currentMetrics.clipCount,
       trackCount: metrics.trackCount || currentMetrics.trackCount,
       effectCount: metrics.effectCount || currentMetrics.effectCount,
@@ -105,97 +121,108 @@ export const PerformanceMonitor = ({
   }, [currentMetrics, metrics]);
 
   // Calculate performance score
-  const calculatePerformanceScore = useCallback((metrics: PerformanceMetrics) => {
-    let score = 100;
-    
-    // FPS penalty
-    if (metrics.fps < defaultThresholds.fps.warning) score -= 30;
-    else if (metrics.fps < defaultThresholds.fps.good) score -= 15;
-    
-    // Memory penalty
-    if (metrics.memoryUsage > defaultThresholds.memory.warning) score -= 25;
-    else if (metrics.memoryUsage > defaultThresholds.memory.good) score -= 10;
-    
-    // CPU penalty
-    if (metrics.cpuUsage > defaultThresholds.cpu.warning) score -= 25;
-    else if (metrics.cpuUsage > defaultThresholds.cpu.good) score -= 10;
-    
-    // Render time penalty
-    if (metrics.renderTime > defaultThresholds.renderTime.warning) score -= 20;
-    else if (metrics.renderTime > defaultThresholds.renderTime.good) score -= 10;
-    
-    return Math.max(0, score);
-  }, []);
+  const calculatePerformanceScore = useCallback(
+    (metrics: PerformanceMetrics) => {
+      let score = 100;
+
+      // FPS penalty
+      if (metrics.fps < defaultThresholds.fps.warning) score -= 30;
+      else if (metrics.fps < defaultThresholds.fps.good) score -= 15;
+
+      // Memory penalty
+      if (metrics.memoryUsage > defaultThresholds.memory.warning) score -= 25;
+      else if (metrics.memoryUsage > defaultThresholds.memory.good) score -= 10;
+
+      // CPU penalty
+      if (metrics.cpuUsage > defaultThresholds.cpu.warning) score -= 25;
+      else if (metrics.cpuUsage > defaultThresholds.cpu.good) score -= 10;
+
+      // Render time penalty
+      if (metrics.renderTime > defaultThresholds.renderTime.warning)
+        score -= 20;
+      else if (metrics.renderTime > defaultThresholds.renderTime.good)
+        score -= 10;
+
+      return Math.max(0, score);
+    },
+    []
+  );
 
   // Detect performance issues
-  const detectIssues = useCallback((metrics: PerformanceMetrics) => {
-    const newIssues: Array<{ message: string; severity: "low" | "medium" | "high" }> = [];
-    
-    if (metrics.fps < defaultThresholds.fps.warning) {
-      newIssues.push({
-        message: `Low frame rate: ${metrics.fps.toFixed(1)} FPS`,
-        severity: "high"
+  const detectIssues = useCallback(
+    (metrics: PerformanceMetrics) => {
+      const newIssues: Array<{
+        message: string;
+        severity: "low" | "medium" | "high";
+      }> = [];
+
+      if (metrics.fps < defaultThresholds.fps.warning) {
+        newIssues.push({
+          message: `Low frame rate: ${metrics.fps.toFixed(1)} FPS`,
+          severity: "high",
+        });
+      } else if (metrics.fps < defaultThresholds.fps.good) {
+        newIssues.push({
+          message: `Reduced frame rate: ${metrics.fps.toFixed(1)} FPS`,
+          severity: "medium",
+        });
+      }
+
+      if (metrics.memoryUsage > defaultThresholds.memory.warning) {
+        newIssues.push({
+          message: `High memory usage: ${metrics.memoryUsage.toFixed(0)} MB`,
+          severity: "high",
+        });
+      } else if (metrics.memoryUsage > defaultThresholds.memory.good) {
+        newIssues.push({
+          message: `Elevated memory usage: ${metrics.memoryUsage.toFixed(0)} MB`,
+          severity: "medium",
+        });
+      }
+
+      if (metrics.cpuUsage > defaultThresholds.cpu.warning) {
+        newIssues.push({
+          message: `High CPU usage: ${metrics.cpuUsage.toFixed(1)}%`,
+          severity: "high",
+        });
+      } else if (metrics.cpuUsage > defaultThresholds.cpu.good) {
+        newIssues.push({
+          message: `Elevated CPU usage: ${metrics.cpuUsage.toFixed(1)}%`,
+          severity: "medium",
+        });
+      }
+
+      if (metrics.renderTime > defaultThresholds.renderTime.warning) {
+        newIssues.push({
+          message: `Slow render time: ${metrics.renderTime.toFixed(1)}ms`,
+          severity: "high",
+        });
+      }
+
+      // Complex project warnings
+      if (metrics.clipCount > 20) {
+        newIssues.push({
+          message: `Large number of clips: ${metrics.clipCount}`,
+          severity: "low",
+        });
+      }
+
+      if (metrics.effectCount > 50) {
+        newIssues.push({
+          message: `Many effects applied: ${metrics.effectCount}`,
+          severity: "medium",
+        });
+      }
+
+      setIssues(newIssues);
+
+      // Notify callback of new issues
+      newIssues.forEach((issue) => {
+        onPerformanceIssue?.(issue.message, issue.severity);
       });
-    } else if (metrics.fps < defaultThresholds.fps.good) {
-      newIssues.push({
-        message: `Reduced frame rate: ${metrics.fps.toFixed(1)} FPS`,
-        severity: "medium"
-      });
-    }
-    
-    if (metrics.memoryUsage > defaultThresholds.memory.warning) {
-      newIssues.push({
-        message: `High memory usage: ${metrics.memoryUsage.toFixed(0)} MB`,
-        severity: "high"
-      });
-    } else if (metrics.memoryUsage > defaultThresholds.memory.good) {
-      newIssues.push({
-        message: `Elevated memory usage: ${metrics.memoryUsage.toFixed(0)} MB`,
-        severity: "medium"
-      });
-    }
-    
-    if (metrics.cpuUsage > defaultThresholds.cpu.warning) {
-      newIssues.push({
-        message: `High CPU usage: ${metrics.cpuUsage.toFixed(1)}%`,
-        severity: "high"
-      });
-    } else if (metrics.cpuUsage > defaultThresholds.cpu.good) {
-      newIssues.push({
-        message: `Elevated CPU usage: ${metrics.cpuUsage.toFixed(1)}%`,
-        severity: "medium"
-      });
-    }
-    
-    if (metrics.renderTime > defaultThresholds.renderTime.warning) {
-      newIssues.push({
-        message: `Slow render time: ${metrics.renderTime.toFixed(1)}ms`,
-        severity: "high"
-      });
-    }
-    
-    // Complex project warnings
-    if (metrics.clipCount > 20) {
-      newIssues.push({
-        message: `Large number of clips: ${metrics.clipCount}`,
-        severity: "low"
-      });
-    }
-    
-    if (metrics.effectCount > 50) {
-      newIssues.push({
-        message: `Many effects applied: ${metrics.effectCount}`,
-        severity: "medium"
-      });
-    }
-    
-    setIssues(newIssues);
-    
-    // Notify callback of new issues
-    newIssues.forEach(issue => {
-      onPerformanceIssue?.(issue.message, issue.severity);
-    });
-  }, [onPerformanceIssue]);
+    },
+    [onPerformanceIssue]
+  );
 
   // Update metrics
   useEffect(() => {
@@ -204,17 +231,17 @@ export const PerformanceMonitor = ({
     intervalRef.current = setInterval(() => {
       const newMetrics = simulateMetrics();
       setCurrentMetrics(newMetrics);
-      
+
       // Add to history (keep last 60 data points)
-      setMetricsHistory(prev => {
+      setMetricsHistory((prev) => {
         const updated = [...prev, newMetrics];
         return updated.slice(-60);
       });
-      
+
       // Calculate performance score
       const score = calculatePerformanceScore(newMetrics);
       setPerformanceScore(score);
-      
+
       // Detect issues
       detectIssues(newMetrics);
     }, 1000);
@@ -228,7 +255,7 @@ export const PerformanceMonitor = ({
 
   // Update current metrics when props change
   useEffect(() => {
-    setCurrentMetrics(prev => ({
+    setCurrentMetrics((prev) => ({
       ...prev,
       ...metrics,
       timestamp: Date.now(),
@@ -245,7 +272,11 @@ export const PerformanceMonitor = ({
     setPerformanceScore(100);
   };
 
-  const getMetricStatus = (value: number, thresholds: { good: number; warning: number }, reverse = false) => {
+  const getMetricStatus = (
+    value: number,
+    thresholds: { good: number; warning: number },
+    reverse = false
+  ) => {
     if (reverse) {
       if (value >= thresholds.good) return "good";
       if (value >= thresholds.warning) return "warning";
@@ -259,19 +290,27 @@ export const PerformanceMonitor = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "good": return "text-green-600";
-      case "warning": return "text-yellow-600";
-      case "critical": return "text-red-600";
-      default: return "text-muted-foreground";
+      case "good":
+        return "text-green-600";
+      case "warning":
+        return "text-yellow-600";
+      case "critical":
+        return "text-red-600";
+      default:
+        return "text-muted-foreground";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "good": return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case "warning": return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case "critical": return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      default: return <Activity className="h-4 w-4" />;
+      case "good":
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case "warning":
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      case "critical":
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Activity className="h-4 w-4" />;
     }
   };
 
@@ -297,22 +336,14 @@ export const PerformanceMonitor = ({
             </Badge>
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleMonitoring}
-            >
+            <Button variant="outline" size="sm" onClick={toggleMonitoring}>
               {isMonitoring ? (
                 <Pause className="h-4 w-4" />
               ) : (
                 <Play className="h-4 w-4" />
               )}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={resetMetrics}
-            >
+            <Button variant="outline" size="sm" onClick={resetMetrics}>
               <RotateCcw className="h-4 w-4" />
             </Button>
           </div>
@@ -323,10 +354,10 @@ export const PerformanceMonitor = ({
         {/* Performance Score */}
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            <span className="text-sm text-muted-foreground">Performance Score</span>
-            <span className={cn("text-2xl font-bold", color)}>
-              {grade}
+            <span className="text-sm text-muted-foreground">
+              Performance Score
             </span>
+            <span className={cn("text-2xl font-bold", color)}>{grade}</span>
           </div>
           <Progress value={performanceScore} className="h-2" />
           <span className="text-xs text-muted-foreground">
@@ -345,8 +376,25 @@ export const PerformanceMonitor = ({
                 <span className="text-sm">FPS</span>
               </div>
               <div className="flex items-center space-x-1">
-                {getStatusIcon(getMetricStatus(currentMetrics.fps, defaultThresholds.fps, true))}
-                <span className={cn("text-sm font-medium", getStatusColor(getMetricStatus(currentMetrics.fps, defaultThresholds.fps, true)))}>
+                {getStatusIcon(
+                  getMetricStatus(
+                    currentMetrics.fps,
+                    defaultThresholds.fps,
+                    true
+                  )
+                )}
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    getStatusColor(
+                      getMetricStatus(
+                        currentMetrics.fps,
+                        defaultThresholds.fps,
+                        true
+                      )
+                    )
+                  )}
+                >
                   {currentMetrics.fps.toFixed(1)}
                 </span>
               </div>
@@ -361,13 +409,31 @@ export const PerformanceMonitor = ({
                 <span className="text-sm">Memory</span>
               </div>
               <div className="flex items-center space-x-1">
-                {getStatusIcon(getMetricStatus(currentMetrics.memoryUsage, defaultThresholds.memory))}
-                <span className={cn("text-sm font-medium", getStatusColor(getMetricStatus(currentMetrics.memoryUsage, defaultThresholds.memory)))}>
+                {getStatusIcon(
+                  getMetricStatus(
+                    currentMetrics.memoryUsage,
+                    defaultThresholds.memory
+                  )
+                )}
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    getStatusColor(
+                      getMetricStatus(
+                        currentMetrics.memoryUsage,
+                        defaultThresholds.memory
+                      )
+                    )
+                  )}
+                >
                   {currentMetrics.memoryUsage.toFixed(0)}MB
                 </span>
               </div>
             </div>
-            <Progress value={Math.min(100, (currentMetrics.memoryUsage / 1000) * 100)} className="h-1" />
+            <Progress
+              value={Math.min(100, (currentMetrics.memoryUsage / 1000) * 100)}
+              className="h-1"
+            />
           </div>
 
           <div className="space-y-2">
@@ -377,8 +443,23 @@ export const PerformanceMonitor = ({
                 <span className="text-sm">CPU</span>
               </div>
               <div className="flex items-center space-x-1">
-                {getStatusIcon(getMetricStatus(currentMetrics.cpuUsage, defaultThresholds.cpu))}
-                <span className={cn("text-sm font-medium", getStatusColor(getMetricStatus(currentMetrics.cpuUsage, defaultThresholds.cpu)))}>
+                {getStatusIcon(
+                  getMetricStatus(
+                    currentMetrics.cpuUsage,
+                    defaultThresholds.cpu
+                  )
+                )}
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    getStatusColor(
+                      getMetricStatus(
+                        currentMetrics.cpuUsage,
+                        defaultThresholds.cpu
+                      )
+                    )
+                  )}
+                >
                   {currentMetrics.cpuUsage.toFixed(1)}%
                 </span>
               </div>
@@ -393,13 +474,31 @@ export const PerformanceMonitor = ({
                 <span className="text-sm">Render</span>
               </div>
               <div className="flex items-center space-x-1">
-                {getStatusIcon(getMetricStatus(currentMetrics.renderTime, defaultThresholds.renderTime))}
-                <span className={cn("text-sm font-medium", getStatusColor(getMetricStatus(currentMetrics.renderTime, defaultThresholds.renderTime)))}>
+                {getStatusIcon(
+                  getMetricStatus(
+                    currentMetrics.renderTime,
+                    defaultThresholds.renderTime
+                  )
+                )}
+                <span
+                  className={cn(
+                    "text-sm font-medium",
+                    getStatusColor(
+                      getMetricStatus(
+                        currentMetrics.renderTime,
+                        defaultThresholds.renderTime
+                      )
+                    )
+                  )}
+                >
                   {currentMetrics.renderTime.toFixed(1)}ms
                 </span>
               </div>
             </div>
-            <Progress value={Math.min(100, (currentMetrics.renderTime / 50) * 100)} className="h-1" />
+            <Progress
+              value={Math.min(100, (currentMetrics.renderTime / 50) * 100)}
+              className="h-1"
+            />
           </div>
         </div>
 
@@ -410,15 +509,21 @@ export const PerformanceMonitor = ({
           <h4 className="text-sm font-medium mb-3">Project Complexity</h4>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold">{currentMetrics.clipCount}</div>
+              <div className="text-2xl font-bold">
+                {currentMetrics.clipCount}
+              </div>
               <div className="text-xs text-muted-foreground">Clips</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{currentMetrics.trackCount}</div>
+              <div className="text-2xl font-bold">
+                {currentMetrics.trackCount}
+              </div>
               <div className="text-xs text-muted-foreground">Tracks</div>
             </div>
             <div>
-              <div className="text-2xl font-bold">{currentMetrics.effectCount}</div>
+              <div className="text-2xl font-bold">
+                {currentMetrics.effectCount}
+              </div>
               <div className="text-xs text-muted-foreground">Effects</div>
             </div>
           </div>
@@ -439,9 +544,11 @@ export const PerformanceMonitor = ({
                     key={index}
                     className={cn(
                       "p-2 rounded-md border text-sm",
-                      issue.severity === "high" ? "border-red-200 bg-red-50 text-red-700" :
-                      issue.severity === "medium" ? "border-yellow-200 bg-yellow-50 text-yellow-700" :
-                      "border-blue-200 bg-blue-50 text-blue-700"
+                      issue.severity === "high"
+                        ? "border-red-200 bg-red-50 text-red-700"
+                        : issue.severity === "medium"
+                          ? "border-yellow-200 bg-yellow-50 text-yellow-700"
+                          : "border-blue-200 bg-blue-50 text-blue-700"
                     )}
                   >
                     {issue.message}

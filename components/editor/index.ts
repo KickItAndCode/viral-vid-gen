@@ -9,6 +9,8 @@ export { ClipEditorControls } from "./clip-editor-controls";
 export { TimelineClipEditor } from "./timeline-clip-editor";
 export { ExportSettingsModal } from "./export-settings-modal";
 export { ExportProgressModal } from "./export-progress-modal";
+export { CaptionEditor } from "./caption-editor";
+export { VisualEffectsPanel } from "./visual-effects-panel";
 export { PerformanceMonitor } from "./performance-monitor";
 export { PerformanceTestPanel } from "./performance-test-panel";
 export { PerformanceDashboard } from "./performance-dashboard";

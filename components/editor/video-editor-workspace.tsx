@@ -66,7 +66,8 @@ export const VideoEditorWorkspace = ({
   const [previewSize, setPreviewSize] = useState({ width: 1920, height: 1080 });
   const [showExportSettings, setShowExportSettings] = useState(false);
   const [showExportProgress, setShowExportProgress] = useState(false);
-  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false);
+  const [showPerformanceDashboard, setShowPerformanceDashboard] =
+    useState(false);
 
   // Video editor store selectors
   const {
@@ -302,6 +303,7 @@ export const VideoEditorWorkspace = ({
             <VideoEditorSidebar
               activePanel={activePanel}
               onPanelChange={setActivePanel}
+              duration={duration}
               className="h-full"
             />
           </ResizablePanel>

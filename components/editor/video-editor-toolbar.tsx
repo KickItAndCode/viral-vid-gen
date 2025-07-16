@@ -208,9 +208,9 @@ export const VideoEditorToolbar = ({
           Share
         </Button>
 
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           title="Performance Dashboard"
           onClick={onPerformance}
         >
