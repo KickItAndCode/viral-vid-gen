@@ -24,26 +24,38 @@ export function WizardProvider({
   autoLoadProgress = true,
   sessionId,
 }: WizardProviderProps) {
+  // Use a ref to track if we've initialized
+  const initRef = React.useRef(false);
   const [isInitialized, setIsInitialized] = React.useState(false);
-
-  useEffect(() => {
-    // Initialize wizard store with config
-    useWizardStore.setState({
+  
+  // Initialize only once when component mounts
+  React.useLayoutEffect(() => {
+    if (initRef.current) return;
+    
+    initRef.current = true;
+    
+    // Initialize wizard store with config - do this synchronously
+    const store = useWizardStore.getState();
+    store.resetWizard(); // Start with clean state
+    
+    // Set initial config without triggering re-renders
+    const initialState = {
       totalSteps: config.steps.length,
       currentStepId: config.steps[0]?.id || "",
       currentStepIndex: 0,
-    });
-
+      data: store.data, // Keep existing data
+    };
+    
+    // Use direct store update to avoid triggering subscribers during render
+    Object.assign(store, initialState);
+    
     // Auto-load progress if enabled
     if (autoLoadProgress && sessionId) {
-      useWizardStore.getState().loadProgress(sessionId);
-    } else if (!autoLoadProgress) {
-      // Reset wizard if not auto-loading
-      useWizardStore.getState().resetWizard();
+      store.loadProgress(sessionId);
     }
-
+    
     setIsInitialized(true);
-  }, [config.steps.length, config.steps[0]?.id, autoLoadProgress, sessionId]);
+  }, []); // Only run once on mount
 
   const contextValue: WizardContextValue = useMemo(() => ({
     config,

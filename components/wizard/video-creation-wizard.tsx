@@ -18,14 +18,8 @@ interface VideoCreationWizardProps {
   sessionId?: string;
 }
 
-// Create step icons as static elements to prevent re-renders
-const TrendIcon = <TrendingUp className="h-5 w-5 text-primary" />;
-const StyleIcon = <Palette className="h-5 w-5 text-primary" />;
-const AIIcon = <Bot className="h-5 w-5 text-primary" />;
-const ProgressIcon = <Activity className="h-5 w-5 text-primary" />;
-const PreviewIcon = <Eye className="h-5 w-5 text-primary" />;
-
-const wizardConfig: WizardConfig = {
+// Move everything outside component to prevent re-creation
+const WIZARD_CONFIG: WizardConfig = {
   id: "video-creation-wizard",
   title: "Create AI Video",
   description: "Follow these steps to create your viral-ready video using AI",
@@ -40,7 +34,7 @@ const wizardConfig: WizardConfig = {
       id: "trend-selection",
       title: "Select Trend",
       description: "Choose trending content to base your video on",
-      icon: TrendIcon,
+      icon: React.createElement(TrendingUp, { className: "h-5 w-5 text-primary" }),
       component: TrendSelectionStep,
       isOptional: false,
       isSkippable: false,
@@ -49,7 +43,7 @@ const wizardConfig: WizardConfig = {
       id: "style-configuration",
       title: "Configure Style",
       description: "Customize the visual style and platform settings",
-      icon: StyleIcon,
+      icon: React.createElement(Palette, { className: "h-5 w-5 text-primary" }),
       component: StyleConfigurationStep,
       isOptional: false,
       isSkippable: false,
@@ -58,7 +52,7 @@ const wizardConfig: WizardConfig = {
       id: "ai-configuration",
       title: "AI Settings",
       description: "Configure AI provider and generation options",
-      icon: AIIcon,
+      icon: React.createElement(Bot, { className: "h-5 w-5 text-primary" }),
       component: AIConfigurationStep,
       isOptional: false,
       isSkippable: false,
@@ -67,7 +61,7 @@ const wizardConfig: WizardConfig = {
       id: "generation-progress",
       title: "Generate Video",
       description: "Watch your video being created in real-time",
-      icon: ProgressIcon,
+      icon: React.createElement(Activity, { className: "h-5 w-5 text-primary" }),
       component: GenerationProgressStep,
       isOptional: false,
       isSkippable: false,
@@ -76,7 +70,7 @@ const wizardConfig: WizardConfig = {
       id: "preview-edit",
       title: "Preview & Finalize",
       description: "Review your video and make final adjustments",
-      icon: PreviewIcon,
+      icon: React.createElement(Eye, { className: "h-5 w-5 text-primary" }),
       component: PreviewEditStep,
       isOptional: false,
       isSkippable: false,
@@ -117,7 +111,7 @@ export function VideoCreationWizard({
   }, []);
 
   const configWithHandlers: WizardConfig = useMemo(() => ({
-    ...wizardConfig,
+    ...WIZARD_CONFIG,
     onComplete: handleComplete,
     onCancel: handleCancel,
     onStepChange: handleStepChange,
