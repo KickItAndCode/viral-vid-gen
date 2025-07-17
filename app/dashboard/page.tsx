@@ -174,9 +174,9 @@ export default function DashboardPage() {
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-purple-500 rounded-full" />
                 <div>
-                  <p className="text-sm font-medium">Analytics report ready</p>
+                  <p className="text-sm font-medium">New trending topic detected</p>
                   <p className="text-xs text-muted-foreground">
-                    Weekly performance summary available
+                    Tech trends are gaining momentum
                   </p>
                 </div>
               </div>

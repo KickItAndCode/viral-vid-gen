@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import {
   useUIStore,
   useVideoWizardStore,
-  useVideoEditorStore,
   usePreferencesStore,
 } from "./index";
 
@@ -83,45 +82,6 @@ export function useWizardAutoSave() {
   }, [autoSaveEnabled]);
 }
 
-// Auto-save for video editor projects
-export function useEditorAutoSave() {
-  const autoSaveEnabled = usePreferencesStore((state) => state.video.autoSave);
-  const autoSaveIntervalRef = useRef<NodeJS.Timeout>();
-
-  useEffect(() => {
-    if (!autoSaveEnabled) {
-      if (autoSaveIntervalRef.current) {
-        clearInterval(autoSaveIntervalRef.current);
-      }
-      return;
-    }
-
-    // Auto-save every 30 seconds when changes are made
-    let hasChanges = false;
-
-    const unsubscribe = useVideoEditorStore.subscribe((state) => {
-      hasChanges = true;
-    });
-
-    autoSaveIntervalRef.current = setInterval(() => {
-      if (hasChanges) {
-        const projectData = useVideoEditorStore.getState().saveProject();
-        console.debug(
-          "Video editor project auto-saved:",
-          projectData.projectName
-        );
-        hasChanges = false;
-      }
-    }, 30000); // 30 seconds
-
-    return () => {
-      unsubscribe();
-      if (autoSaveIntervalRef.current) {
-        clearInterval(autoSaveIntervalRef.current);
-      }
-    };
-  }, [autoSaveEnabled]);
-}
 
 // Notification management with auto-cleanup
 export function useNotificationAutoCleanup() {
@@ -167,7 +127,6 @@ export function usePreferencesSync() {
 // Keyboard shortcut manager
 export function useKeyboardShortcuts() {
   const shortcuts = usePreferencesStore((state) => state.shortcuts);
-  const editorActions = useVideoEditorStore();
   const wizardActions = useVideoWizardStore();
 
   useEffect(() => {
@@ -190,29 +149,7 @@ export function useKeyboardShortcuts() {
           event.preventDefault();
 
           switch (action) {
-            case "playPause":
-              if (editorActions.isPlaying) {
-                editorActions.pause();
-              } else {
-                editorActions.play();
-              }
-              break;
-            case "stop":
-              editorActions.stop();
-              break;
-            case "undo":
-              editorActions.undo();
-              break;
-            case "redo":
-              editorActions.redo();
-              break;
-            case "toggleMute":
-              editorActions.toggleMute();
-              break;
-            case "fullscreen":
-              editorActions.toggleFullscreen();
-              break;
-            // Add more shortcut actions as needed
+            // Add shortcut actions as needed
           }
         }
       });
@@ -220,7 +157,7 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [shortcuts, editorActions, wizardActions]);
+  }, [shortcuts, wizardActions]);
 }
 
 // Performance monitoring for store updates
@@ -231,7 +168,6 @@ export function useStorePerformanceMonitoring() {
     const stores = {
       ui: useUIStore,
       wizard: useVideoWizardStore,
-      editor: useVideoEditorStore,
       preferences: usePreferencesStore,
     };
 
@@ -261,7 +197,6 @@ export function useStoreValidation() {
       const ui = useUIStore.getState();
       const preferences = usePreferencesStore.getState();
       const wizard = useVideoWizardStore.getState();
-      const editor = useVideoEditorStore.getState();
 
       // Validate theme consistency
       if (ui.theme !== preferences.ui.theme) {
@@ -277,10 +212,6 @@ export function useStoreValidation() {
         console.warn("Wizard in complete state but no generated video");
       }
 
-      // Validate editor state consistency
-      if (editor.isPlaying && editor.timeline.duration === 0) {
-        console.warn("Editor playing but no timeline duration");
-      }
     };
 
     // Run validation periodically in development
@@ -294,7 +225,6 @@ export function useStoreValidation() {
 export function useStoreSubscriptions() {
   useThemeSync();
   useWizardAutoSave();
-  useEditorAutoSave();
   useNotificationAutoCleanup();
   usePreferencesSync();
   useKeyboardShortcuts();
