@@ -5,12 +5,13 @@ import { Doc, Id } from "./_generated/dataModel";
 export const getUser = query({
   args: { clerkUserId: v.string() },
   handler: async (ctx, args) => {
+    // Handle potential duplicates by getting the first user
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_user_id", (q) =>
         q.eq("clerkUserId", args.clerkUserId)
       )
-      .unique();
+      .first();
 
     return user;
   },
@@ -24,6 +25,19 @@ export const createUser = mutation({
     clerkUserId: v.string(),
   },
   handler: async (ctx, args) => {
+    // Check if user already exists to prevent duplicates
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_user_id", (q) =>
+        q.eq("clerkUserId", args.clerkUserId)
+      )
+      .first();
+
+    if (existingUser) {
+      // Return existing user ID instead of creating duplicate
+      return existingUser._id;
+    }
+
     const now = Date.now();
 
     const userId = await ctx.db.insert("users", {
@@ -101,5 +115,38 @@ export const consumeCredit = mutation({
     });
 
     return user.credits - 1;
+  },
+});
+
+// Cleanup function to remove duplicate users (keep the oldest one)
+export const cleanupDuplicateUsers = mutation({
+  args: { clerkUserId: v.string() },
+  handler: async (ctx, args) => {
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_user_id", (q) =>
+        q.eq("clerkUserId", args.clerkUserId)
+      )
+      .collect();
+
+    if (users.length <= 1) {
+      return { message: "No duplicates found", kept: users[0]?._id };
+    }
+
+    // Sort by creation time, keep the oldest one
+    users.sort((a, b) => a.createdAt - b.createdAt);
+    const userToKeep = users[0];
+    const usersToDelete = users.slice(1);
+
+    // Delete duplicate users
+    for (const user of usersToDelete) {
+      await ctx.db.delete(user._id);
+    }
+
+    return {
+      message: `Cleaned up ${usersToDelete.length} duplicate users`,
+      kept: userToKeep._id,
+      deleted: usersToDelete.map(u => u._id),
+    };
   },
 });

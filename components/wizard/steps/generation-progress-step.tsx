@@ -128,7 +128,12 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
         throw new Error("Missing required data");
       }
 
-      // First get the Convex user record using the Clerk user ID
+      // First clean up any duplicate users
+      await convex.mutation(api.users.cleanupDuplicateUsers, {
+        clerkUserId: user.id,
+      });
+
+      // Get the Convex user record using the Clerk user ID
       let convexUser = await convex.query(api.users.getUser, {
         clerkUserId: user.id,
       });
