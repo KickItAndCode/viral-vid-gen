@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { startVideoGenerationWorker, VideoGenerationWorker } from "@/lib/workers/video-generation-worker";
 
 interface VideoGenerationContextType {
@@ -17,6 +18,7 @@ interface VideoGenerationProviderProps {
 }
 
 export function VideoGenerationProvider({ children }: VideoGenerationProviderProps) {
+  const { user } = useUser();
   const [worker, setWorker] = useState<VideoGenerationWorker | null>(null);
   const [isWorkerRunning, setIsWorkerRunning] = useState(false);
 
@@ -28,8 +30,13 @@ export function VideoGenerationProvider({ children }: VideoGenerationProviderPro
         return;
       }
 
+      if (!user?.id) {
+        console.log("⏸️ User not authenticated, skipping worker start");
+        return;
+      }
+
       console.log("🚀 Starting video generation worker...");
-      const workerInstance = await startVideoGenerationWorker(convexUrl);
+      const workerInstance = await startVideoGenerationWorker(convexUrl, user.id);
       setWorker(workerInstance);
       setIsWorkerRunning(true);
       console.log("✅ Video generation worker started successfully");
@@ -47,9 +54,11 @@ export function VideoGenerationProvider({ children }: VideoGenerationProviderPro
     }
   };
 
-  // Auto-start worker on mount
+  // Auto-start worker when user is authenticated
   useEffect(() => {
-    startWorker();
+    if (user?.id) {
+      startWorker();
+    }
 
     // Cleanup on unmount
     return () => {
@@ -57,7 +66,7 @@ export function VideoGenerationProvider({ children }: VideoGenerationProviderPro
         worker.stop();
       }
     };
-  }, []);
+  }, [user?.id]);
 
   // Monitor window visibility to pause/resume worker
   useEffect(() => {

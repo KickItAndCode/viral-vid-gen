@@ -13,17 +13,25 @@ export class VideoGenerationWorker {
   private queue: any;
   private isRunning = false;
   private pollInterval: NodeJS.Timeout | null = null;
+  private clerkUserId: string | null = null;
+  private convexUserId: Id<"users"> | null = null;
 
-  constructor(convexUrl: string) {
+  constructor(convexUrl: string, clerkUserId?: string) {
     this.convex = new ConvexHttpClient(convexUrl);
     this.queue = getVideoQueue();
+    this.clerkUserId = clerkUserId || null;
   }
 
   async start() {
     if (this.isRunning) return;
     this.isRunning = true;
     
-    console.log("🚀 Video Generation Worker started");
+    console.log("🚀 Video Generation Worker started", this.clerkUserId ? `for user ${this.clerkUserId}` : "(no user ID)");
+    
+    // Resolve Convex user ID if we have a Clerk user ID
+    if (this.clerkUserId && !this.convexUserId) {
+      await this.resolveConvexUserId();
+    }
     
     // Start polling for new jobs every 5 seconds
     this.pollInterval = setInterval(() => {
@@ -43,11 +51,48 @@ export class VideoGenerationWorker {
     console.log("⏹️ Video Generation Worker stopped");
   }
 
+  setUserId(clerkUserId: string) {
+    this.clerkUserId = clerkUserId;
+    this.convexUserId = null; // Reset Convex user ID so it gets resolved again
+    console.log(`🆔 Video Generation Worker clerk user ID set to: ${clerkUserId}`);
+  }
+
+  private async resolveConvexUserId() {
+    if (!this.clerkUserId) return;
+    
+    try {
+      const user = await this.convex.query(api.users.getUser, {
+        clerkUserId: this.clerkUserId,
+      });
+      
+      if (user) {
+        this.convexUserId = user._id;
+        console.log(`✅ Resolved Convex user ID: ${this.convexUserId} for Clerk user: ${this.clerkUserId}`);
+      } else {
+        console.warn(`⚠️ No Convex user found for Clerk user: ${this.clerkUserId}`);
+      }
+    } catch (error) {
+      console.error(`❌ Error resolving Convex user ID for ${this.clerkUserId}:`, error);
+    }
+  }
+
   private async processNewJobs() {
     try {
+      // Skip processing if no Convex user ID is available
+      if (!this.convexUserId) {
+        if (this.clerkUserId) {
+          console.log("Waiting for Convex user ID resolution...");
+          await this.resolveConvexUserId();
+        }
+        if (!this.convexUserId) {
+          console.log("No Convex user ID available for video generation worker");
+          return;
+        }
+      }
+
       // Get all queued jobs from Convex
       const queuedJobs = await this.convex.query(api.videoGeneration.getUserVideoJobs, {
-        userId: "temp-user-id" as Id<"users">, // This would be dynamic in production
+        userId: this.convexUserId,
         status: "queued",
         limit: 10,
       });
@@ -191,15 +236,17 @@ export class VideoGenerationWorker {
 // Singleton instance
 let workerInstance: VideoGenerationWorker | null = null;
 
-export function getVideoGenerationWorker(convexUrl: string): VideoGenerationWorker {
+export function getVideoGenerationWorker(convexUrl: string, clerkUserId?: string): VideoGenerationWorker {
   if (!workerInstance) {
-    workerInstance = new VideoGenerationWorker(convexUrl);
+    workerInstance = new VideoGenerationWorker(convexUrl, clerkUserId);
+  } else if (clerkUserId) {
+    workerInstance.setUserId(clerkUserId);
   }
   return workerInstance;
 }
 
-export async function startVideoGenerationWorker(convexUrl: string) {
-  const worker = getVideoGenerationWorker(convexUrl);
+export async function startVideoGenerationWorker(convexUrl: string, clerkUserId?: string) {
+  const worker = getVideoGenerationWorker(convexUrl, clerkUserId);
   await worker.start();
   return worker;
 }

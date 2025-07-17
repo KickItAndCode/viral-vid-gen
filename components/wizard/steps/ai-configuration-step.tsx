@@ -116,6 +116,15 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
   const [selectedProvider, setSelectedProvider] = useState<string>(
     wizardData.aiSettings?.provider || ""
   );
+  const [selectedQuality, setSelectedQuality] = useState<string>(
+    wizardData.aiSettings?.quality || "standard"
+  );
+  const [styleStrength, setStyleStrength] = useState<number>(
+    wizardData.aiSettings?.styleStrength || 50
+  );
+  const [creativityLevel, setCreativityLevel] = useState<number>(
+    wizardData.aiSettings?.creativityLevel || 50
+  );
   const [priority, setPriority] = useState<string>(
     wizardData.aiSettings?.priority || "normal"
   );
@@ -136,6 +145,9 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
     if (isValid) {
       const aiData = {
         provider: selectedProvider as "veo" | "runway" | "luma" | "auto",
+        quality: selectedQuality,
+        styleStrength,
+        creativityLevel,
         priority: priority as "low" | "normal" | "high",
         customPrompt,
         useCustomPrompt,
@@ -148,6 +160,9 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
     }
   }, [
     selectedProvider,
+    selectedQuality,
+    styleStrength,
+    creativityLevel,
     priority,
     customPrompt,
     useCustomPrompt,
