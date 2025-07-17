@@ -2,6 +2,7 @@ import { VideoProvider, ProviderConfig } from "./types";
 import { createVeoProvider } from "./veo-provider";
 import { createRunwayProvider } from "./runway-provider";
 import { createLumaProvider } from "./luma-provider";
+import { MockVideoProvider } from "./mock-provider";
 
 export interface ProviderConfigs {
   veo?: ProviderConfig;
@@ -22,7 +23,13 @@ export class VideoProviderFactory {
   static getInstance(configs?: ProviderConfigs): VideoProviderFactory {
     if (!VideoProviderFactory.instance) {
       if (!configs) {
-        throw new Error("Provider configs required for first initialization");
+        // Use mock configs for development when no real configs provided
+        console.warn("No provider configs provided, using development mock providers");
+        configs = {
+          veo: { apiKey: "mock-veo-key", baseUrl: "https://mock-veo-api.dev" },
+          runway: { apiKey: "mock-runway-key", baseUrl: "https://mock-runway-api.dev" },
+          luma: { apiKey: "mock-luma-key", baseUrl: "https://mock-luma-api.dev" },
+        };
       }
       VideoProviderFactory.instance = new VideoProviderFactory(configs);
     }
@@ -30,25 +37,43 @@ export class VideoProviderFactory {
   }
 
   private initializeProviders(): void {
-    if (this.configs.veo?.apiKey) {
-      this.providers.set(
-        "veo",
-        createVeoProvider(this.configs.veo.apiKey, this.configs.veo)
-      );
-    }
+    // Check if we're using mock configs (development mode)
+    const isMockMode = this.configs.veo?.apiKey?.includes("mock") ||
+                       this.configs.runway?.apiKey?.includes("mock") ||
+                       this.configs.luma?.apiKey?.includes("mock");
 
-    if (this.configs.runway?.apiKey) {
-      this.providers.set(
-        "runway",
-        createRunwayProvider(this.configs.runway.apiKey, this.configs.runway)
-      );
-    }
+    if (isMockMode) {
+      // Use mock provider for development
+      console.log("[VideoProviderFactory] Using mock provider for development");
+      this.providers.set("mock", new MockVideoProvider({
+        apiKey: "mock-key",
+        baseUrl: "https://mock-api.dev",
+        priority: 5,
+        timeout: 30000,
+        retryCount: 1,
+      }));
+    } else {
+      // Use real providers with actual API keys
+      if (this.configs.veo?.apiKey) {
+        this.providers.set(
+          "veo",
+          createVeoProvider(this.configs.veo.apiKey, this.configs.veo)
+        );
+      }
 
-    if (this.configs.luma?.apiKey) {
-      this.providers.set(
-        "luma",
-        createLumaProvider(this.configs.luma.apiKey, this.configs.luma)
-      );
+      if (this.configs.runway?.apiKey) {
+        this.providers.set(
+          "runway",
+          createRunwayProvider(this.configs.runway.apiKey, this.configs.runway)
+        );
+      }
+
+      if (this.configs.luma?.apiKey) {
+        this.providers.set(
+          "luma",
+          createLumaProvider(this.configs.luma.apiKey, this.configs.luma)
+        );
+      }
     }
   }
 

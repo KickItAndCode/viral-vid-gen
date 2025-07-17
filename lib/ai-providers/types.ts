@@ -1,6 +1,6 @@
 // Types for AI video generation providers
 
-export type VideoProvider = "veo" | "runway" | "luma";
+export type VideoProviderName = "veo" | "runway" | "luma" | "mock";
 
 export interface VideoGenerationRequest {
   prompt: string;
@@ -10,23 +10,23 @@ export interface VideoGenerationRequest {
   fps?: 24 | 30 | 60;
   aspectRatio?: "16:9" | "9:16" | "1:1";
   seed?: number;
-  provider?: VideoProvider;
+  provider?: VideoProviderName;
   metadata?: Record<string, any>;
 }
 
 export interface VideoGenerationResponse {
-  id: string;
+  jobId: string;
   status: "queued" | "processing" | "completed" | "failed";
-  url?: string;
+  videoUrl?: string;
   thumbnailUrl?: string;
   progress?: number; // 0-100
-  estimatedTime?: number; // seconds
+  estimatedCompletion?: number; // timestamp
   error?: string;
   metadata?: Record<string, any>;
 }
 
 export interface VideoProvider {
-  name: VideoProvider;
+  name: VideoProviderName;
   generateVideo(
     request: VideoGenerationRequest
   ): Promise<VideoGenerationResponse>;
@@ -34,6 +34,8 @@ export interface VideoProvider {
   cancelGeneration?(jobId: string): Promise<void>;
   getCredits?(): Promise<number>;
   isAvailable(): Promise<boolean>;
+  getPriority(): number;
+  getTimeout(): number;
 }
 
 export interface ProviderConfig {
@@ -46,7 +48,7 @@ export interface ProviderConfig {
 
 export interface GenerationJob {
   id: string;
-  provider: VideoProvider;
+  provider: VideoProviderName;
   request: VideoGenerationRequest;
   status: VideoGenerationResponse["status"];
   createdAt: number;
@@ -61,7 +63,7 @@ export interface GenerationJob {
 export class VideoGenerationError extends Error {
   constructor(
     message: string,
-    public provider: VideoProvider,
+    public provider: VideoProviderName,
     public code?: string,
     public statusCode?: number
   ) {
@@ -71,7 +73,7 @@ export class VideoGenerationError extends Error {
 }
 
 export class ProviderUnavailableError extends VideoGenerationError {
-  constructor(provider: VideoProvider, reason?: string) {
+  constructor(provider: VideoProviderName, reason?: string) {
     super(
       `Provider ${provider} is unavailable${reason ? `: ${reason}` : ""}`,
       provider,
@@ -82,7 +84,7 @@ export class ProviderUnavailableError extends VideoGenerationError {
 }
 
 export class QuotaExceededError extends VideoGenerationError {
-  constructor(provider: VideoProvider) {
+  constructor(provider: VideoProviderName) {
     super(
       `Quota exceeded for provider ${provider}`,
       provider,
@@ -93,7 +95,7 @@ export class QuotaExceededError extends VideoGenerationError {
 }
 
 export class GenerationTimeoutError extends VideoGenerationError {
-  constructor(provider: VideoProvider, timeout: number) {
+  constructor(provider: VideoProviderName, timeout: number) {
     super(
       `Generation timeout after ${timeout}ms for provider ${provider}`,
       provider,

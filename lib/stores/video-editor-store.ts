@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { shallow } from "zustand/shallow";
+import { useMemo } from "react";
 
 export interface VideoClip {
   id: string;
@@ -769,126 +770,117 @@ export const useVideoEditorStore = create<VideoEditorState>()(
   )
 );
 
-// Selectors for common use cases
+// Memoized selectors for common use cases
+const playbackSelector = (state: VideoEditorState) => ({
+  isPlaying: state.isPlaying,
+  isMuted: state.isMuted,
+  volume: state.volume,
+  playbackRate: state.playbackRate,
+  currentTime: state.timeline.currentTime,
+  duration: state.timeline.duration,
+});
+
+const playbackActionsSelector = (state: VideoEditorState) => ({
+  play: state.play,
+  pause: state.pause,
+  stop: state.stop,
+  seek: state.seek,
+  setVolume: state.setVolume,
+  setPlaybackRate: state.setPlaybackRate,
+  toggleMute: state.toggleMute,
+});
+
 export const usePlayback = () => {
-  const playbackState = useVideoEditorStore(
-    (state) => ({
-      isPlaying: state.isPlaying,
-      isMuted: state.isMuted,
-      volume: state.volume,
-      playbackRate: state.playbackRate,
-      currentTime: state.timeline.currentTime,
-      duration: state.timeline.duration,
-    }),
-    shallow
-  );
+  const playbackState = useVideoEditorStore(playbackSelector, shallow);
+  const playbackActions = useVideoEditorStore(playbackActionsSelector, shallow);
 
-  const playbackActions = useVideoEditorStore((state) => ({
-    play: state.play,
-    pause: state.pause,
-    stop: state.stop,
-    seek: state.seek,
-    setVolume: state.setVolume,
-    setPlaybackRate: state.setPlaybackRate,
-    toggleMute: state.toggleMute,
-  }));
-
-  return { ...playbackState, ...playbackActions };
+  return useMemo(() => ({ ...playbackState, ...playbackActions }), [playbackState, playbackActions]);
 };
+
+const timelineSelector = (state: VideoEditorState) => state.timeline;
+
+const timelineActionsSelector = (state: VideoEditorState) => ({
+  setCurrentTime: state.setCurrentTime,
+  setZoom: state.setZoom,
+  setScrollPosition: state.setScrollPosition,
+  selectClip: state.selectClip,
+  selectEffect: state.selectEffect,
+  selectText: state.selectText,
+});
 
 export const useTimeline = () => {
-  const timelineState = useVideoEditorStore((state) => state.timeline, shallow);
+  const timelineState = useVideoEditorStore(timelineSelector, shallow);
+  const timelineActions = useVideoEditorStore(timelineActionsSelector, shallow);
 
-  const timelineActions = useVideoEditorStore((state) => ({
-    setCurrentTime: state.setCurrentTime,
-    setZoom: state.setZoom,
-    setScrollPosition: state.setScrollPosition,
-    selectClip: state.selectClip,
-    selectEffect: state.selectEffect,
-    selectText: state.selectText,
-  }));
-
-  return { timeline: timelineState, ...timelineActions };
+  return useMemo(() => ({ timeline: timelineState, ...timelineActions }), [timelineState, timelineActions]);
 };
 
-export const useClips = () =>
-  useVideoEditorStore(
-    (state) => ({
-      clips: state.clips,
-      addClip: state.addClip,
-      removeClip: state.removeClip,
-      updateClip: state.updateClip,
-      reorderClips: state.reorderClips,
-      trimClip: state.trimClip,
-    }),
-    shallow
-  );
+const clipsSelector = (state: VideoEditorState) => ({
+  clips: state.clips,
+  addClip: state.addClip,
+  removeClip: state.removeClip,
+  updateClip: state.updateClip,
+  reorderClips: state.reorderClips,
+  trimClip: state.trimClip,
+});
 
-export const useEffects = () =>
-  useVideoEditorStore(
-    (state) => ({
-      clips: state.clips,
-      addEffect: state.addEffect,
-      removeEffect: state.removeEffect,
-      updateEffect: state.updateEffect,
-      toggleEffect: state.toggleEffect,
-    }),
-    shallow
-  );
+export const useClips = () => useVideoEditorStore(clipsSelector, shallow);
 
-export const useTextOverlays = () =>
-  useVideoEditorStore(
-    (state) => ({
-      textOverlays: state.textOverlays,
-      addTextOverlay: state.addTextOverlay,
-      removeTextOverlay: state.removeTextOverlay,
-      updateTextOverlay: state.updateTextOverlay,
-    }),
-    shallow
-  );
+const effectsSelector = (state: VideoEditorState) => ({
+  effects: state.effects,
+  addEffect: state.addEffect,
+  removeEffect: state.removeEffect,
+  updateEffect: state.updateEffect,
+  toggleEffect: state.toggleEffect,
+});
 
-export const useAudioTracks = () =>
-  useVideoEditorStore(
-    (state) => ({
-      audioTracks: state.audioTracks,
-      addAudioTrack: state.addAudioTrack,
-      removeAudioTrack: state.removeAudioTrack,
-      updateAudioTrack: state.updateAudioTrack,
-    }),
-    shallow
-  );
+export const useEffects = () => useVideoEditorStore(effectsSelector, shallow);
 
-export const useExport = () =>
-  useVideoEditorStore(
-    (state) => ({
-      exportSettings: state.exportSettings,
-      isExporting: state.isExporting,
-      exportProgress: state.exportProgress,
-      exportStage: state.exportStage,
-      exportError: state.exportError,
-      exportedVideoUrl: state.exportedVideoUrl,
-      setExportSettings: state.setExportSettings,
-      startExport: state.startExport,
-      updateExportProgress: state.updateExportProgress,
-      setExportStage: state.setExportStage,
-      setExportError: state.setExportError,
-      completeExport: state.completeExport,
-      cancelExport: state.cancelExport,
-    }),
-    shallow
-  );
+const textOverlaysSelector = (state: VideoEditorState) => ({
+  textOverlays: state.textOverlays,
+  addTextOverlay: state.addTextOverlay,
+  removeTextOverlay: state.removeTextOverlay,
+  updateTextOverlay: state.updateTextOverlay,
+});
 
-export const useProjectActions = () =>
-  useVideoEditorStore(
-    (state) => ({
-      projectName: state.projectName,
-      loadProject: state.loadProject,
-      saveProject: state.saveProject,
-      resetProject: state.resetProject,
-      undo: state.undo,
-      redo: state.redo,
-      canUndo: state.historyIndex > 0,
-      canRedo: state.historyIndex < state.history.length - 1,
-    }),
-    shallow
-  );
+export const useTextOverlays = () => useVideoEditorStore(textOverlaysSelector, shallow);
+
+const audioTracksSelector = (state: VideoEditorState) => ({
+  audioTracks: state.audioTracks,
+  addAudioTrack: state.addAudioTrack,
+  removeAudioTrack: state.removeAudioTrack,
+  updateAudioTrack: state.updateAudioTrack,
+});
+
+export const useAudioTracks = () => useVideoEditorStore(audioTracksSelector, shallow);
+
+const exportSelector = (state: VideoEditorState) => ({
+  exportSettings: state.exportSettings,
+  isExporting: state.isExporting,
+  exportProgress: state.exportProgress,
+  exportStage: state.exportStage,
+  exportError: state.exportError,
+  exportedVideoUrl: state.exportedVideoUrl,
+  setExportSettings: state.setExportSettings,
+  startExport: state.startExport,
+  updateExportProgress: state.updateExportProgress,
+  setExportStage: state.setExportStage,
+  setExportError: state.setExportError,
+  completeExport: state.completeExport,
+  cancelExport: state.cancelExport,
+});
+
+export const useExport = () => useVideoEditorStore(exportSelector, shallow);
+
+const projectActionsSelector = (state: VideoEditorState) => ({
+  projectName: state.projectName,
+  loadProject: state.loadProject,
+  saveProject: state.saveProject,
+  resetProject: state.resetProject,
+  undo: state.undo,
+  redo: state.redo,
+  canUndo: state.historyIndex > 0,
+  canRedo: state.historyIndex < state.history.length - 1,
+});
+
+export const useProjectActions = () => useVideoEditorStore(projectActionsSelector, shallow);

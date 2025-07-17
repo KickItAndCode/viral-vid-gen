@@ -3,6 +3,7 @@ import {
   VideoGenerationRequest,
   VideoGenerationResponse,
   VideoProvider,
+  VideoProviderName,
   VideoGenerationError,
   ProviderUnavailableError,
 } from "./types";
@@ -71,13 +72,17 @@ export class VideoGenerationQueue {
     userId: string,
     trendId?: string,
     priority: JobPriority = "normal",
-    preferredProvider?: VideoProvider["name"]
+    preferredProvider?: VideoProviderName
   ): Promise<string> {
     const jobId = this.generateJobId();
 
+    // Determine default provider based on environment
+    const defaultProvider: VideoProviderName = preferredProvider || 
+      (process.env.NODE_ENV === "development" ? "mock" : "runway");
+
     const job: GenerationJob = {
       id: jobId,
-      provider: preferredProvider || "runway", // Default provider
+      provider: defaultProvider,
       request,
       status: "queued",
       createdAt: Date.now(),
@@ -232,7 +237,7 @@ export class VideoGenerationQueue {
 
       // Poll for completion if not immediately completed
       if (response.status !== "completed") {
-        await this.pollJobCompletion(provider, response.id, job);
+        await this.pollJobCompletion(provider, response.jobId, job);
       } else {
         job.status = "completed";
         job.updatedAt = Date.now();

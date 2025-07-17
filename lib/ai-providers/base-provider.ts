@@ -1,5 +1,6 @@
 import {
   VideoProvider,
+  VideoProviderName,
   VideoGenerationRequest,
   VideoGenerationResponse,
   ProviderConfig,
@@ -10,7 +11,7 @@ import {
 } from "./types";
 
 export abstract class BaseVideoProvider implements VideoProvider {
-  abstract name: VideoProvider["name"];
+  abstract name: VideoProviderName;
 
   protected config: ProviderConfig;
   protected isOnline: boolean = true;

@@ -38,7 +38,8 @@ export default defineSchema({
       provider: v.union(
         v.literal("veo"),
         v.literal("runway"),
-        v.literal("luma")
+        v.literal("luma"),
+        v.literal("mock")
       ),
       style: v.string(),
       trend: v.string(),
@@ -107,7 +108,7 @@ export default defineSchema({
       v.literal("failed"),
       v.literal("cancelled")
     ),
-    provider: v.union(v.literal("veo"), v.literal("runway"), v.literal("luma")),
+    provider: v.union(v.literal("veo"), v.literal("runway"), v.literal("luma"), v.literal("mock")),
     priority: v.union(v.literal("low"), v.literal("normal"), v.literal("high")),
     jobData: v.object({
       trend: v.string(),
@@ -119,6 +120,7 @@ export default defineSchema({
     progress: v.number(), // 0-100
     errorMessage: v.optional(v.string()),
     estimatedCompletion: v.optional(v.number()),
+    providerJobId: v.optional(v.string()), // AI provider's job tracking ID
     retryCount: v.number(),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -308,7 +310,7 @@ export default defineSchema({
     preferences: v.object({
       defaultStyle: v.optional(v.string()),
       defaultProvider: v.optional(
-        v.union(v.literal("veo"), v.literal("runway"), v.literal("luma"))
+        v.union(v.literal("veo"), v.literal("runway"), v.literal("luma"), v.literal("mock"))
       ),
       defaultDuration: v.optional(v.number()),
       categories: v.optional(v.array(v.string())),
