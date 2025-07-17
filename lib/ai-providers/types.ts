@@ -10,6 +10,7 @@ export interface VideoGenerationRequest {
   fps?: 24 | 30 | 60;
   aspectRatio?: "16:9" | "9:16" | "1:1";
   seed?: number;
+  provider?: VideoProvider;
   metadata?: Record<string, any>;
 }
 

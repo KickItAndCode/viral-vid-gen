@@ -84,15 +84,16 @@ export function SimpleVideoWizard({
     sessionId: `wizard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     ...(initialTrendId && { selectedTrend: { id: initialTrendId } as any }),
   });
+  const [steps, setSteps] = useState<WizardStep[]>(STEPS);
 
   const handleNext = useCallback(() => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
       // Wizard completed
       onComplete?.(wizardData);
     }
-  }, [currentStep, wizardData, onComplete]);
+  }, [currentStep, steps.length, wizardData, onComplete]);
 
   const handlePrevious = useCallback(() => {
     if (currentStep > 0) {
@@ -106,8 +107,10 @@ export function SimpleVideoWizard({
 
   const handleDataChange = useCallback(
     (stepId: string, data: Record<string, any>) => {
+      let updatedWizardData: WizardData;
+      
       setWizardData((prev) => {
-        const updatedData = {
+        updatedWizardData = {
           ...prev,
           ...data,
           updatedAt: Date.now(),
@@ -115,48 +118,64 @@ export function SimpleVideoWizard({
 
         // Log for debugging
         console.log(`[Wizard] Step ${stepId} data updated:`, data);
-        console.log(`[Wizard] Full wizard data:`, updatedData);
+        console.log(`[Wizard] Full wizard data:`, updatedWizardData);
 
-        return updatedData;
+        return updatedWizardData;
       });
+
+      // Update step validation status using the updated data
+      setSteps((prevSteps) => 
+        prevSteps.map((step) => {
+          if (step.id === stepId) {
+            const isValid = validateStep(stepId, updatedWizardData);
+            return { ...step, isValid };
+          }
+          return step;
+        })
+      );
     },
     []
   );
 
   const handleStepComplete = useCallback(() => {
     // Automatically move to next step when current step is completed
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
       onComplete?.(wizardData);
     }
-  }, [currentStep, wizardData, onComplete]);
+  }, [currentStep, steps.length, wizardData, onComplete]);
 
-  const currentStepData = STEPS[currentStep];
-  const progress = ((currentStep + 1) / STEPS.length) * 100;
+  const currentStepData = steps[currentStep];
+  const progress = ((currentStep + 1) / steps.length) * 100;
   const CurrentStepComponent = currentStepData.component;
 
-  // Check if current step is valid
-  const isCurrentStepValid = () => {
-    switch (currentStepData.id) {
+  // Validation function for steps
+  const validateStep = (stepId: string, data: WizardData) => {
+    switch (stepId) {
       case "trend-selection":
-        return !!wizardData.selectedTrend?.id;
+        return !!data.selectedTrend?.id;
       case "style-configuration":
         return (
-          !!wizardData.videoStyle?.style && !!wizardData.videoStyle?.duration
+          !!data.videoStyle?.style && !!data.videoStyle?.duration
         );
       case "ai-configuration":
-        return !!wizardData.aiSettings?.provider;
+        return !!data.aiSettings?.provider;
       case "generation-progress":
         return (
-          wizardData.generation?.status === "completed" ||
-          wizardData.generation?.status === "processing"
+          data.generation?.status === "completed" ||
+          data.generation?.status === "processing"
         );
       case "preview-edit":
-        return !!wizardData.generation?.videoUrl; // Valid if video was generated
+        return !!data.generation?.videoUrl; // Valid if video was generated
       default:
         return false;
     }
+  };
+
+  // Check if current step is valid
+  const isCurrentStepValid = () => {
+    return validateStep(currentStepData.id, wizardData);
   };
 
   const canProceed = isCurrentStepValid();
@@ -181,7 +200,7 @@ export function SimpleVideoWizard({
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>
-                Step {currentStep + 1} of {STEPS.length}
+                Step {currentStep + 1} of {steps.length}
               </span>
               <span>{Math.round(progress)}% complete</span>
             </div>
@@ -202,7 +221,7 @@ export function SimpleVideoWizard({
               onPrevious={handlePrevious}
               onComplete={handleStepComplete}
               isFirstStep={currentStep === 0}
-              isLastStep={currentStep === STEPS.length - 1}
+              isLastStep={currentStep === steps.length - 1}
               canProceed={canProceed}
               canGoBack={currentStep > 0}
             />
@@ -220,7 +239,7 @@ export function SimpleVideoWizard({
             </Button>
 
             <div className="flex space-x-2">
-              {STEPS.map((step, index) => (
+              {steps.map((step, index) => (
                 <div
                   key={step.id}
                   className={cn(
@@ -237,10 +256,10 @@ export function SimpleVideoWizard({
 
             <Button
               onClick={handleNext}
-              disabled={!canProceed && currentStep < STEPS.length - 1}
+              disabled={!canProceed && currentStep < steps.length - 1}
             >
-              {currentStep === STEPS.length - 1 ? "Complete" : "Next"}
-              {currentStep < STEPS.length - 1 && (
+              {currentStep === steps.length - 1 ? "Complete" : "Next"}
+              {currentStep < steps.length - 1 && (
                 <ChevronRight className="h-4 w-4 ml-2" />
               )}
             </Button>

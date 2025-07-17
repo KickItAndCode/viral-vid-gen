@@ -5,6 +5,7 @@ import { dark } from "@clerk/themes";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { ConvexClientProvider } from "@/components/providers/convex-provider";
+import { VideoGenerationProvider } from "@/components/providers/video-generation-provider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -118,7 +119,11 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <ConvexClientProvider>
-              <QueryProvider>{children}</QueryProvider>
+              <QueryProvider>
+                <VideoGenerationProvider>
+                  {children}
+                </VideoGenerationProvider>
+              </QueryProvider>
             </ConvexClientProvider>
           </ThemeProvider>
         </body>

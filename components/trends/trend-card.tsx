@@ -52,8 +52,9 @@ export function TrendCard({
 
   const handleCreateVideo = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Integrate with video creation wizard
     console.log("Create video for trend:", trend.title);
+    // Call onSelect to actually select this trend for video creation
+    onSelect?.(trend);
   };
 
   const formatNumber = (num: number) => {

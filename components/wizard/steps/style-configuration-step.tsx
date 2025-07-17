@@ -156,6 +156,12 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
     wizardData.videoStyle?.resolution || "1080p"
   );
   const [fps, setFps] = useState<number>(wizardData.videoStyle?.fps || 30);
+  
+  // Additional options state
+  const [includeSubtitles, setIncludeSubtitles] = useState<boolean>(true);
+  const [includeMusicOverlay, setIncludeMusicOverlay] = useState<boolean>(true);
+  const [voiceNarration, setVoiceNarration] = useState<boolean>(false);
+  const [customPrompt, setCustomPrompt] = useState<string>("");
 
   // Update step validation when data changes
   useEffect(() => {
@@ -193,6 +199,12 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
 
       onDataChange("style-configuration", {
         videoStyle: styleData,
+        additionalOptions: {
+          includeSubtitles,
+          includeMusicOverlay,
+          voiceNarration,
+          customPrompt,
+        },
       });
     }
   }, [
@@ -204,7 +216,10 @@ export function StyleConfigurationStep(props: StyleConfigurationStepProps) {
     aspectRatio,
     resolution,
     fps,
-    onDataChange,
+    includeSubtitles,
+    includeMusicOverlay,
+    voiceNarration,
+    customPrompt,
   ]);
 
   const handleStyleSelect = (styleId: string) => {
