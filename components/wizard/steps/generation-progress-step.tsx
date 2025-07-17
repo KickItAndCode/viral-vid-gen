@@ -28,7 +28,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useUser } from "@/hooks/use-users";
+import { useUser } from "@clerk/nextjs";
 
 interface GenerationProgressStepProps extends WizardStepProps {}
 
@@ -88,7 +88,7 @@ interface GenerationState {
 export function GenerationProgressStep(props: GenerationProgressStepProps) {
   const { wizardData, onDataChange } = props;
   const convex = useConvex();
-  const { data: user } = useUser("temp-user-id");
+  const { user } = useUser();
 
   // State for generation progress
   const [generationState, setGenerationState] = useState<GenerationState>({
@@ -128,8 +128,17 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
         throw new Error("Missing required data");
       }
 
+      // First get the Convex user record using the Clerk user ID
+      const convexUser = await convex.query(api.users.getUser, {
+        clerkUserId: user.id,
+      });
+
+      if (!convexUser) {
+        throw new Error("User not found in database");
+      }
+
       return await convex.action(api.videoGeneration.initiateVideoGeneration, {
-        userId: user._id,
+        userId: convexUser._id,
         trendId: wizardData.selectedTrend.id,
         options: {
           style: wizardData.videoStyle?.style || "entertaining",

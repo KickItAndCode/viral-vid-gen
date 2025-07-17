@@ -62,6 +62,9 @@ export interface WizardData {
   // Step 3: AI Configuration
   aiSettings?: {
     provider: "veo" | "runway" | "luma" | "auto";
+    quality?: string;
+    styleStrength?: number;
+    creativityLevel?: number;
     priority: "low" | "normal" | "high";
     customPrompt?: string;
     useCustomPrompt: boolean;
@@ -72,6 +75,9 @@ export interface WizardData {
       cta: string;
       tags: string[];
     };
+    enableAdvancedFeatures?: boolean;
+    customPromptEnhancement?: string;
+    enableFallback?: boolean;
   };
 
   // Step 4: Generation Progress

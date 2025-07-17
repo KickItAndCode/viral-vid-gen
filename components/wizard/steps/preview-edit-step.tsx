@@ -98,10 +98,10 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
 
   // Editing state
   const [videoTitle, setVideoTitle] = useState(
-    wizardData.finalVideo?.title || "My AI Generated Video"
+    wizardData.preview?.title || "My AI Generated Video"
   );
   const [videoDescription, setVideoDescription] = useState(
-    wizardData.finalVideo?.description || ""
+    wizardData.preview?.description || ""
   );
   const [selectedExportFormat, setSelectedExportFormat] = useState("mp4-1080p");
   const [includeSubtitles, setIncludeSubtitles] = useState(true);
@@ -118,20 +118,18 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
 
   // Update wizard data when changes occur
   useEffect(() => {
-    const finalVideoData = {
+    const previewData = {
       title: videoTitle,
       description: videoDescription,
-      exportFormat: selectedExportFormat,
-      includeSubtitles,
-      includeBranding,
-      trimStart,
-      trimEnd,
-      audioLevel,
-      customThumbnail: customThumbnail?.name || null,
+      videoUrl: wizardData.generation?.videoUrl,
+      thumbnailUrl: wizardData.generation?.thumbnailUrl,
+      tags: wizardData.selectedTrend?.tags || [],
+      isPublic: false, // Default to private
+      downloadRequested: false,
     };
 
     onDataChange("preview-edit", {
-      finalVideo: finalVideoData,
+      preview: previewData,
       isReadyForExport: !!(videoTitle && selectedExportFormat),
     });
   }, [
@@ -144,6 +142,9 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
     trimEnd,
     audioLevel,
     customThumbnail,
+    wizardData.generation?.videoUrl,
+    wizardData.generation?.thumbnailUrl,
+    wizardData.selectedTrend?.tags,
     onDataChange,
   ]);
 
@@ -565,7 +566,7 @@ export function PreviewEditStep(props: PreviewEditStepProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Provider:</span>
-                  <span>{wizardData.aiConfiguration?.provider || "Veo 3"}</span>
+                  <span>{wizardData.aiSettings?.provider || "Veo 3"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Generated:</span>

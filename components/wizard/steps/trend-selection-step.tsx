@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useTrends } from "@/hooks/use-trends";
+import { Id } from "@/convex/_generated/dataModel";
 import {
   TrendingUp,
   Search,
@@ -22,7 +23,7 @@ interface TrendSelectionStepProps extends WizardStepProps {}
 
 export function TrendSelectionStep(props: TrendSelectionStepProps) {
   const { wizardData, onDataChange } = props;
-  const [selectedTrendId, setSelectedTrendId] = useState<string | null>(
+  const [selectedTrendId, setSelectedTrendId] = useState<Id<"trends"> | null>(
     wizardData.selectedTrend?.id || null
   );
   const [showPreview, setShowPreview] = useState(false);
@@ -48,12 +49,12 @@ export function TrendSelectionStep(props: TrendSelectionStepProps) {
 
   const handleTrendSelect = (trend: any) => {
     console.log("[TrendSelection] Trend selected:", trend);
-    setSelectedTrendId(trend._id);
+    setSelectedTrendId(trend._id as Id<"trends">);
 
     // Update wizard data with complete trend information
     const trendData = {
       selectedTrend: {
-        id: trend._id,
+        id: trend._id as Id<"trends">,
         title: trend.title,
         description: trend.description,
         platform: trend.platform,

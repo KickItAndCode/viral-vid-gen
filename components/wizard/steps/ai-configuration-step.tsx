@@ -143,6 +143,9 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
   const [customPromptEnhancement, setCustomPromptEnhancement] = useState<string>(
     wizardData.aiSettings?.customPromptEnhancement || ""
   );
+  const [enableFallback, setEnableFallback] = useState<boolean>(
+    wizardData.aiSettings?.enableFallback ?? true
+  );
 
   // Update step validation when data changes
   useEffect(() => {
@@ -160,6 +163,7 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
         generatedScript,
         enableAdvancedFeatures,
         customPromptEnhancement,
+        enableFallback,
       };
 
       onDataChange("ai-configuration", {
@@ -177,6 +181,7 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
     generatedScript,
     enableAdvancedFeatures,
     customPromptEnhancement,
+    enableFallback,
     onDataChange,
   ]);
 
