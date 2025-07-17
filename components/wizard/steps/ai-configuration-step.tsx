@@ -137,6 +137,12 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
   const [generatedScript, setGeneratedScript] = useState<any>(
     wizardData.aiSettings?.generatedScript || null
   );
+  const [enableAdvancedFeatures, setEnableAdvancedFeatures] = useState<boolean>(
+    wizardData.aiSettings?.enableAdvancedFeatures ?? false
+  );
+  const [customPromptEnhancement, setCustomPromptEnhancement] = useState<string>(
+    wizardData.aiSettings?.customPromptEnhancement || ""
+  );
 
   // Update step validation when data changes
   useEffect(() => {
@@ -152,6 +158,8 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
         customPrompt,
         useCustomPrompt,
         generatedScript,
+        enableAdvancedFeatures,
+        customPromptEnhancement,
       };
 
       onDataChange("ai-configuration", {
@@ -167,6 +175,8 @@ export function AIConfigurationStep(props: AIConfigurationStepProps) {
     customPrompt,
     useCustomPrompt,
     generatedScript,
+    enableAdvancedFeatures,
+    customPromptEnhancement,
     onDataChange,
   ]);
 
