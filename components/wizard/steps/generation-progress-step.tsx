@@ -129,12 +129,28 @@ export function GenerationProgressStep(props: GenerationProgressStepProps) {
       }
 
       // First get the Convex user record using the Clerk user ID
-      const convexUser = await convex.query(api.users.getUser, {
+      let convexUser = await convex.query(api.users.getUser, {
         clerkUserId: user.id,
       });
 
+      // If user doesn't exist in Convex, create them
       if (!convexUser) {
-        throw new Error("User not found in database");
+        console.log("Creating new user in Convex database");
+        const userId = await convex.mutation(api.users.createUser, {
+          name: user.fullName || user.firstName || "User",
+          email: user.emailAddresses[0]?.emailAddress || "",
+          imageUrl: user.imageUrl,
+          clerkUserId: user.id,
+        });
+        
+        // Get the newly created user
+        convexUser = await convex.query(api.users.getUser, {
+          clerkUserId: user.id,
+        });
+        
+        if (!convexUser) {
+          throw new Error("Failed to create user in database");
+        }
       }
 
       return await convex.action(api.videoGeneration.initiateVideoGeneration, {
