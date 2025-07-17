@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query, action } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
 /**
  * Create a video generation job
@@ -346,7 +347,7 @@ export const initiateVideoGeneration = action({
   },
   handler: async (ctx, args) => {
     // Get trend data
-    const trend = await ctx.runQuery("trends.getTrend", { id: args.trendId });
+    const trend = await ctx.runQuery(api.trends.getTrend, { id: args.trendId });
     if (!trend) {
       throw new Error("Trend not found");
     }
@@ -359,7 +360,7 @@ export const initiateVideoGeneration = action({
     };
 
     // Create video generation job
-    const result = await ctx.runMutation("videoGeneration.createVideoGenerationJob", {
+    const result = await ctx.runMutation(api.videoGeneration.createVideoGenerationJob, {
       userId: args.userId,
       trendId: args.trendId,
       title: `${trend.title} - AI Generated Video`,
