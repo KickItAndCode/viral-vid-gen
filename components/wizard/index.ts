@@ -2,13 +2,12 @@
 export * from "./types";
 export * from "./wizard-store";
 export * from "./wizard-container";
+export { MVPVideoWizard } from "./mvp-video-wizard";
 
-// Step components (will be implemented in subsequent tasks)
+// Step components (legacy - will be removed)
 export { TrendSelectionStep } from "./steps/trend-selection-step";
 export { StyleConfigurationStep } from "./steps/style-configuration-step";
-export { AIConfigurationStep } from "./steps/ai-configuration-step";
 export { GenerationProgressStep } from "./steps/generation-progress-step";
-export { PreviewEditStep } from "./steps/preview-edit-step";
 
 // Utility components
 export { WizardStepWrapper } from "./wizard-step-wrapper";

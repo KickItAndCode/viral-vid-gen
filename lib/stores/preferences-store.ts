@@ -11,15 +11,6 @@ export interface VideoPreferences {
   includeWatermark: boolean;
 }
 
-export interface EditorPreferences {
-  timelineZoom: number;
-  showWaveforms: boolean;
-  snapToGrid: boolean;
-  autoPlay: boolean;
-  keyframeInterval: number;
-  undoLimit: number;
-}
-
 export interface UIPreferences {
   theme: "light" | "dark" | "system";
   sidebarCollapsed: boolean;
@@ -72,7 +63,6 @@ export interface KeyboardShortcuts {
 export interface PreferencesState {
   // Preference categories
   video: VideoPreferences;
-  editor: EditorPreferences;
   ui: UIPreferences;
   notifications: NotificationPreferences;
   trends: TrendPreferences;
@@ -85,7 +75,6 @@ export interface PreferencesState {
 
   // Actions
   updateVideoPreferences: (preferences: Partial<VideoPreferences>) => void;
-  updateEditorPreferences: (preferences: Partial<EditorPreferences>) => void;
   updateUIPreferences: (preferences: Partial<UIPreferences>) => void;
   updateNotificationPreferences: (
     preferences: Partial<NotificationPreferences>
@@ -98,7 +87,6 @@ export interface PreferencesState {
     category?: keyof Pick<
       PreferencesState,
       | "video"
-      | "editor"
       | "ui"
       | "notifications"
       | "trends"
@@ -118,15 +106,6 @@ const defaultVideoPreferences: VideoPreferences = {
   autoSave: true,
   autoGenerate: false,
   includeWatermark: false,
-};
-
-const defaultEditorPreferences: EditorPreferences = {
-  timelineZoom: 1,
-  showWaveforms: true,
-  snapToGrid: true,
-  autoPlay: false,
-  keyframeInterval: 1,
-  undoLimit: 50,
 };
 
 const defaultUIPreferences: UIPreferences = {
@@ -184,7 +163,6 @@ export const usePreferencesStore = create<PreferencesState>()(
       immer((set, get) => ({
         // Initial state with defaults
         video: defaultVideoPreferences,
-        editor: defaultEditorPreferences,
         ui: defaultUIPreferences,
         notifications: defaultNotificationPreferences,
         trends: defaultTrendPreferences,
@@ -195,12 +173,6 @@ export const usePreferencesStore = create<PreferencesState>()(
         updateVideoPreferences: (preferences) => {
           set((state) => {
             Object.assign(state.video, preferences);
-          });
-        },
-
-        updateEditorPreferences: (preferences) => {
-          set((state) => {
-            Object.assign(state.editor, preferences);
           });
         },
 
@@ -242,9 +214,6 @@ export const usePreferencesStore = create<PreferencesState>()(
                 case "video":
                   state.video = { ...defaultVideoPreferences };
                   break;
-                case "editor":
-                  state.editor = { ...defaultEditorPreferences };
-                  break;
                 case "ui":
                   state.ui = { ...defaultUIPreferences };
                   break;
@@ -264,7 +233,6 @@ export const usePreferencesStore = create<PreferencesState>()(
             } else {
               // Reset all
               state.video = { ...defaultVideoPreferences };
-              state.editor = { ...defaultEditorPreferences };
               state.ui = { ...defaultUIPreferences };
               state.notifications = { ...defaultNotificationPreferences };
               state.trends = { ...defaultTrendPreferences };
@@ -279,7 +247,6 @@ export const usePreferencesStore = create<PreferencesState>()(
           const state = get();
           const exportData = {
             video: state.video,
-            editor: state.editor,
             ui: state.ui,
             notifications: state.notifications,
             trends: state.trends,
@@ -305,9 +272,6 @@ export const usePreferencesStore = create<PreferencesState>()(
               // Only import valid preferences
               if (parsed.video && typeof parsed.video === "object") {
                 Object.assign(state.video, parsed.video);
-              }
-              if (parsed.editor && typeof parsed.editor === "object") {
-                Object.assign(state.editor, parsed.editor);
               }
               if (parsed.ui && typeof parsed.ui === "object") {
                 Object.assign(state.ui, parsed.ui);
@@ -360,7 +324,6 @@ export const usePreferencesStore = create<PreferencesState>()(
         // Persist everything except temporary data
         partialize: (state) => ({
           video: state.video,
-          editor: state.editor,
           ui: state.ui,
           notifications: state.notifications,
           trends: state.trends,
@@ -382,12 +345,6 @@ export const useVideoPreferences = () =>
   usePreferencesStore((state) => ({
     preferences: state.video,
     updatePreferences: state.updateVideoPreferences,
-  }));
-
-export const useEditorPreferences = () =>
-  usePreferencesStore((state) => ({
-    preferences: state.editor,
-    updatePreferences: state.updateEditorPreferences,
   }));
 
 export const useUIPreferences = () =>
@@ -442,12 +399,6 @@ export const useFeatureEnabled = (feature: string) => {
         return state.video.autoSave;
       case "autoGenerate":
         return state.video.autoGenerate;
-      case "showWaveforms":
-        return state.editor.showWaveforms;
-      case "snapToGrid":
-        return state.editor.snapToGrid;
-      case "autoPlay":
-        return state.editor.autoPlay;
       case "showTooltips":
         return state.ui.showTooltips;
       case "animationsEnabled":

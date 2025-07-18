@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Target, Zap } from "lucide-react";
-import { SimpleVideoWizard } from "@/components/wizard/simple-video-wizard";
+import { MVPVideoWizard } from "@/components/wizard/mvp-video-wizard";
 
 export default function CreateVideoPage() {
   const [showWizard, setShowWizard] = useState(false);
@@ -35,7 +35,7 @@ export default function CreateVideoPage() {
   if (showWizard) {
     return (
       <div className="p-6">
-        <SimpleVideoWizard
+        <MVPVideoWizard
           onComplete={handleWizardComplete}
           onCancel={handleWizardCancel}
         />
@@ -60,10 +60,10 @@ export default function CreateVideoPage() {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Sparkles className="h-5 w-5 mr-2 text-primary" />
-              Video Creation Wizard
+              Create Video in 2 Simple Steps
             </CardTitle>
             <CardDescription>
-              Follow our step-by-step process to generate your viral video
+              Generate viral videos in under 60 seconds
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -92,29 +92,10 @@ export default function CreateVideoPage() {
                   </div>
                   <div>
                     <h3 className="font-medium text-muted-foreground">
-                      Customize Style
+                      Generate Video
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Set tone and format
-                    </p>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </div>
-
-              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                    <span className="text-sm font-bold text-muted-foreground">
-                      3
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-muted-foreground">
-                      Generate & Review
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      AI creates your video
+                      AI creates your content
                     </p>
                   </div>
                 </div>

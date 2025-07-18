@@ -102,16 +102,6 @@ export const getVideo = query({
 export const deleteVideo = mutation({
   args: { videoId: v.id("videos") },
   handler: async (ctx, args) => {
-    // Delete associated analytics
-    const analytics = await ctx.db
-      .query("analytics")
-      .withIndex("by_video", (q) => q.eq("videoId", args.videoId))
-      .collect();
-
-    for (const analytic of analytics) {
-      await ctx.db.delete(analytic._id);
-    }
-
     // Delete the video
     await ctx.db.delete(args.videoId);
   },

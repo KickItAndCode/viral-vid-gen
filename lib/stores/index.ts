@@ -1,7 +1,6 @@
 // Store exports
 export * from "./ui-store";
 export * from "./video-wizard-store";
-export * from "./video-editor-store";
 export * from "./preferences-store";
 
 // Re-export commonly used hooks with cleaner names
@@ -22,22 +21,10 @@ export {
   useCurrentStepData,
 } from "./video-wizard-store";
 
-export {
-  useVideoEditorStore,
-  usePlayback,
-  useTimeline,
-  useClips,
-  useEffects,
-  useTextOverlays,
-  useAudioTracks,
-  useExport,
-  useProjectActions,
-} from "./video-editor-store";
 
 export {
   usePreferencesStore,
   useVideoPreferences,
-  useEditorPreferences,
   useUIPreferences,
   useNotificationPreferences,
   useTrendPreferences,
@@ -51,7 +38,6 @@ export {
 // Store development utilities
 import { useUIStore } from "./ui-store";
 import { useVideoWizardStore } from "./video-wizard-store";
-import { useVideoEditorStore } from "./video-editor-store";
 import { usePreferencesStore } from "./preferences-store";
 
 export const getStoreSnapshot = () => {
@@ -60,7 +46,6 @@ export const getStoreSnapshot = () => {
   return {
     ui: useUIStore.getState(),
     videoWizard: useVideoWizardStore.getState(),
-    videoEditor: useVideoEditorStore.getState(),
     preferences: usePreferencesStore.getState(),
   };
 };
@@ -71,7 +56,6 @@ export const logAllStores = () => {
   console.group("🏪 Store States");
   console.log("UI Store:", useUIStore.getState());
   console.log("Video Wizard Store:", useVideoWizardStore.getState());
-  console.log("Video Editor Store:", useVideoEditorStore.getState());
   console.log("Preferences Store:", usePreferencesStore.getState());
   console.groupEnd();
 };
@@ -98,8 +82,6 @@ export const resetAllStores = () => {
   // Reset video wizard store
   useVideoWizardStore.getState().resetWizard();
 
-  // Reset video editor store
-  useVideoEditorStore.getState().resetProject();
 
   // Reset preferences store
   usePreferencesStore.getState().resetToDefaults();
@@ -127,15 +109,6 @@ export type {
   VideoWizardState,
 } from "./video-wizard-store";
 
-export type {
-  VideoClip,
-  Effect,
-  TextOverlay,
-  AudioTrack,
-  ExportSettings,
-  TimelineState,
-  VideoEditorState,
-} from "./video-editor-store";
 
 export type {
   VideoPreferences,

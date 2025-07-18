@@ -161,7 +161,7 @@ export default function SettingsPage() {
                 <div className="space-y-0.5">
                   <Label>Performance Updates</Label>
                   <p className="text-sm text-muted-foreground">
-                    Analytics and performance insights
+                    Video generation and performance updates
                   </p>
                 </div>
                 <Switch />

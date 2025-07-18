@@ -22,7 +22,6 @@ const routeMap: Record<string, string> = {
   "/dashboard/create": "Create Video",
   "/dashboard/trends": "Trending Content",
   "/dashboard/library": "Video Library",
-  "/dashboard/analytics": "Analytics",
   "/dashboard/settings": "Settings",
   "/dashboard/profile": "Profile",
   "/dashboard/billing": "Billing",
